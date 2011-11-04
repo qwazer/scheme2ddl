@@ -60,7 +60,7 @@
                             <!--<addDefaultImplementationEntries>true</addDefaultImplementationEntries>-->
                         </manifest>
                         <manifestEntries>
-                            <Implementation-Version>${version}</Implementation-Version>
+                            <Implementation-Version>${project.version}-r${buildNumber}</Implementation-Version>
                         </manifestEntries>
 
                         <manifestSections>
@@ -87,6 +87,25 @@
                     <connectionType>connection</connectionType>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>true</doCheck>
+                    <doUpdate>true</doUpdate>
+                </configuration>
+            </plugin>
+
 
         </plugins>
     </build>
