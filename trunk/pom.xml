@@ -68,7 +68,7 @@
                             <manifestSection>
                                 <name>SVN INFO</name>
                                 <manifestEntries>
-                                    <svn-url>${scm.connection}</svn-url>
+                                    <svn-url>${project.scm.connection}</svn-url>
                                     <svn-revision>${buildNumber}</svn-revision>
                                 </manifestEntries>
                             </manifestSection>
