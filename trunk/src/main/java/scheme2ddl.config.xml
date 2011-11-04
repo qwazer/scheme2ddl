@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/util
+                           http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+    <bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource">
+        <property name="URL" value="jdbc:oracle:thin:scott/tiger@localhost:1521:ORCL"/>
+    </bean>
+
+    <bean id="dao" class="ru.qwazer.scheme2ddl.Dao">
+        <!-- Specify dependable items for every user object type accordingly with http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBIEDIA -->
+        <property name="map">
+            <map>
+                <entry key="TABLE">
+                    <set>
+                        <value>COMMENT</value>
+                        <value>INDEX</value>
+                        <value>OBJECT_GRANT</value>
+                        <value>TRIGGER</value>
+                    </set>
+                </entry>
+                <entry key="VIEW">
+                    <set>
+                        <value>COMMENT</value>
+                        <value>OBJECT_GRANT</value>
+                    </set>
+                </entry>
+                <entry key="MATERIALIZED VIEW">
+                    <set>
+                        <value>COMMENT</value>
+                        <value>INDEX</value>
+                        <value>MATERIALIZED_VIEW_LOG</value>
+                        <value>OBJECT_GRANT</value>
+                    </set>
+                </entry>
+                <entry key="FUNCTION">
+                    <set>
+                        <value>OBJECT_GRANT</value>
+                    </set>
+                </entry>
+                <entry key="PROCEDURE">
+                    <set>
+                        <value>OBJECT_GRANT</value>
+                    </set>
+                </entry>
+                <entry key="PACKAGE">
+                    <set>
+                        <value>OBJECT_GRANT</value>
+                    </set>
+                </entry>
+                <entry key="SYNONYM">
+                    <set>
+                        <value>OBJECT_GRANT</value>
+                    </set>
+                </entry>
+            </map>
+        </property>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="transformParams" ref="transformParams_for_dbms_metadata"/>
+        <property name="filterTypes" ref="types_for_getting_DDL"/>
+        <property name="last_ddl_time_age" value="0"/>
+        <property name="excludeMap" ref="exclude_map_prefixes"/>
+    </bean>
+
+    <util:set id="types_for_getting_DDL">
+        <value>TABLE</value>
+        <value>VIEW</value>
+        <value>FUNCTION</value>
+        <value>PROCEDURE</value>
+        <value>MATERIALIZED VIEW</value>
+        <value>TRIGGER</value>
+        <value>PACKAGE</value>
+        <value>TYPE</value>
+        <value>SEQUENCE</value>
+        <value>SYNONYM</value>
+        <value>DATABASE LINK</value>
+        <value>JAVA SOURCE</value>
+    </util:set>
+
+    <!-- used for exclude object types starts with-->
+    <util:map id="exclude_map_prefixes">
+        <!--<entry key="VIEW">-->
+            <!--<set>-->
+                <!--<value>dm_</value>-->
+                <!--<value>dmc_</value>-->
+                <!--<value>dmi_</value>-->
+                <!--<value>dmr_</value>-->
+                <!--<value>kc_</value>-->
+            <!--</set>-->
+        <!--</entry>-->
+        <!--<entry key="INDEX">-->
+            <!--<set>-->
+                <!--<value>d_1fe6703a8</value>-->
+            <!--</set>-->
+        <!--</entry>-->
+    </util:map>
+
+    <!-- output options -->
+    <bean id="fileWorker" class="ru.qwazer.scheme2ddl.FileWorker">
+        <property name="outputPath" value="D:/temp/oracle-ddl2svn/TEST/"/>
+        <property name="sortByDirectory" value="true"/>
+        <property name="fileExtension" value="sql"/>
+    </bean>
+
+    <!-- http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBJBFGE -->
+    <util:map id="transformParams_for_dbms_metadata">
+        <entry key="SEGMENT_ATTRIBUTES" value="0"/>
+        <entry key="SQLTERMINATOR" value="1"/>
+        <entry key="CONSTRAINTS_AS_ALTER" value="1"/>
+    </util:map>
+
+    <!-- format option for DDL -->
+    <bean id="ddlFormatter" class="ru.qwazer.scheme2ddl.DDLFormatter">
+        <property name="noFormat" value="false"/>
+        <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT. Formatting option can be unsafe because it based on regexp rules -->
+        <property name="statementOnNewLine" value="true"/>
+    </bean>
+
+    <bean id="worker" class="ru.qwazer.scheme2ddl.Worker">
+        <property name="dao" ref="dao"/>
+        <property name="fileWorker" ref="fileWorker"/>
+        <property name="ddlFormatter" ref="ddlFormatter"/>
+    </bean>
+
+</beans>
