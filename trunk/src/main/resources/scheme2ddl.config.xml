@@ -11,7 +11,7 @@
         <property name="URL" value="jdbc:oracle:thin:scott/tiger@localhost:1521:ORCL"/>
     </bean>
 
-    <bean id="dao" class="ru.qwazer.scheme2ddl.Dao">
+    <bean id="dao" class="com.googlecode.scheme2ddl.Dao">
         <!-- Specify dependable items for every user object type accordingly with http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBIEDIA -->
         <property name="map">
             <map>
@@ -100,7 +100,7 @@
     </util:map>
 
     <!-- output options -->
-    <bean id="fileWorker" class="ru.qwazer.scheme2ddl.FileWorker">
+    <bean id="fileWorker" class="com.googlecode.scheme2ddl.FileWorker">
         <property name="outputPath" value="D:/temp/oracle-ddl2svn/TEST/"/>
         <property name="sortByDirectory" value="true"/>
         <property name="fileExtension" value="sql"/>
@@ -114,13 +114,13 @@
     </util:map>
 
     <!-- format option for DDL -->
-    <bean id="ddlFormatter" class="ru.qwazer.scheme2ddl.DDLFormatter">
+    <bean id="ddlFormatter" class="com.googlecode.scheme2ddl.DDLFormatter">
         <property name="noFormat" value="false"/>
         <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT. Formatting option can be unsafe because it based on regexp rules -->
         <property name="statementOnNewLine" value="true"/>
     </bean>
 
-    <bean id="worker" class="ru.qwazer.scheme2ddl.Worker">
+    <bean id="worker" class="com.googlecode.scheme2ddl.Worker">
         <property name="dao" ref="dao"/>
         <property name="fileWorker" ref="fileWorker"/>
         <property name="ddlFormatter" ref="ddlFormatter"/>
