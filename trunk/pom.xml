@@ -61,17 +61,15 @@
                             <!--<addDefaultImplementationEntries>true</addDefaultImplementationEntries>-->
                         </manifest>
                         <manifestEntries>
-                            <Implementation-Version>${project.version}-r${buildNumber}</Implementation-Version>
+                            <Implementation-Version>${project.version}-rev${buildNumber}</Implementation-Version>
                         </manifestEntries>
 
                         <manifestSections>
                             <manifestSection>
                                 <name>SVN INFO</name>
                                 <manifestEntries>
-                                    <svn-url>${scm.url}</svn-url>
+                                    <svn-url>${scm.connection}</svn-url>
                                     <svn-revision>${buildNumber}</svn-revision>
-                                    <svn-author></svn-author>
-                                    <svn-commited-date></svn-commited-date>
                                 </manifestEntries>
                             </manifestSection>
                         </manifestSections>
