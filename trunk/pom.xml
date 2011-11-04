@@ -7,11 +7,90 @@
     <version>0.1-SNAPSHOT</version>
     <name>scheme2ddl</name>
     <url>http://scheme2ddl.googlecode.com</url>
+    <scm>
+        <connection>scm:svn:http://scheme2ddl.googlecode.com/svn/trunk/</connection>
+        <developerConnection>scm:svn:https://scheme2ddl.googlecode.com/svn/trunk/</developerConnection>
+        <url>http://code.google.com/p/scheme2ddl/source/browse/</url>
+    </scm>
+
 
     <!-- Shared version number properties -->
     <properties>
         <org.springframework.version>3.0.5.RELEASE</org.springframework.version>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.0.2</version>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-jar-plugin</artifactId>-->
+            <!--<version>2.3.1</version>-->
+            <!--<configuration>-->
+            <!--<archive>-->
+            <!--<manifest>-->
+            <!--<addDefaultImplementationEntries>true</addDefaultImplementationEntries>-->
+            <!--<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>-->
+            <!--</manifest>-->
+            <!--</archive>-->
+            <!--</configuration>-->
+            <!--</plugin>-->
+
+            <plugin>
+                <!-- NOTE: We don't need a groupId specification because the group is
+                    org.apache.maven.plugins ...which is assumed by default.
+                -->
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2.1</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.googlecode.scheme2ddl.Main</mainClass>
+                            <!--<addDefaultImplementationEntries>true</addDefaultImplementationEntries>-->
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Version>${version}</Implementation-Version>
+                        </manifestEntries>
+
+                        <manifestSections>
+                            <manifestSection>
+                                <name>SVN INFO</name>
+                                <manifestEntries>
+                                    <svn-url></svn-url>
+                                    <svn-revision></svn-revision>
+                                    <svn-author></svn-author>
+                                    <svn-commited-date></svn-commited-date>
+                                </manifestEntries>
+                            </manifestSection>
+                        </manifestSections>
+                    </archive>
+                </configuration>
+
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>1.5</version>
+                <configuration>
+                    <connectionType>connection</connectionType>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
 
     <dependencies>
         <dependency>
