@@ -20,7 +20,6 @@
     </properties>
 
     <build>
-        <finalName>scheme2ddl-${project.version}-${buildNumber}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -69,8 +68,8 @@
                             <manifestSection>
                                 <name>SVN INFO</name>
                                 <manifestEntries>
-                                    <svn-url></svn-url>
-                                    <svn-revision></svn-revision>
+                                    <svn-url>${scm.url}</svn-url>
+                                    <svn-revision>${buildNumber}</svn-revision>
                                     <svn-author></svn-author>
                                     <svn-commited-date></svn-commited-date>
                                 </manifestEntries>
@@ -79,13 +78,15 @@
                     </archive>
                 </configuration>
                 <executions>
-                  <execution>
-                    <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                    <phase>package</phase> <!-- bind to the packaging phase -->
-                    <goals>
-                      <goal>single</goal>
-                    </goals>
-                  </execution>
+                    <execution>
+                        <id>make-assembly</id>
+                        <!-- this is used for inheritance merges -->
+                        <phase>package</phase>
+                        <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
                 </executions>
 
             </plugin>
