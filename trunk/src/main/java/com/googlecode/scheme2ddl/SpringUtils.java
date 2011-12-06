@@ -32,12 +32,6 @@ public class SpringUtils {
     private static ApplicationContext applicationContext;
     private static String configName = "scheme2ddl.config.xml";
 
-//    public static ApplicationContext getApplicationContext() {
-//        if (applicationContext == null)
-//            applicationContext = new ClassPathXmlApplicationContext("scheme2ddl.config.xml");
-//        return applicationContext;
-//    }
-
     public static ApplicationContext getApplicationContext() {
         if (applicationContext == null) {
             try {
