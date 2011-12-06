@@ -16,7 +16,9 @@
 
 package com.googlecode.scheme2ddl;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 /**
@@ -27,7 +29,8 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
  */
 public class SpringUtils {
 
-    static ApplicationContext applicationContext;
+    private static ApplicationContext applicationContext;
+    private static String configName = "scheme2ddl.config.xml";
 
 //    public static ApplicationContext getApplicationContext() {
 //        if (applicationContext == null)
@@ -36,12 +39,17 @@ public class SpringUtils {
 //    }
 
     public static ApplicationContext getApplicationContext() {
-        if (applicationContext == null)
-            applicationContext = new FileSystemXmlApplicationContext("scheme2ddl.config.xml");
+        if (applicationContext == null) {
+            try {
+                applicationContext = new FileSystemXmlApplicationContext(configName);
+            } catch (BeansException beansException) {
+                applicationContext = new ClassPathXmlApplicationContext(configName);
+            }
+        }
         return applicationContext;
     }
 
-    public static Object getSpringBean(String beanName){
+    public static Object getSpringBean(String beanName) {
         return (Object) getApplicationContext().getBean(beanName);
     }
 }
