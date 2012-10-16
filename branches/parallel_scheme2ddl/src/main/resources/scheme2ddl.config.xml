@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+
+    <bean id="configProperties"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="oracleUrl">scott/tiger@localhost:1521:ORCL</prop>
+                <prop key="outputDir">D:/temp/oracle-ddl2svn/TEST/</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!--<context:property-placeholder />-->
+
+
+
+    <util:list id="myList">
+        <value>foo</value>
+        <value>bar</value>
+    </util:list>
+
+    <util:map id="myMap">
+        <entry key="TABLE">
+            <set>
+                <value>COMMENT</value>
+                <value>INDEX</value>
+                <value>OBJECT_GRANT</value>
+                <value>TRIGGER</value>
+            </set>
+        </entry>
+        <entry key="VIEW">
+            <set>
+                <value>COMMENT</value>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="MATERIALIZED VIEW">
+            <set>
+                <value>COMMENT</value>
+                <value>INDEX</value>
+                <value>MATERIALIZED_VIEW_LOG</value>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="FUNCTION">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="PROCEDURE">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="PACKAGE">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="SYNONYM">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+
+    </util:map>
+
+
+</beans>
