@@ -8,39 +8,25 @@
 
     <import resource="applicationContext.xml"/>
 
-    <job id="job1" xmlns="http://www.springframework.org/schema/batch">
-        <step id="step1" parent="simpleStep">
-            <tasklet>
-                <chunk reader="reader" processor="itemProcessor" writer="writer"/>
-            </tasklet>
-        </step>
-    </job>
-
-
-    <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader">
-        <property name="userObjectDao" ref="userObjectDao"/>
-    </bean>
-
-    <bean id="itemProcessor" class="com.googlecode.scheme2ddl.UserObjectProcessor">
-        <property name="userObjectDao" ref="userObjectDao"/>
-        <property name="ddlFormatter" ref="ddlFormatter"/>
-        <property name="excludes" ref="excludes"/>
-        <property name="dependencies" ref="dependencies"/>
-    </bean>
-
 
     <bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource">
         <property name="URL" value="jdbc:oracle:thin:ctc/ctcctc@10.1.138.208:1521/ctkdev"/>
     </bean>
 
-    <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
-        <property name="outputPath" value="D:/temp/oracle-ddl2svn/TEST/"/>
+    <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader">
+        <property name="userObjectDao" ref="userObjectDao"/>
+        <!--todo add dbLink and DBMS_JOBS-->
     </bean>
 
-    <bean id="userObjectDao" class="com.googlecode.scheme2ddl.dao.UserObjectDaoImpl">
-        <property name="dataSource" ref="dataSource"/>
-        <property name="transformParams" ref="transformParams_for_dbms_metadata"/>
+    <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
+        <property name="outputPath" value="D:/temp/oracle-ddl2svn/DEV"/>
     </bean>
+
+
+    <bean id="taskExecutor" class="org.springframework.core.task.SimpleAsyncTaskExecutor">
+        <property name="concurrencyLimit" value="4"/>
+    </bean>
+
 
     <!-- http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBJBFGE -->
     <util:map id="transformParams_for_dbms_metadata">
@@ -58,14 +44,6 @@
         <property name="statementOnNewLine" value="true"/>
     </bean>
 
-    <bean id="simpleStep"
-          class="org.springframework.batch.core.step.item.SimpleStepFactoryBean"
-          abstract="true">
-        <property name="transactionManager" ref="transactionManager"/>
-        <property name="jobRepository" ref="jobRepository"/>
-        <property name="startLimit" value="100"/>
-        <property name="commitInterval" value="1"/>
-    </bean>
 
     <!-- Specify dependable items for every user object type accordingly with http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBIEDIA -->
     <util:map id="dependencies">
@@ -119,20 +97,20 @@
     <!-- currently only '*' wildcard supported-->
     <util:map id="excludes">
         <!--<entry key="*">-->
-            <!--<set>-->
-                <!--<value>dm*</value>-->
-                <!--<value>*_*_temp_*</value>-->
-            <!--</set>-->
+        <!--<set>-->
+        <!--<value>dm*</value>-->
+        <!--<value>*_*_temp_*</value>-->
+        <!--</set>-->
         <!--</entry>-->
         <!--<entry key="VIEW">-->
-            <!--<set>-->
-                <!--<value>*</value>-->
-            <!--</set>-->
+        <!--<set>-->
+        <!--<value>*</value>-->
+        <!--</set>-->
         <!--</entry>-->
         <!--<entry key="INDEX">-->
-            <!--<set>-->
-                <!--<value>*</value>-->
-            <!--</set>-->
+        <!--<set>-->
+        <!--<value>*</value>-->
+        <!--</set>-->
         <!--</entry>-->
 
         <!--For removing system types http://www.sql.ru/forum/actualthread.aspx?bid=3&tid=542661&hl=-->
