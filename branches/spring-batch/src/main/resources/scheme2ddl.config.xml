@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-2.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		  http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+    <import resource="applicationContext.xml"/>
+
+    <job id="job1" xmlns="http://www.springframework.org/schema/batch">
+        <step id="step1" parent="simpleStep">
+            <tasklet>
+                <chunk reader="reader" processor="itemProcessor" writer="writer"/>
+            </tasklet>
+        </step>
+    </job>
+
+
+    <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader">
+        <property name="userObjectDao" ref="userObjectDao"/>
+    </bean>
+
+    <bean id="itemProcessor" class="com.googlecode.scheme2ddl.UserObjectProcessor">
+        <property name="userObjectDao" ref="userObjectDao"/>
+        <property name="ddlFormatter" ref="ddlFormatter"/>
+        <property name="excludes" ref="excludes"/>
+        <property name="dependencies" ref="dependencies"/>
+    </bean>
+
+
+    <bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource">
+        <property name="URL" value="jdbc:oracle:thin:ctc/ctcctc@10.1.138.208:1521/ctkdev"/>
+    </bean>
+
+    <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
+        <property name="outputPath" value="D:/temp/oracle-ddl2svn/TEST/"/>
+    </bean>
+
+    <bean id="userObjectDao" class="com.googlecode.scheme2ddl.dao.UserObjectDaoImpl">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="transformParams" ref="transformParams_for_dbms_metadata"/>
+    </bean>
+
+    <!-- http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBJBFGE -->
+    <util:map id="transformParams_for_dbms_metadata">
+        <entry key="SEGMENT_ATTRIBUTES" value="0"/>
+        <entry key="SQLTERMINATOR" value="1"/>
+        <entry key="CONSTRAINTS_AS_ALTER" value="1"/>
+    </util:map>
+
+
+    <!-- format option for DDL -->
+    <bean id="ddlFormatter" class="com.googlecode.scheme2ddl.DDLFormatter">
+        <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT.
+         Formatting option can be unsafe because it based on regexp rules -->
+        <property name="noFormat" value="false"/>
+        <property name="statementOnNewLine" value="true"/>
+    </bean>
+
+    <bean id="simpleStep"
+          class="org.springframework.batch.core.step.item.SimpleStepFactoryBean"
+          abstract="true">
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="jobRepository" ref="jobRepository"/>
+        <property name="startLimit" value="100"/>
+        <property name="commitInterval" value="1"/>
+    </bean>
+
+    <!-- Specify dependable items for every user object type accordingly with http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBIEDIA -->
+    <util:map id="dependencies">
+        <entry key="TABLE">
+            <set>
+                <value>COMMENT</value>
+                <value>INDEX</value>
+                <value>OBJECT_GRANT</value>
+                <value>TRIGGER</value>
+                <!--<value>TABLE_DATA</value> &lt;!&ndash; todo test&ndash;&gt;-->
+                <!--<value>REF_CONSTRAINT</value> &lt;!&ndash; todo test&ndash;&gt;-->
+            </set>
+        </entry>
+        <entry key="VIEW">
+            <set>
+                <value>COMMENT</value>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="MATERIALIZED VIEW">
+            <set>
+                <value>COMMENT</value>
+                <value>INDEX</value>
+                <value>MATERIALIZED_VIEW_LOG</value>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="FUNCTION">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="PROCEDURE">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="PACKAGE">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="SYNONYM">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+    </util:map>
+
+    <!-- key is the object type value - is pattern for exlude-->
+    <!-- currently only '*' wildcard supported-->
+    <util:map id="excludes">
+        <!--<entry key="*">-->
+            <!--<set>-->
+                <!--<value>dm*</value>-->
+                <!--<value>*_*_temp_*</value>-->
+            <!--</set>-->
+        <!--</entry>-->
+        <!--<entry key="VIEW">-->
+            <!--<set>-->
+                <!--<value>*</value>-->
+            <!--</set>-->
+        <!--</entry>-->
+        <!--<entry key="INDEX">-->
+            <!--<set>-->
+                <!--<value>*</value>-->
+            <!--</set>-->
+        <!--</entry>-->
+
+        <!--For removing system types http://www.sql.ru/forum/actualthread.aspx?bid=3&tid=542661&hl=-->
+        <entry key="TYPE">
+            <set>
+                <value>SYSTP*</value>
+                <value>*==</value>
+            </set>
+        </entry>
+    </util:map>
+
+
+</beans>

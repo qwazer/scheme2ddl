@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.googlecode</groupId>
+    <artifactId>scheme2ddl</artifactId>
+    <version>1.9-SNAPSHOT</version>
+
+    <properties>
+        <spring.framework.version>3.1.2.RELEASE</spring.framework.version>
+        <spring.batch.version>2.1.9.RELEASE</spring.batch.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-core</artifactId>
+            <version>${spring.batch.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-infrastructure</artifactId>
+            <version>${spring.batch.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-test</artifactId>
+            <version>${spring.batch.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring.framework.version}</version>
+        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.springframework</groupId>-->
+            <!--<artifactId>spring-tx</artifactId>-->
+            <!--<version>${spring.framework.version}</version>-->
+        <!--</dependency>-->
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.14</version>
+            <scope>runtime</scope>
+        </dependency>
+        <!--Unfortunately due the binary license there is no public repository with the Oracle Driver JAR.
+
+ Dounload latest jar from http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html.
+ Or use bundled jar
+
+ mvn install:install-file -Dfile=ojdbc5.jar -DgroupId=com.oracle -DartifactId=ojdbc5 -Dversion=11.2.0.3.0 -Dpackaging=jar -DgeneratePom=true
+-->
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc5</artifactId>
+            <version>11.2.0.3.0</version>
+        </dependency>
+    </dependencies>
+    
+</project>

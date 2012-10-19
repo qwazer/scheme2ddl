@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-2.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="jobRepository"/>
+    </bean>
+
+    <bean id="jobRepository" class="org.springframework.batch.core.repository.support.SimpleJobRepository">
+        <constructor-arg>
+            <bean class="org.springframework.batch.core.repository.dao.MapJobInstanceDao"/>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="org.springframework.batch.core.repository.dao.MapJobExecutionDao" />
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="org.springframework.batch.core.repository.dao.MapStepExecutionDao"/>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="org.springframework.batch.core.repository.dao.MapExecutionContextDao"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.batch.support.transaction.ResourcelessTransactionManager"/>
+
+</beans>
