@@ -1,7 +1,5 @@
 package com.googlecode.scheme2ddl;
 
-import com.googlecode.scheme2ddl.domain.UserObject;
-
 /**
  * @author A_Reshetnikov
  * @since Date: 18.10.2012
