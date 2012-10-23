@@ -2,6 +2,8 @@ package com.googlecode.scheme2ddl;
 
 import com.googlecode.scheme2ddl.dao.UserObjectDao;
 import com.googlecode.scheme2ddl.domain.UserObject;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ItemProcessor;
 
 import java.util.Map;
@@ -13,6 +15,7 @@ import java.util.Set;
  */
 public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject> {
 
+    private static final Log log = LogFactory.getLog(UserObjectProcessor.class);
     private UserObjectDao userObjectDao;
     private DDLFormatter ddlFormatter;
     private Map<String, Set<String>> excludes;
@@ -20,8 +23,10 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
 
     public UserObject process(UserObject userObject) throws Exception {
 
-        if (needToExclude(userObject))
+        if (needToExclude(userObject)) {
+            log.debug(String.format("Skipping processing of user object %s ", userObject));
             return null;
+        }
         userObject.setDdl(map2Ddl(userObject));
         //  userObject.setFolderName(map2FolderName(userObject.getType()));
         userObject.setFileName(map2FileName(userObject));
@@ -30,6 +35,12 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
 
     private boolean needToExclude(UserObject userObject) {
         if (excludes == null || excludes.size() == 0) return false;
+        if (excludes.get("*") != null) {
+            for (String pattern : excludes.get("*")) {
+                if (matchesByPattern(userObject.getName(), pattern))
+                    return true;
+            }
+        }
         for (String typeName : excludes.keySet()) {
             if (typeName.equalsIgnoreCase(userObject.getType())) {
                 if (excludes.get(typeName) == null) return true;
@@ -37,12 +48,6 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
                     if (matchesByPattern(userObject.getName(), pattern))
                         return true;
                 }
-            }
-        }
-        if (excludes.get("*") != null) {
-            for (String pattern : excludes.get("*")) {
-                if (matchesByPattern(userObject.getName(), pattern))
-                    return true;
             }
         }
         return false;
@@ -70,7 +75,8 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     }
 
     private String map2FileName(UserObject userObject) {
-        return map2FolderName(userObject.getType()) + "/" + userObject.getName() + ".sql";
+        String res =  map2FolderName(userObject.getType()) + "/" + userObject.getName() + ".sql";
+        return res.toLowerCase();
     }
 
     private String map2FolderName(String type) {

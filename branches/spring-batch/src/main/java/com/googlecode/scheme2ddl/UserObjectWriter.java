@@ -1,9 +1,5 @@
 package com.googlecode.scheme2ddl;
 
-/**
- * @author A_Reshetnikov
- * @since Date: 16.10.2012
- */
 
 import com.googlecode.scheme2ddl.domain.UserObject;
 import org.apache.commons.io.FileUtils;
@@ -16,7 +12,8 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Dummy {@link org.springframework.batch.item.ItemWriter} which only logs data it receives.
+ * @author A_Reshetnikov
+ * @since Date: 16.10.2012
  */
 public class UserObjectWriter implements ItemWriter<UserObject> {
 
@@ -30,13 +27,17 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
         if (data.size() > 0) {
             writeUserObject(data.get(0));
         }
-        log.info(data);
     }
 
     public void writeUserObject(UserObject userObject) throws Exception {
         String absoluteFileName = outputPath + "/" + userObject.getFileName();
         absoluteFileName = FilenameUtils.separatorsToSystem(absoluteFileName);
-        FileUtils.writeStringToFile(new File(absoluteFileName), userObject.getDdl());
+        File file = new File(absoluteFileName);
+        FileUtils.writeStringToFile(file, userObject.getDdl());
+        log.info(String.format("Saved %s %s to file %s",
+                userObject.getType().toLowerCase(),
+                userObject.getName().toLowerCase(),
+                file.getAbsolutePath()));
     }
 
     public void setOutputPath(String outputPath) {

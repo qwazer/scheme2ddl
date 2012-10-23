@@ -2,6 +2,8 @@ package com.googlecode.scheme2ddl;
 
 import com.googlecode.scheme2ddl.dao.UserObjectDao;
 import com.googlecode.scheme2ddl.domain.UserObject;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
@@ -16,15 +18,16 @@ import java.util.List;
  */
 public class UserObjectReader implements ItemReader<UserObject> {
 
+    private static final Log log = LogFactory.getLog(UserObjectReader.class);
     private static List<UserObject> list;
     private UserObjectDao userObjectDao;
     private boolean processPublicDbLinks = false;    //todo use
     private boolean processDbmsJobs = false;         //todo use
 
-
-    public UserObject read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+    public synchronized UserObject read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
         if (list == null) {
             fillList();
+            log.info(String.format("Found %s items for processing", list.size()));
         }
         if (list.size() == 0)
             return null;
@@ -32,7 +35,8 @@ public class UserObjectReader implements ItemReader<UserObject> {
             return list.remove(0);
     }
 
-    private void fillList() {
+    private synchronized void fillList() {
+        log.debug("Start getting of user object list for processing");
         list = userObjectDao.findListForProccessing(); //todo make it threadsafe
 
     }

@@ -6,7 +6,7 @@
 
     <job id="job1" xmlns="http://www.springframework.org/schema/batch">
         <step id="step1" parent="simpleStep">
-            <tasklet task-executor="taskExecutor" throttle-limit="1000">  <!-- actual limit defined in taskExecutor bean-->
+            <tasklet task-executor="taskExecutor" throttle-limit="100000">  <!-- actual limit defined in taskExecutor bean-->
                 <chunk reader="reader" processor="processor" writer="writer" />
             </tasklet>
         </step>

@@ -1,6 +1,8 @@
 package com.googlecode.scheme2ddl.dao;
 
 import com.googlecode.scheme2ddl.domain.UserObject;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,6 +22,7 @@ import java.util.Map;
 public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
 
     private Map<String,String> transformParams;
+    private static final Log log = LogFactory.getLog(UserObjectDaoImpl.class);
 
 
     public List<UserObject> findListForProccessing() {
@@ -30,7 +33,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                         "   and not exists (select 1 " +
                         "          from user_nested_tables unt" +
                         "         where t.object_name = unt.table_name)",
-                new RowMapper<UserObject>() {
+                new RowMapper() {
                     public UserObject mapRow(ResultSet rs, int rowNum) throws SQLException {
                         UserObject userObject = new UserObject();
                         userObject.setName(rs.getString("object_name"));
@@ -76,6 +79,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                 try {
                     rs = ps.executeQuery();
                 } catch (SQLException e) {
+                    log.debug(String.format("Error during select dbms_metadata.get_dependent_ddl(%s, %s) from dual", type, name));
                     return "";
                 }
                 try {
