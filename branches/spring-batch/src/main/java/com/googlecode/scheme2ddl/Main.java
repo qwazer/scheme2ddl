@@ -74,7 +74,7 @@ public class Main {
     }
 
     private static void printVersion() {
-        System.out.println(getVersion());
+        System.out.println("scheme2ddl version " + getVersion());
     }
 
     private static String getVersion() {

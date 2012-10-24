@@ -7,11 +7,47 @@
     <groupId>com.googlecode</groupId>
     <artifactId>scheme2ddl</artifactId>
     <version>1.9-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <properties>
         <spring.framework.version>2.5.6</spring.framework.version>
         <spring.batch.version>2.1.9.RELEASE</spring.batch.version>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.5</version>
+                <configuration>
+                    <transformers>
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <manifestEntries>
+                                <Main-Class>com.googlecode.scheme2ddl.Main</Main-Class>
+                                <Implementation-Version>${project.version}</Implementation-Version>
+                            </manifestEntries>
+                        </transformer>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                            <resource>META-INF/spring.handlers</resource>
+                        </transformer>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                            <resource>META-INF/spring.schemas</resource>
+                        </transformer>
+                    </transformers>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <dependency>
@@ -35,12 +71,6 @@
             <artifactId>spring-jdbc</artifactId>
             <version>${spring.framework.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.springframework</groupId>-->
-            <!--<artifactId>spring-tx</artifactId>-->
-            <!--<version>${spring.framework.version}</version>-->
-        <!--</dependency>-->
-
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -54,9 +84,7 @@
         </dependency>
         <!--Unfortunately due the binary license there is no public repository with the Oracle Driver JAR.
 
- Dounload latest jar from http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html.
- Or use bundled jar
-
+ Download latest jar from http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html.
  mvn install:install-file -Dfile=ojdbc5.jar -DgroupId=com.oracle -DartifactId=ojdbc5 -Dversion=11.2.0.3.0 -Dpackaging=jar -DgeneratePom=true
 -->
         <dependency>
@@ -65,5 +93,5 @@
             <version>11.2.0.3.0</version>
         </dependency>
     </dependencies>
-    
+
 </project>
