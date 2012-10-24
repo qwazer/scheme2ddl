@@ -115,6 +115,8 @@ public class Main {
     }
 
     private static ConfigurableApplicationContext findApplicationContext(String location) {
+        //todo add default config in jar
+        //make FileSystem first
         ConfigurableApplicationContext context = null;
         try {
             context = new ClassPathXmlApplicationContext(configLocation);
