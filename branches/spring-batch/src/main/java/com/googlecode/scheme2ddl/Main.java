@@ -1,9 +1,14 @@
 package com.googlecode.scheme2ddl;
 
+import com.googlecode.scheme2ddl.dao.UserObjectDao;
+import oracle.jdbc.pool.OracleDataSource;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+
+import java.sql.SQLException;
 
 /**
  * @author A_Reshetnikov
@@ -11,7 +16,7 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
  */
 public class Main {
 
-    public static String outputDir = null;
+    public static String outputPath = null;
     public static int parallelCount = 4;
     private static boolean justPrintUsage = false;
     private static boolean justPrintVersion = false;
@@ -41,12 +46,44 @@ public class Main {
         }
     }
 
-    private static void testDBConnection(ConfigurableApplicationContext context) {
-        //todo implement testDBConnection in Main
+    private static void testDBConnection(ConfigurableApplicationContext context) throws SQLException {
+        UserObjectDao dao = (UserObjectDao) context.getBean("userObjectDao");
+        OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
+        if (dao.isConnectionAvailable()) {
+            System.out.println("OK success connection to " + dataSource.getURL());
+        } else {
+            System.out.println("FAIL connect to " + dataSource.getURL());
+        }
     }
 
     private static void modifyContext(ConfigurableApplicationContext context) {
-        //todo implement modifyContext in Main
+        if (dbUrl != null) {
+            String url = "jdbc:oracle:thin:" + dbUrl;
+            String user = extractUserfromDbUrl(dbUrl);
+            String password = extractPasswordfromDbUrl(dbUrl);
+            OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
+            dataSource.setURL(url);
+            // for OracleDataSource in connectionCachingEnabled mode need explicitly set user and password
+            dataSource.setUser(user);
+            dataSource.setPassword(password);
+        }
+        if (outputPath != null) {
+            UserObjectWriter writer = (UserObjectWriter) context.getBean("writer");
+            writer.setOutputPath(outputPath);
+        }
+        if (parallelCount > 0) {
+            SimpleAsyncTaskExecutor taskExecutor = (SimpleAsyncTaskExecutor) context.getBean("taskExecutor");
+            taskExecutor.setConcurrencyLimit(parallelCount);
+        }
+    }
+
+    private static String extractUserfromDbUrl(String dbUrl) {
+        return dbUrl.split("/")[0];
+    }
+
+    private static String extractPasswordfromDbUrl(String dbUrl) {
+        //scott/tiger@localhost:1521:ORCL
+        return dbUrl.split("/|@")[1];
     }
 
     /**
@@ -91,9 +128,8 @@ public class Main {
                 dbUrl = args[i + 1];
                 i++;
             } else if (arg.equals("-o") || arg.equals("-output")) {
-                outputDir = args[i + 1];
+                outputPath = args[i + 1];
                 i++;
-                // createDir();  //todo test
             } else if (arg.equals("-p") || arg.equals("--parallel")) {
                 parallelCount = Integer.parseInt(args[i + 1]);
                 i++;

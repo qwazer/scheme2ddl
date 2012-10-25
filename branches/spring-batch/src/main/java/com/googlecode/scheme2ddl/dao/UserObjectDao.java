@@ -15,4 +15,7 @@ public interface UserObjectDao {
     String findPrimaryDDL(String type, String name);
 
     String findDependentDLLByTypeName(String type, String name);
+
+    boolean isConnectionAvailable();
+
 }

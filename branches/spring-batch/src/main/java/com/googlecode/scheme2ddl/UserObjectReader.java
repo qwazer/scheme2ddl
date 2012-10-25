@@ -35,7 +35,7 @@ public class UserObjectReader implements ItemReader<UserObject> {
     }
 
     private synchronized void fillList() {
-        log.debug("Start getting of user object list for processing");
+        log.info("Start getting of user object list for processing");
         list = userObjectDao.findListForProccessing(); //todo make it threadsafe
 
     }

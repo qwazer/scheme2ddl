@@ -8,10 +8,7 @@ import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
@@ -21,9 +18,8 @@ import java.util.Map;
  */
 public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
 
-    private Map<String,String> transformParams;
     private static final Log log = LogFactory.getLog(UserObjectDaoImpl.class);
-
+    private Map<String, Boolean> transformParams;
 
     public List<UserObject> findListForProccessing() {
         return getJdbcTemplate().query(
@@ -42,7 +38,6 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                     }
                 });
     }
-
 
     public String findPrimaryDDL(final String type, final String name) {
         final String query = "select dbms_metadata.get_ddl(?, ?) from dual";
@@ -65,11 +60,11 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
         });
     }
 
-
     public String findDependentDLLByTypeName(final String type, final String name) {
 
         return (String) getJdbcTemplate().execute(new ConnectionCallback() {
             final String query = "select dbms_metadata.get_dependent_ddl(?, ?) from dual";
+
             public Object doInConnection(Connection connection) throws SQLException, DataAccessException {
                 applyTransformParameters(connection);
                 PreparedStatement ps = connection.prepareStatement(query);
@@ -79,7 +74,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                 try {
                     rs = ps.executeQuery();
                 } catch (SQLException e) {
-                    log.debug(String.format("Error during select dbms_metadata.get_dependent_ddl(%s, %s) from dual", type, name));
+                    log.trace(String.format("Error during select dbms_metadata.get_dependent_ddl(%s, %s) from dual", type, name));
                     return "";
                 }
                 try {
@@ -94,23 +89,32 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
         });
     }
 
-    private void applyTransformParameters(Connection connection) throws SQLException {
-        for (String parameterName: transformParams.keySet()) {
+    public boolean isConnectionAvailable() {
+        try {
+            getJdbcTemplate().queryForInt("select 1 from dual");
+        } catch (DataAccessException e) {
+            return false;
+        }
+        return true;
+    }
+
+
+    public void applyTransformParameters(Connection connection) throws SQLException {
+        for (String parameterName : transformParams.keySet()) {
             connection.setAutoCommit(false);
-            //  DBMS_METADATA.SESSION_TRANSFORM replaced by -1 because,
-            // variables and constants in the package can only be accessed from the PL / SQL,
-            // not from SQL as in my case.
-            //(for oracle 10 it works)  //todo test for oracle 11
-            String sql = "call DBMS_METADATA.SET_TRANSFORM_PARAM(-1,?,?)";
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, parameterName);
-            ps.setString(2, transformParams.get(parameterName) );
+            // setBoolean doesn't convert java boolean to pl/sql boolean, so used such query building
+            String sql = String.format(
+                    "BEGIN " +
+                    " dbms_metadata.set_transform_param(DBMS_METADATA.SESSION_TRANSFORM,'%s',%s)" +
+                    " END;", parameterName,  transformParams.get(parameterName) ) ;
+            PreparedStatement ps = connection.prepareCall(sql);
+            //  ps.setString(1, parameterName);
+            //  ps.setBoolean(2, transformParams.get(parameterName) );  //In general this doesn't work
             ps.execute();
         }
     }
 
-
-    public void setTransformParams(Map<String, String> transformParams) {
+    public void setTransformParams(Map<String, Boolean> transformParams) {
         this.transformParams = transformParams;
     }
 }

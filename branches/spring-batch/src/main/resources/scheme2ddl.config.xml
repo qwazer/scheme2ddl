@@ -33,9 +33,9 @@
 
     <!-- http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBJBFGE -->
     <util:map id="transformParams_for_dbms_metadata">
-        <entry key="SEGMENT_ATTRIBUTES" value="0"/>
-        <entry key="SQLTERMINATOR" value="1"/>
-        <entry key="CONSTRAINTS_AS_ALTER" value="1"/>
+        <entry key="SEGMENT_ATTRIBUTES" value="FALSE"/>
+        <entry key="SQLTERMINATOR" value="TRUE"/>
+        <entry key="CONSTRAINTS_AS_ALTER" value="TRUE"/>
     </util:map>
 
 
@@ -98,15 +98,17 @@
 
     <!-- key is the object type value - is pattern for exlude-->
     <!-- currently only '*' wildcard supported-->
+    <!-- todo -->
     <util:map id="excludes">
         <!--<entry key="*">-->
-            <!--<set>-->
-                <!--<value>dm*</value>-->
-                <!--<value>*_*_temp_*</value>-->
-            <!--</set>-->
+        <!--<set>-->
+        <!--<value>dm*</value>-->
+        <!--<value>*_*_temp_*</value>-->
+        <!--</set>-->
         <!--</entry>-->
         <entry key="VIEW">
             <set>
+                <value>*</value>
                 <value>dm_*</value>
                 <value>dmc_*</value>
                 <value>dmi_*</value>
@@ -116,6 +118,7 @@
         </entry>
         <entry key="INDEX">
             <set>
+                <value>*</value>
                 <value>d_1fe6703a8*</value>
                 <value>d_1F01B2118*</value>
             </set>
@@ -123,6 +126,21 @@
         <entry key="SEQUENCE">
             <set>
                 <value>dmi_seq_03</value>
+            </set>
+        </entry>
+        <entry key="SYNONYM">
+            <set>
+                <value>*</value>
+            </set>
+        </entry>
+        <entry key="PACKAGE">
+            <set>
+                <value>*</value>
+            </set>
+        </entry>
+        <entry key="PACKAGE BODY">
+            <set>
+                <value>*</value>
             </set>
         </entry>
         <!--For removing system types http://www.sql.ru/forum/actualthread.aspx?bid=3&tid=542661&hl=-->
@@ -133,6 +151,9 @@
             </set>
         </entry>
     </util:map>
+
+    <!-- todo includes -->
+    <!-- ORA-31603: объект "/140c6e3d_LetsSequencer" с типом JAVA_CLASS не найден в схеме "APPS" -->
 
 
 </beans>
