@@ -28,7 +28,6 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
             return null;
         }
         userObject.setDdl(map2Ddl(userObject));
-        //  userObject.setFolderName(map2FolderName(userObject.getType()));
         userObject.setFileName(map2FileName(userObject));
         return userObject;
     }

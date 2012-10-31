@@ -8,12 +8,8 @@ public class UserObject {
 
     private String name;
     private String type;
-    private String type4DBMS; //todo add mapping
-    private boolean specialObject; //todo?
     private String ddl;
-    private String dependedDdl;    //todo
-    private String folderName;   //todo replace by fileName
-    private String fileName;     //todo
+    private String fileName;
 
 
     public String getName() {
@@ -40,14 +36,6 @@ public class UserObject {
         this.ddl = ddl;
     }
 
-    public String getFolderName() {
-        return folderName;
-    }
-
-    public void setFolderName(String folderName) {
-        this.folderName = folderName;
-    }
-
     public String getFileName() {
         return fileName;
     }
@@ -56,13 +44,6 @@ public class UserObject {
         this.fileName = fileName;
     }
 
-    public String getDependedDdl() {
-        return dependedDdl;
-    }
-
-    public void setDependedDdl(String dependedDdl) {
-        this.dependedDdl = dependedDdl;
-    }
 
     @Override
     public String toString() {
@@ -70,7 +51,6 @@ public class UserObject {
                 "name='" + name + '\'' +
                 ", type='" + type + '\'' +
                 ", ddl='" + ddl + '\'' +
-                ", folderName='" + folderName + '\'' +
                 '}';
     }
 }
