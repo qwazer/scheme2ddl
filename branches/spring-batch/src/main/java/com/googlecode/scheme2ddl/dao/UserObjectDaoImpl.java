@@ -105,7 +105,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
             // setBoolean doesn't convert java boolean to pl/sql boolean, so used such query building
             String sql = String.format(
                     "BEGIN " +
-                    " dbms_metadata.set_transform_param(DBMS_METADATA.SESSION_TRANSFORM,'%s',%s)" +
+                    " dbms_metadata.set_transform_param(DBMS_METADATA.SESSION_TRANSFORM,'%s',%s);" +
                     " END;", parameterName,  transformParams.get(parameterName) ) ;
             PreparedStatement ps = connection.prepareCall(sql);
             //  ps.setString(1, parameterName);

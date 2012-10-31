@@ -2,7 +2,8 @@ package com.googlecode.scheme2ddl;
 
 import com.googlecode.scheme2ddl.dao.UserObjectDao;
 import oracle.jdbc.pool.OracleDataSource;
-import org.springframework.beans.BeansException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -21,8 +22,11 @@ public class Main {
     private static boolean justPrintUsage = false;
     private static boolean justPrintVersion = false;
     private static boolean justTestConnection = false;
-    private static String configLocation = "scheme2ddl.config.xml";
+    private static String customConfigLocation = null;
+    private static String defaultConfigLocation = "scheme2ddl.config.xml";
     private static String dbUrl = null;
+
+    private static final Log log = LogFactory.getLog(Main.class);
 
     public static void main(String[] args) throws Exception {
         collectArgs(args);
@@ -35,7 +39,7 @@ public class Main {
             return;
         }
 
-        ConfigurableApplicationContext context = findApplicationContext(configLocation);
+        ConfigurableApplicationContext context = loadApplicationContext();
 
         modifyContext(context);
 
@@ -136,7 +140,7 @@ public class Main {
             } else if (arg.equals("-tc") || arg.equals("--test-connection")) {
                 justTestConnection = true;
             } else if (arg.equals("-c") || arg.equals("--config")) {
-                configLocation = args[i + 1];
+                customConfigLocation = args[i + 1];
                 i++;
             } else if (arg.equals("-version")) {
                 justPrintVersion = true;
@@ -150,15 +154,12 @@ public class Main {
         }
     }
 
-    private static ConfigurableApplicationContext findApplicationContext(String location) {
-        //todo add default config in jar
-        //make FileSystem first
+    private static ConfigurableApplicationContext loadApplicationContext() {
         ConfigurableApplicationContext context = null;
-        try {
-            context = new ClassPathXmlApplicationContext(configLocation);
-        } catch (BeansException e) {
-            context = new FileSystemXmlApplicationContext(location);
-        }
+        if (customConfigLocation != null)
+            context = new FileSystemXmlApplicationContext(customConfigLocation);
+        else
+            context = new ClassPathXmlApplicationContext(defaultConfigLocation);
         return context;
     }
 }
