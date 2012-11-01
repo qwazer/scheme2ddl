@@ -57,8 +57,6 @@
                 <value>INDEX</value>
                 <value>OBJECT_GRANT</value>
                 <value>TRIGGER</value>
-                <!--<value>TABLE_DATA</value> &lt;!&ndash; todo test&ndash;&gt;-->
-                <!--<value>REF_CONSTRAINT</value> &lt;!&ndash; todo test&ndash;&gt;-->
             </set>
         </entry>
         <entry key="VIEW">
@@ -103,7 +101,6 @@
     <util:map id="excludes">
         <entry key="*">
             <set>
-                <value>dm*</value>
                 <value>*_*_temp_*</value>
             </set>
         </entry>
