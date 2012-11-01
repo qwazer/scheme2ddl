@@ -18,7 +18,8 @@
 
     <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader">
         <property name="userObjectDao" ref="userObjectDao"/>
-        <!--todo add dbLink and DBMS_JOBS-->
+        <property name="processPublicDbLinks" value="true"/>
+        <property name="processDmbsJobs" value="true"/>
     </bean>
 
     <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
@@ -114,8 +115,13 @@
             </set>
         </entry>
         -->
-        <!--Excluded, because all them persist in PACKAGE-->
+        <!--Excluded, because all them persist in PACKAGE and TYPE -->
         <entry key="PACKAGE BODY">
+            <set>
+                <value>*</value>
+            </set>
+        </entry>
+        <entry key="TYPE BODY">
             <set>
                 <value>*</value>
             </set>

@@ -44,7 +44,7 @@ public class UserObjectJobRunner {
 
     private void writeJobExecutionStatus(JobExecution jobExecution) {
         StepExecution step = jobExecution.getStepExecutions().toArray(new StepExecution[]{})[0];
-        logger.info(String.format("Writed %d ddls of user objects from total %d",
+        logger.info(String.format("Written %d ddls with user objects from total %d",
                 step.getWriteCount(), step.getReadCount()));
         logger.info(String.format("Skip processing %d user objects from total %d",
                 step.getFilterCount(), step.getReadCount()));

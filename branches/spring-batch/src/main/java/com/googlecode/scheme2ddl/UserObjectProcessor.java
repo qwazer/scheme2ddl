@@ -58,8 +58,13 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     }
 
     private String map2Ddl(UserObject userObject) {
-        String res = "";
-        res = userObjectDao.findPrimaryDDL(map2TypeForDBMS(userObject.getType()), userObject.getName());
+        if (userObject.getType().equals("DBMS JOB")) {
+            return userObjectDao.findDbmsJobDDL(userObject.getName());
+        }
+        if (userObject.getType().equals("PUBLIC DATABASE LINK")) {
+            return userObjectDao.findDDLInPublicScheme(map2TypeForDBMS(userObject.getType()), userObject.getName());
+        }
+        String res = userObjectDao.findPrimaryDDL(map2TypeForDBMS(userObject.getType()), userObject.getName());
         Set<String> dependedTypes = dependencies.get(userObject.getType());
         if (dependedTypes != null) {
             for (String dependedType : dependedTypes) {
@@ -69,19 +74,36 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
         return ddlFormatter.formatDDL(res);
     }
 
+    /**
+     * Oracle types in user_table without underscore, for example PACKAGE BODY
+     * but in DBMS_METADATA with underscore   PACKAGE_BODY
+     *
+     * @return type name for using in  DBMS_METADATA package
+     */
     private String map2TypeForDBMS(String type) {
+        if (type.contains("DATABASE LINK"))
+            return "DB_LINK";
+        if (type.equals("JOB"))
+            return "PROCOBJ";
         return type.replace(" ", "_");
     }
 
     private String map2FileName(UserObject userObject) {
-        String res =  map2FolderName(userObject.getType()) + "/" + userObject.getName() + ".sql";
+        String res = map2FolderName(userObject.getType()) + "/" + userObject.getName() + ".sql";
         return res.toLowerCase();
     }
 
     private String map2FolderName(String type) {
+        if (type.equals("DATABASE LINK"))
+            return "db_links";
+        if (type.equals("PUBLIC DATABASE LINK"))
+            return "public_db_links";
         type = type.toLowerCase().replaceAll(" ", "_");
         if (type.endsWith("x") || type.endsWith("s")) {
             return type + "es";
+        }
+        if (type.endsWith("y")) {
+            return type.substring(0, type.length() - 1) + "ies";
         }
         return type + "s";
     }

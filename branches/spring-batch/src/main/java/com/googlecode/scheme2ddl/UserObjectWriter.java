@@ -20,9 +20,6 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
     private static final Log log = LogFactory.getLog(UserObjectWriter.class);
     private String outputPath;
 
-    /**
-     * @see org.springframework.batch.item.ItemWriter#write(Object)
-     */
     public void write(List<? extends UserObject> data) throws Exception {
         if (data.size() > 0) {
             writeUserObject(data.get(0));

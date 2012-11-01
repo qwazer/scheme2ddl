@@ -20,8 +20,8 @@ public class UserObjectReader implements ItemReader<UserObject> {
     private static final Log log = LogFactory.getLog(UserObjectReader.class);
     private static List<UserObject> list;
     private UserObjectDao userObjectDao;
-    private boolean processPublicDbLinks = false;    //todo use
-    private boolean processDbmsJobs = false;         //todo use
+    private boolean processPublicDbLinks = false;
+    private boolean processDmbsJobs = false;
 
     public synchronized UserObject read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
         if (list == null) {
@@ -36,11 +36,25 @@ public class UserObjectReader implements ItemReader<UserObject> {
 
     private synchronized void fillList() {
         log.info("Start getting of user object list for processing");
-        list = userObjectDao.findListForProccessing(); //todo make it threadsafe
+        list = userObjectDao.findListForProccessing();
+        if (processPublicDbLinks) {
+            list.addAll(userObjectDao.findPublicDbLinks());
+        }
+        if (processDmbsJobs){
+            list.addAll(userObjectDao.findDmbsJobs());
+        }
 
     }
 
     public void setUserObjectDao(UserObjectDao userObjectDao) {
         this.userObjectDao = userObjectDao;
+    }
+
+    public void setProcessPublicDbLinks(boolean processPublicDbLinks) {
+        this.processPublicDbLinks = processPublicDbLinks;
+    }
+
+    public void setProcessDmbsJobs(boolean processDmbsSchedulerJobs) {
+        this.processDmbsJobs = processDmbsSchedulerJobs;
     }
 }
