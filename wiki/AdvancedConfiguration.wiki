@@ -3,3 +3,4 @@
 advanced configuration provided in scheme2ddl.config.xml
 
 What can be configured:
+//todo
