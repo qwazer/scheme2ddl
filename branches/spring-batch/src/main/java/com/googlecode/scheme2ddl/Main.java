@@ -106,7 +106,7 @@ public class Main {
         msg.append("  -url,                  DB connection URL" + lSep);
         msg.append("                         example: scott/tiger@localhost:1521:ORCL" + lSep);
 
-        msg.append("  -output, -o            output dir" + lSep);
+        msg.append("  -o, --output            output dir" + lSep);
         msg.append("  -p, --parallel,        number of parallel thread (default 4)" + lSep);
         msg.append("  -c, --config,          path to scheme2ddl config file (xml)" + lSep);
         msg.append("  --test-connection,-tc  test db connection available" + lSep);
@@ -126,15 +126,15 @@ public class Main {
 
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
-            if (arg.equals("-help") || arg.equals("-h")) {
+            if (arg.equals("-help") || arg.equals("-h") || arg.equals("--help")) {
                 justPrintUsage = true;
-            } else if (arg.equals("-url")) {
+            } else if (arg.equals("-url") || arg.equals("--url")) {
                 dbUrl = args[i + 1];
                 i++;
-            } else if (arg.equals("-o") || arg.equals("-output")) {
+            } else if (arg.equals("-o") || arg.equals("-output") || arg.equals("--output")) {
                 outputPath = args[i + 1];
                 i++;
-            } else if (arg.equals("-p") || arg.equals("--parallel")) {
+            } else if (arg.equals("-p") || arg.equals("--parallel") || arg.equals("-parallel")) {
                 parallelCount = Integer.parseInt(args[i + 1]);
                 i++;
             } else if (arg.equals("-tc") || arg.equals("--test-connection")) {
