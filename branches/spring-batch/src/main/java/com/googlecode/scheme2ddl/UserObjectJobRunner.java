@@ -2,10 +2,7 @@ package com.googlecode.scheme2ddl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -19,7 +16,7 @@ public class UserObjectJobRunner {
     protected static final Log logger = LogFactory.getLog(UserObjectJobRunner.class);
     private JobLauncher launcher;
 
-    int start(ConfigurableApplicationContext context) {
+    int start(ConfigurableApplicationContext context) throws Exception {
         try {
             context.getAutowireCapableBeanFactory().autowireBeanProperties(this,
                     AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
@@ -29,12 +26,15 @@ public class UserObjectJobRunner {
             JobExecution jobExecution = launcher.run(job, new JobParameters());
             //write some log
             writeJobExecutionStatus(jobExecution);
+            if (jobExecution.getStatus().isUnsuccessful()){
+                throw new Exception("Job unsuccessful");
+            }
             return 1;
 
-        } catch (Throwable e) {
+        } catch (Exception e) {
             String message = "Job Terminated in error: " + e.getMessage();
             logger.error(message, e);
-            return -1;
+            throw e;
         } finally {
             if (context != null) {
                 context.close();
