@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.googlecode</groupId>
+  <artifactId>scheme2ddl</artifactId>
+  <versioning>
+    <release>2.0</release>
+    <versions>
+      <version>2.0</version>
+    </versions>
+    <lastUpdated>20121109105035</lastUpdated>
+  </versioning>
+</metadata>
