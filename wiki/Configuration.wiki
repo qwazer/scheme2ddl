@@ -1,0 +1,20 @@
+#labels Featured
+=Configuration=
+
+Configuration provided by xml config.
+Default config placed inside scheme2ddl.jar. But you can provide option
+{{{--config <path_to_your_custom_config>}}}
+
+Sample config placed in distribution package.
+
+==What can be configured==
+
+|| name of config option ||  details ||
+|| dataSource || ||
+|| reader || ||
+|| writer || || 
+|| taskExecutor || 
+|| transformParams_for_dbms_metadata || ||
+|| ddlFormatter ||
+|| dependencies ||
+|| excludes ||
