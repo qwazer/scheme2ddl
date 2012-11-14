@@ -1,10 +1,14 @@
 #labels Featured
 ==What's new in version 2.0==
 
-  # oracle-ddl2svn splitted on 2 project, scheme2ddl moved to new namespace com.googlecode.scheme2ddl
-  # Fully rewritten code, build on top of spring-batch
+  # oracle-ddl2svn splitted on 2 project, scheme2ddl moved to new namespace under com.googlecode.scheme2ddl
+  # Fully rewritten code, build on top of [spring-batch static.springsource.org/spring-batch/]
   # Greatly improved perfomance with {{{--parallel <number>}}} option, 
   # scheme2ddl is now multithreaded!
-  # Advansed xml config rewritten and simplyfied and now is not compatable with 1.x verision
+  # [Configuration] with xml rewritten:
+      # simplified option names
+      # excluded option types_for_getting_ddl, now scheme2ddl try to unload all user_objects
+      # 2.x config is not compatible with 1.x 
   # New {{{--config <path_to_config>}}} option
   # fix a lot of issues from 1.x versions
+    # add log4j
