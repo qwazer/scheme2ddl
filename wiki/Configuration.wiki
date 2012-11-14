@@ -19,5 +19,5 @@ Sample custom config placed in distribution package.
 || taskExecutor || number of threads ||
 || transformParams_for_dbms_metadata || ||
 || ddlFormatter || some prettify options ||
-|| dependencies || for example, index is dependency for table ||
+|| dependencies || for example, index depend from table ||
 || excludes || patterns to exclude proccessing ||
