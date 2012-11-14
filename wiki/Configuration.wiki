@@ -9,12 +9,12 @@ Sample config placed in distribution package.
 
 ==What can be configured==
 
-|| name of config option ||  details ||
-|| dataSource || ||
-|| reader || ||
-|| writer || || 
-|| taskExecutor || 
+|| **name** ||  **details** ||
+|| dataSource || connecttion string to oracle ||
+|| reader || try to process Public Db Links and Dmbs Jobs ||
+|| writer || output path || 
+|| taskExecutor || number of thread ||
 || transformParams_for_dbms_metadata || ||
-|| ddlFormatter ||
-|| dependencies ||
-|| excludes ||
+|| ddlFormatter || some prettify options ||
+|| dependencies || for example, index is dependency for table ||
+|| excludes || patterns to exclude proccessing ||
