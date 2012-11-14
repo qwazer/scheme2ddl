@@ -2,10 +2,13 @@
 =Configuration=
 
 Configuration provided by xml config.
-Default config placed inside scheme2ddl.jar. But you can provide option
-{{{--config <path_to_your_custom_config>}}}
+Default config placed inside scheme2ddl.jar.
 
-Sample config placed in distribution package.
+You can provide option
+
+{{{java -jar scheme2ddl.jar --config <path_to_your_custom_config>}}}
+
+Sample custom config placed in distribution package.
 
 ==What can be configured==
 
