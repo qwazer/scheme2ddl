@@ -1,15 +1,9 @@
-#what is new?
+#labels Featured
+==What's new in version 2.0==
 
-//todo
-
-= Introduction =
-
-Add your content here.
-
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+  # oracle-ddl2svn splitted on 2 project, scheme2ddl moved to new namespace com.googlecode.scheme2ddl
+  # Fully rewritten code, build on top of spring-batch
+  # Greatly improved perfomance with {{{--parallel <number>}}} option, 
+  # scheme2ddl is now multithreaded!
+  # Advansed xml config rewritten and simplyfied and now is not compatable with 1.x verision
+  # New {{{--config <path_to_config>}}} option
