@@ -11,7 +11,7 @@
       # simplified option names
       # excluded option types_for_getting_ddl, now scheme2ddl try to unload all user_objects
       # 2.x config is not compatible with 1.x 
-  # New {{{--config <path_to_config>}}} option
+      # New {{{--config <path_to_config>}}} option
   # fix a lot of issues from 1.x versions
      # add log4j for logging
      # fix issues for passing options to dmbs_metadata in oracle 11g
