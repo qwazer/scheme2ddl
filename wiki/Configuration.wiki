@@ -1,7 +1,8 @@
 #labels Featured
 =Configuration=
 
-Configuration provided by xml config.
+Configuration provided by xml config. [http://code.google.com/p/scheme2ddl/source/browse/trunk/src/main/resources/scheme2ddl.config.xml Look at current one in svn] 
+
 Default config placed inside scheme2ddl.jar.
 
 You can use custom config with option
