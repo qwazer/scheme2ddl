@@ -5,8 +5,8 @@
   # Fully rewritten code
      # written on top of [http://static.springsource.org/spring-batch/ spring-batch]
      # scheme2ddl build with maven
-  # Greatly improved perfomance with {{{--parallel <number>}}} option, 
-  # scheme2ddl is now multithreaded!
+  # scheme2ddl is now multithreaded
+     # Greatly improved perfomance with {{{--parallel <number>}}} option. On my test speed increased in 100 times with 120 threads.
   # [Configuration] with xml rewritten:
       # simplified option names
       # excluded option types_for_getting_ddl, now scheme2ddl try to unload all user_objects
