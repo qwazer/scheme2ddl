@@ -2,7 +2,9 @@
 ==What's new in version 2.0==
 
   # oracle-ddl2svn splitted on 2 project, scheme2ddl moved to new namespace under com.googlecode.scheme2ddl
-  # Fully rewritten code, build on top of [spring-batch http://static.springsource.org/spring-batch/]
+  # Fully rewritten code
+     # written on top of [http://static.springsource.org/spring-batch/ spring-batch]
+     # scheme2ddl build with maven
   # Greatly improved perfomance with {{{--parallel <number>}}} option, 
   # scheme2ddl is now multithreaded!
   # [Configuration] with xml rewritten:
@@ -12,4 +14,5 @@
   # New {{{--config <path_to_config>}}} option
   # fix a lot of issues from 1.x versions
      # add log4j for logging
-     # fix issues for passing options to dmbs_metadata in oracle 11g 
+     # fix issues for passing options to dmbs_metadata in oracle 11g
+     # add sample ant script to oracle-ddl2svn scripts
