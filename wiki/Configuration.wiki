@@ -9,7 +9,7 @@ Sample config placed in distribution package.
 
 ==What can be configured==
 
-|| *name** ||  *details* ||
+|| *name* ||  *details* ||
 || dataSource || connecttion string to oracle ||
 || reader || try to process Public Db Links and Dmbs Jobs ||
 || writer || output path || 
