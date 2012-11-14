@@ -4,7 +4,7 @@
 Configuration provided by xml config.
 Default config placed inside scheme2ddl.jar.
 
-You can provide option
+You can use custom config with option
 
 {{{java -jar scheme2ddl.jar --config <path_to_your_custom_config>}}}
 
