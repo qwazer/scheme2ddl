@@ -44,7 +44,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
     public List<UserObject> findDmbsJobs() {
         return getJdbcTemplate().query(
                 "select job || '' as object_name, 'DBMS JOB' as object_type " +
-                        "from DBA_JOBS " +
+                        "from user_jobs " +
                         "where schema_user != 'SYSMAN'",
                 new UserObjectRowMapper());
     }
