@@ -31,9 +31,15 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
         absoluteFileName = FilenameUtils.separatorsToSystem(absoluteFileName);
         File file = new File(absoluteFileName);
         FileUtils.writeStringToFile(file, userObject.getDdl());
-        log.info(String.format("Saved %s %s to file %s",
-                userObject.getType().toLowerCase(),
-                userObject.getName().toLowerCase(),
+        String schema = userObject.getSchema();
+        if (schema == null)
+            schema = "";
+        else
+            schema = "[" + schema + "]";
+        log.info(String.format("Saved %s %s %s to file %s",
+                schema,
+                userObject.getType(),
+                userObject.getName(),
                 file.getAbsolutePath()));
     }
 

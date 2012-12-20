@@ -25,6 +25,7 @@ public class Main {
     private static String customConfigLocation = null;
     private static String defaultConfigLocation = "scheme2ddl.config.xml";
     private static String dbUrl = null;
+    private static String processSchemas = null;
 
     private static final Log log = LogFactory.getLog(Main.class);
 
@@ -61,11 +62,13 @@ public class Main {
     }
 
     private static void modifyContext(ConfigurableApplicationContext context) {
+        OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
+        UserObjectReader reader = (UserObjectReader) context.getBean("reader");
+
         if (dbUrl != null) {
             String url = "jdbc:oracle:thin:" + dbUrl;
             String user = extractUserfromDbUrl(dbUrl);
             String password = extractPasswordfromDbUrl(dbUrl);
-            OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
             dataSource.setURL(url);
             // for OracleDataSource in connectionCachingEnabled mode need explicitly set user and password
             dataSource.setUser(user);
@@ -75,10 +78,19 @@ public class Main {
             UserObjectWriter writer = (UserObjectWriter) context.getBean("writer");
             writer.setOutputPath(outputPath);
         }
+        if (processSchemas != null) {
+            reader.setProcessSchemas(processSchemas);
+        }
         if (parallelCount > 0) {
             SimpleAsyncTaskExecutor taskExecutor = (SimpleAsyncTaskExecutor) context.getBean("taskExecutor");
             taskExecutor.setConcurrencyLimit(parallelCount);
         }
+
+        if (dataSource.getUser().toLowerCase().matches(".+as +sysdba *")) {
+              System.out.println("Execute as SYSDBA user...");
+              reader.setIsLaunchedByDBA(true);
+        } else
+              System.out.println("Execute for user schema only: " + dataSource.getUser());
     }
 
     private static String extractUserfromDbUrl(String dbUrl) {
@@ -106,8 +118,10 @@ public class Main {
         msg.append("  -url,                  DB connection URL" + lSep);
         msg.append("                         example: scott/tiger@localhost:1521:ORCL" + lSep);
 
-        msg.append("  -o, --output            output dir" + lSep);
+        msg.append("  -o, --output,          output dir" + lSep);
         msg.append("  -p, --parallel,        number of parallel thread (default 4)" + lSep);
+        msg.append("  -s, --schemas,         a comma separated list of schemas for processing" + lSep);
+        msg.append("                         (workes only for DBA users)" + lSep);
         msg.append("  -c, --config,          path to scheme2ddl config file (xml)" + lSep);
         msg.append("  --test-connection,-tc  test db connection available" + lSep);
         msg.append("  -version,              print version info and exit" + lSep);
@@ -133,6 +147,9 @@ public class Main {
                 i++;
             } else if (arg.equals("-o") || arg.equals("-output") || arg.equals("--output")) {
                 outputPath = args[i + 1];
+                i++;
+            } else if (arg.equals("-s") || arg.equals("-schemas") || arg.equals("--schemas")) {
+                processSchemas = args[i + 1];
                 i++;
             } else if (arg.equals("-p") || arg.equals("--parallel") || arg.equals("-parallel")) {
                 parallelCount = Integer.parseInt(args[i + 1]);

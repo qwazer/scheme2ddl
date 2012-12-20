@@ -11,19 +11,19 @@ import java.util.List;
  */
 public interface UserObjectDao {
 
-    List<UserObject> findListForProccessing();
+    List<UserObject> findListForProccessing(String schema);
 
     List<UserObject> findPublicDbLinks();
 
-    List<UserObject> findDmbsJobs();
+    List<UserObject> findDmbsJobs(String schema);
 
-    String findPrimaryDDL(String type, String name);
+    String findPrimaryDDL(String type, String name, String schema);
 
-    String findDependentDLLByTypeName(String type, String name);
+    String findDependentDLLByTypeName(String type, String name, String schema);
 
     String findDDLInPublicScheme(String type, String name);
 
-    String findDbmsJobDDL(String name);
+    String findDbmsJobDDL(String name, boolean asSysDBA);
 
     boolean isConnectionAvailable();
 

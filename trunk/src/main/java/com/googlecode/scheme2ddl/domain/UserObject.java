@@ -8,6 +8,7 @@ public class UserObject {
 
     private String name;
     private String type;
+    private String schema;
     private String ddl;
     private String fileName;
 
@@ -24,8 +25,16 @@ public class UserObject {
         return type;
     }
 
+    public String getSchema() {
+        return schema;
+    }
+
     public void setType(String type) {
         this.type = type;
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
     }
 
     public String getDdl() {
@@ -50,6 +59,7 @@ public class UserObject {
         return "UserObject{" +
                 "name='" + name + '\'' +
                 ", type='" + type + '\'' +
+                ", schema='" + schema + '\'' +
                 ", ddl='" + ddl + '\'' +
                 '}';
     }

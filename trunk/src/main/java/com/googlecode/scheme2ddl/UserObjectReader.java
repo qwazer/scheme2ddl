@@ -22,6 +22,8 @@ public class UserObjectReader implements ItemReader<UserObject> {
     private UserObjectDao userObjectDao;
     private boolean processPublicDbLinks = false;
     private boolean processDmbsJobs = false;
+    private String processSchemas = null;
+    private boolean isLaunchedByDBA = false;
 
     public synchronized UserObject read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
         if (list == null) {
@@ -35,15 +37,40 @@ public class UserObjectReader implements ItemReader<UserObject> {
     }
 
     private synchronized void fillList() {
-        log.info("Start getting of user object list for processing");
-        list = userObjectDao.findListForProccessing();
+        if (processSchemas == null || processSchemas.equals("")) {
+            if (isLaunchedByDBA) {
+                log.info("You must fill the 'processSchemas' config option for DBA user. Exit...");
+                System.exit(1);
+            }
+            log.info("Start getting of user object list for processing");
+            fillListForSchema(null);
+        } else {
+            if (!isLaunchedByDBA) {
+                log.info("The 'processSchemas' config option is supported only for DBA users. Exit...");
+                System.exit(1);
+            }
+            String[] schemas_array = processSchemas.split(", *");
+
+            for(int i =0; i < schemas_array.length ; i++) {
+                log.info(String.format("[%d/%d] Start getting of user object list for processing for '%s' schema.",
+                        i+1, schemas_array.length, schemas_array[i]));
+                fillListForSchema(schemas_array[i]);
+            }
+        }
+
         if (processPublicDbLinks) {
             list.addAll(userObjectDao.findPublicDbLinks());
         }
-        if (processDmbsJobs){
-            list.addAll(userObjectDao.findDmbsJobs());
-        }
+    }
 
+    private synchronized void fillListForSchema(String schema) {
+        if (list == null)
+            list = userObjectDao.findListForProccessing(schema);
+        else
+            list.addAll(userObjectDao.findListForProccessing(schema));
+        if (processDmbsJobs){
+            list.addAll(userObjectDao.findDmbsJobs(schema));
+        }
     }
 
     public void setUserObjectDao(UserObjectDao userObjectDao) {
@@ -56,5 +83,13 @@ public class UserObjectReader implements ItemReader<UserObject> {
 
     public void setProcessDmbsJobs(boolean processDmbsSchedulerJobs) {
         this.processDmbsJobs = processDmbsSchedulerJobs;
+    }
+
+    public void setProcessSchemas(String processSchemas) {
+        this.processSchemas = processSchemas;
+    }
+
+    public void setIsLaunchedByDBA(boolean isLaunchedByDBA) {
+        this.isLaunchedByDBA = isLaunchedByDBA;
     }
 }
