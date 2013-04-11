@@ -51,7 +51,8 @@
         <property name="statementOnNewLine" value="true"/>
         <!-- Enabled 'isMorePrettyFormat' option disables the 'statementOnNewLine' option -->
         <property name="isMorePrettyFormat" value="false"/>
-        <property name="isFilenameToLowerCase" value="true"/>
+		<!-- 'filenameCase' can be 'lower' (default) or 'upper' -->
+        <property name="filenameCase" value="lower"/>
     </bean>
 
 
