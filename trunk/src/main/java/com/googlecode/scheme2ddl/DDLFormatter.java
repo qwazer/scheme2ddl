@@ -8,7 +8,7 @@ public class DDLFormatter {
 
     private boolean noFormat;
     private boolean statementOnNewLine;
-    private boolean isFilenameToLowerCase = true;
+    private String filenameCase = "lower";
     private boolean isMorePrettyFormat = false;
     // Get a new line specific to the system
     static String newline = System.getProperty("line.separator");
@@ -38,12 +38,12 @@ public class DDLFormatter {
         this.statementOnNewLine = statementOnNewLine;
     }
 
-    public void setIsFilenameToLowerCase(boolean isFilenameToLowerCase) {
-        this.isFilenameToLowerCase = isFilenameToLowerCase;
+    public void setFilenameCase(String filenameCase) {
+        this.filenameCase = filenameCase;
     }
 
-    public boolean getIsFilenameToLowerCase() {
-        return isFilenameToLowerCase;
+    public String getFilenameCase() {
+        return filenameCase;
     }
 
     public void setIsMorePrettyFormat(boolean isMorePrettyFormat) {

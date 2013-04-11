@@ -93,25 +93,27 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     }
 
     private String map2FileName(UserObject userObject) {
-        String res = map2FolderName(userObject.getType()) + "/" + userObject.getName() + ".sql";
+        String res = map2FolderName(userObject.getType()) + "/" + userObject.getName();
         String schema = userObject.getSchema();
         if (schema != null)
             res = schema + "/" + res;
-        if (ddlFormatter.getIsFilenameToLowerCase())
-            return res.toLowerCase();
-        else
-            return res;
+        if (ddlFormatter.getFilenameCase().equals("lower"))
+            return res.toLowerCase() + ".sql";
+        else if (ddlFormatter.getFilenameCase().equals("upper"))
+		    return res.toUpperCase() + ".sql";
+		else
+			return res + ".sql";
     }
 
     private String map2FolderName(String type) {
         if (type.equals("DATABASE LINK")) {
-            if (ddlFormatter.getIsFilenameToLowerCase())
+            if (ddlFormatter.getFilenameCase().equals("lower"))
                 return "db_links";
             else
                 return "DATABASE_LINKS";
         }
         if (type.equals("PUBLIC DATABASE LINK")) {
-            if (ddlFormatter.getIsFilenameToLowerCase())
+            if (ddlFormatter.getFilenameCase().equals("lower"))
                 return "public_db_links";
             else
                 return "PUBLIC_DATABASE_LINKS";
@@ -125,10 +127,12 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
             type += "s";
         }
 
-        if (ddlFormatter.getIsFilenameToLowerCase())
-            return type;
-        else
+        if (ddlFormatter.getFilenameCase().equals("lower"))
+            return type.toLowerCase();
+        else if (ddlFormatter.getFilenameCase().equals("upper"))
             return type.toUpperCase();
+		else
+			return type;
     }
 
     public void setExcludes(Map excludes) {
