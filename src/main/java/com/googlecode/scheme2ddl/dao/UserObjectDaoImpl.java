@@ -30,7 +30,10 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                             " where t.generated = 'N' " +
                             "   and not exists (select 1 " +
                             "          from user_nested_tables unt" +
-                            "         where t.object_name = unt.table_name)",
+                            "         where t.object_name = unt.table_name)" +
+                            " UNION ALL " +
+                         	" select rname, 'REFRESH_GROUP', NULL " +
+                         	" from user_refresh a ",
                     new UserObjectRowMapper());
         } else {
             return getJdbcTemplate().query(
@@ -40,7 +43,11 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                             "   and t.owner = '" + schema + "' " +
                             "   and not exists (select 1 " +
                             "          from user_nested_tables unt" +
-                            "         where t.object_name = unt.table_name)",
+                            "         where t.object_name = unt.table_name)" +
+                     " UNION ALL " +
+                     	" select rname, 'REFRESH_GROUP', rowner " +
+                     	" from dba_refresh a " +
+                     	" where a.rowner = '" + schema + "' ",
                     new UserObjectRowMapper());
         }
     }
