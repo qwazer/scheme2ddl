@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-2.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		  http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+    <import resource="classpath:applicationContext.xml"/>
+
+
+    <bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource">
+        <property name="URL" value="jdbc:oracle:thin:@MyOracleHost:1521:MyDB"/>
+        <!-- You can choose a DBA user. For example: value="sys as sysdba" -->
+        <property name="user" value="scott"/>
+        <property name="password" value="tiger"/>
+        <property name="connectionCachingEnabled" value="true"/>
+    </bean>
+
+    <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader">
+        <!-- a comma separated list of schemas for processing. Workes only for DBA users -->
+        <!-- property name="processSchemas" value="SCOTT"/ -->
+        <property name="userObjectDao" ref="userObjectDao"/>
+        <property name="processPublicDbLinks" value="true"/>
+        <property name="processDmbsJobs" value="true"/>
+    </bean>
+
+    <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
+        <property name="outputPath" value="output"/>
+    </bean>
+
+
+    <bean id="taskExecutor" class="org.springframework.core.task.SimpleAsyncTaskExecutor">
+        <property name="concurrencyLimit" value="4"/>
+    </bean>
+
+
+    <!-- http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBJBFGE -->
+    <util:map id="transformParams_for_dbms_metadata">
+        <entry key="SEGMENT_ATTRIBUTES" value="FALSE"/>
+        <entry key="SQLTERMINATOR" value="TRUE"/>
+        <entry key="CONSTRAINTS_AS_ALTER" value="TRUE"/>
+    </util:map>
+
+
+    <!-- format option for DDL -->
+    <bean id="ddlFormatter" class="com.googlecode.scheme2ddl.DDLFormatter">
+        <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT.
+         Formatting option can be unsafe because it based on regexp rules -->
+        <property name="noFormat" value="false"/>
+        <property name="statementOnNewLine" value="true"/>
+        <!-- Enabled 'isMorePrettyFormat' option disables the 'statementOnNewLine' option -->
+        <property name="isMorePrettyFormat" value="false"/>
+		<!-- 'filenameCase' can be 'lower' (default) or 'upper' -->
+        <property name="filenameCase" value="lower"/>
+    </bean>
+
+
+    <!-- Specify dependable items for every user object type accordingly with http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBIEDIA -->
+    <util:map id="dependencies">
+        <entry key="TABLE">
+            <set>
+                <value>COMMENT</value>
+                <value>INDEX</value>
+                <value>OBJECT_GRANT</value>
+                <value>TRIGGER</value>
+            </set>
+        </entry>
+        <entry key="VIEW">
+            <set>
+                <value>COMMENT</value>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="MATERIALIZED VIEW">
+            <set>
+                <value>COMMENT</value>
+                <value>INDEX</value>
+                <value>MATERIALIZED_VIEW_LOG</value>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="FUNCTION">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="PROCEDURE">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="PACKAGE">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="SYNONYM">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="TYPE">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+    </util:map>
+
+    <!-- Key is the object type,
+         Value - is set of patterns for exlude
+         Currently only '*' wildcard supported -->
+    <util:map id="excludes">
+        <entry key="*">
+            <set>
+                <value>*_*_temp_*</value>
+            </set>
+        </entry>
+        <!--
+        <entry key="VIEW">
+            <set>
+                <value>example_exlude_prefix_*</value>
+                <value>*_example_exlude_suffix</value>
+            </set>
+        </entry>
+        -->
+
+
+        <entry key="TABLE PARTITION">
+            <set>
+                <value>*</value>
+            </set>
+        </entry>
+
+        <!--Excluded, because all them persist in PACKAGE, TYPE and TABLE -->
+        <entry key="PACKAGE BODY">
+            <set>
+                <value>*</value>
+            </set>
+        </entry>
+        <entry key="TYPE BODY">
+            <set>
+                <value>*</value>
+            </set>
+        </entry>
+        <entry key="INDEX">
+            <set>
+                <value>*</value>
+            </set>
+        </entry>
+        <!--For removing system types http://www.sql.ru/forum/actualthread.aspx?bid=3&tid=542661&hl=-->
+        <entry key="TYPE">
+            <set>
+                <value>SYSTP*</value>
+                <value>*==</value>
+            </set>
+        </entry>
+    </util:map>
+
+
+</beans>
