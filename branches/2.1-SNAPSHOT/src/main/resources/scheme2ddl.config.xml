@@ -24,6 +24,8 @@
 
     <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
         <property name="outputPath" value="output"/>
+        <!-- use 'lower' or 'upper' for specify filename case rule -->
+        <property name="fileNameCase" value="lower"/>
     </bean>
 
 
