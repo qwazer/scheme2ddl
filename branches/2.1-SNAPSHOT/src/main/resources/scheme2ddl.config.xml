@@ -129,6 +129,12 @@
             </set>
         </entry>
 
+        <entry key="INDEX PARTITION">
+            <set>
+                <value>*</value>
+            </set>
+        </entry>
+
         <entry key="LOB">
             <set>
                 <value>*</value>
