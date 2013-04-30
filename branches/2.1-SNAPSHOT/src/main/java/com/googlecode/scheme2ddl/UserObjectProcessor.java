@@ -9,6 +9,8 @@ import org.springframework.batch.item.ItemProcessor;
 import java.util.Map;
 import java.util.Set;
 
+import static com.googlecode.scheme2ddl.TypeNamesUtil.map2TypeForDBMS;
+
 /**
  * @author A_Reshetnikov
  * @since Date: 17.10.2012
@@ -74,19 +76,6 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
         return ddlFormatter.formatDDL(res);
     }
 
-    /**
-     * Oracle types in user_table without underscore, for example PACKAGE BODY
-     * but in DBMS_METADATA with underscore   PACKAGE_BODY
-     *
-     * @return type name for using in  DBMS_METADATA package
-     */
-    private String map2TypeForDBMS(String type) {
-        if (type.contains("DATABASE LINK"))
-            return "DB_LINK";
-        if (type.equals("JOB"))
-            return "PROCOBJ";
-        return type.replace(" ", "_");
-    }
 
     private String map2FileName(UserObject userObject) {
         String res = map2FolderName(userObject.getType()) + "/" + userObject.getName() + ".sql";
