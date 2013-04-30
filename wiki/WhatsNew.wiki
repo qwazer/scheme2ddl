@@ -1,4 +1,14 @@
 #labels Featured
+==What's new in version 2.1==
+
+  # More verbose error logging with suggestions how to fix error
+  # New object type - `REFRESH_GROUP` (thanks to arnoreinhofer82)
+  # Improved default exclude config - add exlusions of `TABLE PARTITION`, `INDEX PARTITION` and `LOB`
+  # Some new advanced config formatter options
+    # `morePrettyFormat` in ddlFormatter section
+    # `fileNameCase` in writer section
+
+
 ==What's new in version 2.0==
 
   # oracle-ddl2svn splitted on 2 project, scheme2ddl moved to new namespace under com.googlecode.scheme2ddl
