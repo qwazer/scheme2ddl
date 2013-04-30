@@ -46,6 +46,8 @@
          Formatting option can be unsafe because it based on regexp rules -->
         <property name="noFormat" value="false"/>
         <property name="statementOnNewLine" value="true"/>
+        <!-- Enabled 'isMorePrettyFormat' option disables the 'statementOnNewLine' option -->
+        <property name="isMorePrettyFormat" value="false"/>
     </bean>
 
 
