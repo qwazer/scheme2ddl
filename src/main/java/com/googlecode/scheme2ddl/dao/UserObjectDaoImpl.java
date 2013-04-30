@@ -188,7 +188,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
             UserObject userObject = new UserObject();
             userObject.setName(rs.getString("object_name"));
             userObject.setType(rs.getString("object_type"));
-            userObject.setSchema(schemaName);
+            userObject.setSchema(schemaName == null ? "" : schemaName);
             return userObject;
         }
     }
