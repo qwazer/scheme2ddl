@@ -129,6 +129,12 @@
             </set>
         </entry>
 
+        <entry key="LOB">
+            <set>
+                <value>*</value>
+            </set>
+        </entry>
+
         <!--Excluded, because all them persist in PACKAGE, TYPE and TABLE -->
        <entry key="PACKAGE BODY">
             <set>
