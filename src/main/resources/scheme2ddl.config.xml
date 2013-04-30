@@ -26,6 +26,8 @@
         <property name="outputPath" value="output"/>
         <!-- use 'lower' or 'upper' for specify filename case rule -->
         <property name="fileNameCase" value="lower"/>
+        <!-- include schema name to filepath - true/false -->
+        <property name="includeSchemaName" value="false"/>
     </bean>
 
 

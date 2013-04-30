@@ -20,6 +20,7 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
     private static final Log log = LogFactory.getLog(UserObjectWriter.class);
     private String outputPath;
     private String fileNameCase;
+    private boolean includeSchemaName;
 
     public void write(List<? extends UserObject> data) throws Exception {
         if (data.size() > 0) {
@@ -30,7 +31,8 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
     public void writeUserObject(UserObject userObject) throws Exception {
         String fileName = userObject.getFileName();
         fileName = applyFileNameCaseRule(fileName);
-        String absoluteFileName = outputPath + "/" + fileName;
+        String schemaName = includeSchemaName ? userObject.getSchema() : "";
+        String absoluteFileName = outputPath + "/" + schemaName + "/" + fileName;
         absoluteFileName = FilenameUtils.separatorsToSystem(absoluteFileName);
         File file = new File(absoluteFileName);
         FileUtils.writeStringToFile(file, userObject.getDdl());
@@ -54,5 +56,9 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
 
     public void setFileNameCase(String fileNameCase) {
         this.fileNameCase = fileNameCase;
+    }
+
+    public void setIncludeSchemaName(boolean includeSchemaName) {
+        this.includeSchemaName = includeSchemaName;
     }
 }
