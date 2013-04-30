@@ -1,5 +1,6 @@
 package com.googlecode.scheme2ddl;
 
+import oracle.jdbc.pool.OracleDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.*;
@@ -7,6 +8,8 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.Assert;
+
+import java.util.Map;
 
 /**
  * @author A_Reshetnikov
@@ -23,7 +26,12 @@ public class UserObjectJobRunner {
 
             Assert.state(launcher != null, "A JobLauncher must be provided.  Please add one to the configuration.");
             Job job = (Job) context.getBean("job1");
-            JobExecution jobExecution = launcher.run(job, new JobParameters());
+
+            JobParametersBuilder parametersBuilder = new JobParametersBuilder();
+            String schemaName = ((OracleDataSource) context.getBean("dataSource")).getUser();
+            parametersBuilder.addString("schemaName", schemaName);
+
+            JobExecution jobExecution = launcher.run(job, parametersBuilder.toJobParameters());
             //write some log
             writeJobExecutionStatus(jobExecution);
             if (jobExecution.getStatus().isUnsuccessful()){

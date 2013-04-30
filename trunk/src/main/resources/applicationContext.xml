@@ -21,9 +21,10 @@
         <property name="commitInterval" value="1"/>
     </bean>
 
-    <bean id="userObjectDao" class="com.googlecode.scheme2ddl.dao.UserObjectDaoImpl">
+    <bean id="userObjectDao" class="com.googlecode.scheme2ddl.dao.UserObjectDaoImpl" scope="step">
         <property name="dataSource" ref="dataSource"/>
         <property name="transformParams" ref="transformParams_for_dbms_metadata"/>
+        <property name="schemaName" value="#{jobParameters['schemaName']}"/>
     </bean>
 
     <bean id="processor" class="com.googlecode.scheme2ddl.UserObjectProcessor">

@@ -25,6 +25,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
 
     private static final Log log = LogFactory.getLog(UserObjectDaoImpl.class);
     private Map<String, Boolean> transformParams;
+    private String schemaName;
 
     public List<UserObject> findListForProccessing() {
         return getJdbcTemplate().query(
@@ -170,6 +171,10 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
         this.transformParams = transformParams;
     }
 
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
+    }
+
     private class CallableStatementCallbackImpl implements CallableStatementCallback {
         public Object doInCallableStatement(CallableStatement callableStatement) throws SQLException, DataAccessException {
             callableStatement.registerOutParameter(1, java.sql.Types.VARCHAR);
@@ -183,6 +188,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
             UserObject userObject = new UserObject();
             userObject.setName(rs.getString("object_name"));
             userObject.setType(rs.getString("object_type"));
+            userObject.setSchema(schemaName);
             return userObject;
         }
     }
