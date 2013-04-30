@@ -27,11 +27,9 @@ public class UserObjectJobRunner {
             Assert.state(launcher != null, "A JobLauncher must be provided.  Please add one to the configuration.");
             Job job = (Job) context.getBean("job1");
 
-            JobParametersBuilder parametersBuilder = new JobParametersBuilder();
-            String schemaName = ((OracleDataSource) context.getBean("dataSource")).getUser();
-            parametersBuilder.addString("schemaName", schemaName);
+            JobParameters jobParameters = getJobParameters(context);
 
-            JobExecution jobExecution = launcher.run(job, parametersBuilder.toJobParameters());
+            JobExecution jobExecution = launcher.run(job, jobParameters);
             //write some log
             writeJobExecutionStatus(jobExecution);
             if (jobExecution.getStatus().isUnsuccessful()){
@@ -48,6 +46,21 @@ public class UserObjectJobRunner {
                 context.close();
             }
         }
+    }
+
+    private static JobParameters getJobParameters(ConfigurableApplicationContext context) {
+        JobParametersBuilder parametersBuilder = new JobParametersBuilder();
+        String userName = ((OracleDataSource) context.getBean("dataSource")).getUser();
+        boolean isLaunchedByDBA = false;
+        String schemaName = userName;
+        if (userName.toLowerCase().matches(".+as +sysdba *")) {
+            System.out.println("Execute as SYSDBA user..."); //todo move to logging level
+            schemaName = userName.split(" ")[0];
+            isLaunchedByDBA = true;
+        }
+        parametersBuilder.addString("schemaName", schemaName.toUpperCase());
+        parametersBuilder.addString("launchedByDBA", Boolean.toString(isLaunchedByDBA));
+        return parametersBuilder.toJobParameters();
     }
 
     private void writeJobExecutionStatus(JobExecution jobExecution) {

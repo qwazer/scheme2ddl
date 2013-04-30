@@ -26,6 +26,8 @@ public class Main {
     private static String defaultConfigLocation = "scheme2ddl.config.xml";
     private static String dbUrl = null;
 
+    //todo add multi schemas
+
     private static final Log log = LogFactory.getLog(Main.class);
 
     public static void main(String[] args) throws Exception {

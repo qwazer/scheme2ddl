@@ -1,11 +1,9 @@
 package com.googlecode.scheme2ddl.dao;
 
-import com.googlecode.scheme2ddl.TypeNamesUtil;
 import com.googlecode.scheme2ddl.domain.UserObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.CallableStatementCallback;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.RowMapper;
@@ -26,53 +24,77 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
     private static final Log log = LogFactory.getLog(UserObjectDaoImpl.class);
     private Map<String, Boolean> transformParams;
     private String schemaName;
+    private boolean isLaunchedByDBA = false;
 
     public List<UserObject> findListForProccessing() {
-        return getJdbcTemplate().query(
-                "select t.object_name, t.object_type " +
-                        "  from user_objects t " +
-                        " where t.generated = 'N' " +
-                        "   and not exists (select 1 " +
-                        "          from user_nested_tables unt" +
-                        "         where t.object_name = unt.table_name)" +
-                " UNION ALL " +
-                        " select rname as object_name, 'REFRESH GROUP' as object_type " +
-                        " from user_refresh ",
-                new UserObjectRowMapper());
+        String sql;
+        if (isLaunchedByDBA)
+            sql = "select t.object_name, t.object_type " +
+                    "  from dba_objects t " +
+                    " where t.generated = 'N' " +
+                    "   and t.owner = '" + schemaName + "' " +
+                    "   and not exists (select 1 " +
+                    "          from user_nested_tables unt" +
+                    "         where t.object_name = unt.table_name)" +
+                    " UNION ALL " +
+                    " select rname as object_name, 'REFRESH_GROUP' as object_type " +
+                    " from dba_refresh a " +
+                    " where a.rowner = '" + schemaName + "' ";
+        else
+            sql = "select t.object_name, t.object_type " +
+                    "  from user_objects t " +
+                    " where t.generated = 'N' " +
+                    "   and not exists (select 1 " +
+                    "          from user_nested_tables unt" +
+                    "         where t.object_name = unt.table_name)" +
+                    " UNION ALL " +
+                    " select rname as object_name, 'REFRESH GROUP' as object_type " +
+                    " from user_refresh ";
+
+        return getJdbcTemplate().query(sql, new UserObjectRowMapper());
     }
 
     public List<UserObject> findPublicDbLinks() {
-        return getJdbcTemplate().query(
+        List<UserObject> list = getJdbcTemplate().query(
                 "select db_link as object_name, 'PUBLIC DATABASE LINK' as object_type " +
                         "from DBA_DB_LINKS " +
                         "where owner='PUBLIC'",
                 new UserObjectRowMapper());
+        for (UserObject userObject : list) {
+            userObject.setSchema("PUBLIC");
+        }
+        return list;
     }
 
     public List<UserObject> findDmbsJobs() {
-        return getJdbcTemplate().query(
-                "select job || '' as object_name, 'DBMS JOB' as object_type " +
-                        "from user_jobs " +
-                        "where schema_user != 'SYSMAN'",
-                new UserObjectRowMapper());
+        String tableName = isLaunchedByDBA ? "dba_jobs" : "user_jobs";
+        String whereClause = isLaunchedByDBA ? "schema_user = '" + schemaName + "'" : "schema_user != 'SYSMAN'";
+        String sql = "select job || '' as object_name, 'DBMS JOB' as object_type " +
+                "from  " + tableName + " where " + whereClause;
+        return getJdbcTemplate().query(sql, new UserObjectRowMapper());
     }
 
     public String findPrimaryDDL(final String type, final String name) {
-        return executeDbmsMetadataGetDdl("select dbms_metadata.get_ddl(?, ?) from dual", type, name);
+        if (isLaunchedByDBA)
+            return executeDbmsMetadataGetDdl("select dbms_metadata.get_ddl(?, ?, ?) from dual", type, name, schemaName);
+        else
+            return executeDbmsMetadataGetDdl("select dbms_metadata.get_ddl(?, ?) from dual", type, name, null);
     }
 
-    private String executeDbmsMetadataGetDdl(final String query, final String type, final String name) {
+    private String executeDbmsMetadataGetDdl(final String query, final String type, final String name, final String schema) {
         return (String) getJdbcTemplate().execute(new ConnectionCallback() {
             public String doInConnection(Connection connection) throws SQLException, DataAccessException {
                 applyTransformParameters(connection);
                 PreparedStatement ps = connection.prepareStatement(query);
                 ps.setString(1, type);
                 ps.setString(2, name);
+                if (schema != null) {
+                    ps.setString(3, schema);
+                }
                 ResultSet rs = null;
                 try {
                     rs = ps.executeQuery();
-                }
-                catch (SQLException e){
+                } catch (SQLException e) {
                     log.error(String.format("Error during select dbms_metadata.get_ddl('%s', '%s') from dual\n" +
                             "Try to exclude type '%s' in advanced config excludes section\n", type, name, map2TypeForConfig(type)));
                     log.error(String.format("Sample:\n\n" +
@@ -91,9 +113,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                     if (rs.next()) {
                         return rs.getString(1).trim();
                     }
-                }
-
-                finally {
+                } finally {
                     rs.close();
                 }
                 return null;
@@ -131,16 +151,27 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
     }
 
     public String findDDLInPublicScheme(String type, String name) {
-        return executeDbmsMetadataGetDdl("select dbms_metadata.get_ddl(?, ?, 'PUBLIC') from dual", type, name);
+        return executeDbmsMetadataGetDdl("select dbms_metadata.get_ddl(?, ?, ?) from dual", type, name, "PUBLIC");
     }
 
     public String findDbmsJobDDL(String name) {
-        return (String) getJdbcTemplate().execute("DECLARE\n" +
-                " callstr VARCHAR2(4096);\n" +
-                "BEGIN\n" +
-                "  dbms_job.user_export(" + name + ", callstr);\n" +
-                ":done := callstr; " +
-                "END;", new CallableStatementCallbackImpl());
+        String sql;
+        if (isLaunchedByDBA)
+            // The 'dbms_job.user_export' function does not work with sys/dba users (can't find users jobs). :(
+            sql = "DECLARE\n" +
+                    " callstr VARCHAR2(4096);\n" +
+                    "BEGIN\n" +
+                    "  dbms_ijob.full_export(" + name + ", callstr);\n" +
+                    ":done := callstr; END;";
+        else
+            sql = "DECLARE\n" +
+                    " callstr VARCHAR2(4096);\n" +
+                    "BEGIN\n" +
+                    "  dbms_job.user_export(" + name + ", callstr);\n" +
+                    ":done := callstr; " +
+                    "END;";
+
+        return (String) getJdbcTemplate().execute(sql, new CallableStatementCallbackImpl());
     }
 
     public boolean isConnectionAvailable() {
@@ -173,6 +204,10 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
 
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
+    }
+
+    public void setLaunchedByDBA(boolean launchedByDBA) {
+        this.isLaunchedByDBA = launchedByDBA;
     }
 
     private class CallableStatementCallbackImpl implements CallableStatementCallback {

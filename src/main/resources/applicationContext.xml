@@ -25,6 +25,7 @@
         <property name="dataSource" ref="dataSource"/>
         <property name="transformParams" ref="transformParams_for_dbms_metadata"/>
         <property name="schemaName" value="#{jobParameters['schemaName']}"/>
+        <property name="launchedByDBA" value="#{jobParameters['launchedByDBA']}"/>
     </bean>
 
     <bean id="processor" class="com.googlecode.scheme2ddl.UserObjectProcessor">
