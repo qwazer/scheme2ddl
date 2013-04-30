@@ -93,6 +93,11 @@
                 <value>OBJECT_GRANT</value>
             </set>
         </entry>
+        <entry key="TYPE">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
     </util:map>
 
     <!-- Key is the object type,
@@ -112,13 +117,26 @@
             </set>
         </entry>
         -->
-        <!--Excluded, because all them persist in PACKAGE and TYPE -->
-        <entry key="PACKAGE BODY">
+
+
+        <entry key="TABLE PARTITION">
+            <set>
+                <value>*</value>
+            </set>
+        </entry>
+
+        <!--Excluded, because all them persist in PACKAGE, TYPE and TABLE -->
+       <entry key="PACKAGE BODY">
             <set>
                 <value>*</value>
             </set>
         </entry>
         <entry key="TYPE BODY">
+            <set>
+                <value>*</value>
+            </set>
+        </entry>
+        <entry key="INDEX">
             <set>
                 <value>*</value>
             </set>
