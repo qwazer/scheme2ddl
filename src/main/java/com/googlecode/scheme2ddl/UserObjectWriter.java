@@ -19,8 +19,7 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
 
     private static final Log log = LogFactory.getLog(UserObjectWriter.class);
     private String outputPath;
-    private String fileNameCase;
-    private boolean includeSchemaName;
+
 
     public void write(List<? extends UserObject> data) throws Exception {
         if (data.size() > 0) {
@@ -29,36 +28,29 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
     }
 
     public void writeUserObject(UserObject userObject) throws Exception {
-        String fileName = userObject.getFileName();
-        fileName = applyFileNameCaseRule(fileName);
-        String schemaName = includeSchemaName ? userObject.getSchema() : "";
-        String absoluteFileName = outputPath + "/" + schemaName + "/" + fileName;
+        String absoluteFileName = outputPath + "/" +  userObject.getFileName();
         absoluteFileName = FilenameUtils.separatorsToSystem(absoluteFileName);
         File file = new File(absoluteFileName);
         FileUtils.writeStringToFile(file, userObject.getDdl());
-        log.info(String.format("Saved %s %s to file %s",
+        log.info(String.format("Saved %s %s.%s to file %s",
                 userObject.getType().toLowerCase(),
+                userObject.getSchema().toLowerCase(),
                 userObject.getName().toLowerCase(),
                 file.getAbsolutePath()));
     }
 
-    private String applyFileNameCaseRule(String s) {
-        if (fileNameCase != null) {
-            if (fileNameCase.equalsIgnoreCase("lower")) return s.toLowerCase();
-            if (fileNameCase.equalsIgnoreCase("upper")) return s.toUpperCase();
-        }
-        return s;
-    }
+
 
     public void setOutputPath(String outputPath) {
         this.outputPath = outputPath;
     }
 
+    @Deprecated
     public void setFileNameCase(String fileNameCase) {
-        this.fileNameCase = fileNameCase;
+        //for compatability with 2.1.x config
     }
-
+    @Deprecated
     public void setIncludeSchemaName(boolean includeSchemaName) {
-        this.includeSchemaName = includeSchemaName;
+        //for compatability with 2.1.x config
     }
 }

@@ -24,10 +24,6 @@
 
     <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
         <property name="outputPath" value="output"/>
-        <!-- use 'lower' or 'upper' for specify filename case rule -->
-        <property name="fileNameCase" value="lower"/>
-        <!-- include schema name to filepath - true/false -->
-        <property name="includeSchemaName" value="false"/>
     </bean>
 
 
@@ -52,6 +48,25 @@
         <property name="statementOnNewLine" value="true"/>
         <!-- Enabled 'morePrettyFormat' option disables the 'statementOnNewLine' option -->
         <property name="morePrettyFormat" value="false"/>
+    </bean>
+
+    <!-- rules for format filenames  -->
+    <bean id="fileNameMapper" class="com.googlecode.scheme2ddl.FileNameMapper">
+        <property name="pattern" value="types_plural/object_name.ext"/>
+        <!-- Construct your custom layout from keywords
+            Keywords are:
+                schema - schema name in lower case
+                type - type name in lower case, for example 'table' or 'index'
+                types_plural - type name in plural form in lower case, for xample 'tables' or 'indexes'
+                object_name - object name in lower case
+                ext - extension in lower case
+                SCHEMA - schema name in UPPER case
+                TYPE - type name in UPPER case, for example 'table' or 'index'
+                TYPES_PLURAL - type name in plural form in UPPER case, for xample 'tables' or 'indexes'
+                OBJECT_NAME - object name in UPPER case
+                EXT - extension in UPPER case
+        -->
+
     </bean>
 
 

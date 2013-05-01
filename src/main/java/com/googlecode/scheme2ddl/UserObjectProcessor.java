@@ -20,6 +20,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     private static final Log log = LogFactory.getLog(UserObjectProcessor.class);
     private UserObjectDao userObjectDao;
     private DDLFormatter ddlFormatter;
+    private FileNameMapper fileNameMapper = new FileNameMapper(); //for backward compatabiliti with old config's
     private Map<String, Set<String>> excludes;
     private Map<String, Set<String>> dependencies;
 
@@ -30,7 +31,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
             return null;
         }
         userObject.setDdl(map2Ddl(userObject));
-        userObject.setFileName(map2FileName(userObject));
+        userObject.setFileName(fileNameMapper.map2FileName(userObject));
         return userObject;
     }
 
@@ -77,26 +78,6 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     }
 
 
-    private String map2FileName(UserObject userObject) {
-        String res = map2FolderName(userObject.getType()) + "/" + userObject.getName() + ".sql";
-        return res.toLowerCase();
-    }
-
-    private String map2FolderName(String type) {
-        if (type.equals("DATABASE LINK"))
-            return "db_links";
-        if (type.equals("PUBLIC DATABASE LINK"))
-            return "public_db_links";
-        type = type.toLowerCase().replaceAll(" ", "_");
-        if (type.endsWith("x") || type.endsWith("s")) {
-            return type + "es";
-        }
-        if (type.endsWith("y")) {
-            return type.substring(0, type.length() - 1) + "ies";
-        }
-        return type + "s";
-    }
-
     public void setExcludes(Map excludes) {
         this.excludes = excludes;
     }
@@ -111,5 +92,9 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
 
     public void setDdlFormatter(DDLFormatter ddlFormatter) {
         this.ddlFormatter = ddlFormatter;
+    }
+
+    public void setFileNameMapper(FileNameMapper fileNameMapper) {
+        this.fileNameMapper = fileNameMapper;
     }
 }
