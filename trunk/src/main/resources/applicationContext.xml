@@ -28,7 +28,7 @@
         <property name="launchedByDBA" value="#{jobParameters['launchedByDBA']}"/>
     </bean>
 
-    <bean id="processor" class="com.googlecode.scheme2ddl.UserObjectProcessor">
+    <bean id="processor" class="com.googlecode.scheme2ddl.UserObjectProcessor" autowire="autodetect">
         <property name="userObjectDao" ref="userObjectDao"/>
         <property name="ddlFormatter" ref="ddlFormatter"/>
         <property name="excludes" ref="excludes"/>
