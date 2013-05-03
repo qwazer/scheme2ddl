@@ -20,7 +20,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     private static final Log log = LogFactory.getLog(UserObjectProcessor.class);
     private UserObjectDao userObjectDao;
     private DDLFormatter ddlFormatter;
-    private FileNameMapper fileNameMapper = new FileNameMapper(); //for backward compatabiliti with old config's
+    private FileNameConstructor fileNameConstructor = new FileNameConstructor(); //for backward compatabiliti with old config's
     private Map<String, Set<String>> excludes;
     private Map<String, Set<String>> dependencies;
 
@@ -31,7 +31,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
             return null;
         }
         userObject.setDdl(map2Ddl(userObject));
-        userObject.setFileName(fileNameMapper.map2FileName(userObject));
+        userObject.setFileName(fileNameConstructor.map2FileName(userObject));
         return userObject;
     }
 
@@ -94,7 +94,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
         this.ddlFormatter = ddlFormatter;
     }
 
-    public void setFileNameMapper(FileNameMapper fileNameMapper) {
-        this.fileNameMapper = fileNameMapper;
+    public void setFileNameConstructor(FileNameConstructor fileNameConstructor) {
+        this.fileNameConstructor = fileNameConstructor;
     }
 }
