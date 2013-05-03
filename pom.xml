@@ -106,6 +106,13 @@
             <artifactId>ojdbc5</artifactId>
             <version>11.2.0.3.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

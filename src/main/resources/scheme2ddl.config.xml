@@ -51,8 +51,8 @@
     </bean>
 
     <!-- rules for format filenames  -->
-    <bean id="fileNameMapper" class="com.googlecode.scheme2ddl.FileNameMapper">
-        <property name="pattern" value="types_plural/object_name.ext"/>
+    <bean id="fileNameConstructor" class="com.googlecode.scheme2ddl.FileNameConstructor">
+        <property name="template" value="types_plural/object_name.ext"/>
         <!-- Construct your custom layout from keywords
             Keywords are:
                 schema - schema name in lower case
@@ -65,6 +65,7 @@
                 TYPES_PLURAL - type name in plural form in UPPER case, for xample 'tables' or 'indexes'
                 OBJECT_NAME - object name in UPPER case
                 EXT - extension in UPPER case
+            Keywords escaping is not supported
         -->
 
     </bean>
