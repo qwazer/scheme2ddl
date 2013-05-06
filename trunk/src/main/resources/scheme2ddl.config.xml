@@ -16,10 +16,10 @@
         <property name="connectionCachingEnabled" value="true"/>
     </bean>
 
-    <!-- list of schema for processing, used only if oracle user connected as sys dba-->
+    <!-- list of schema for processing, used only if oracle user connected as sysdba-->
     <util:list id="schemaList">
-       <value>SYS</value>
        <value>SCOTT</value>
+       <value>HR</value>
     </util:list>
 
     <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader">
