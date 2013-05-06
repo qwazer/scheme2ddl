@@ -76,8 +76,8 @@
         <property name="template" value="types_plural/object_name.ext"/>
         <property name="templateForSysDBA" value="SCHEMA/types_plural/object_name.ext"/>
 
-        <!-- File extension mapper. File extension depends on object type
-        Use predefined 'TOAD' or 'PL/SQL Developer' mapping or create custom mapping  -->
+        <!-- File extension map rules.
+        Use predefined 'TOAD' or 'PL/SQL Developer' mapping or create custom mapping -->
         <property name="extensionMap" ref="sql_by_default"/>
     </bean>
 
@@ -87,6 +87,7 @@
         </entry>
     </util:map>
 
+    <!-- File extension map rules like TOAD -->
     <util:map id="toad">
         <!--todo need carefully test -->
         <entry key="DEFAULT">
@@ -112,6 +113,7 @@
         </entry>
     </util:map>
 
+    <!-- File extension map rules like PL/SQL Developer -->
     <util:map id="plsqldeveloper">
         <!--todo need filling and carefully test -->
         <entry key="DEFAULT">
