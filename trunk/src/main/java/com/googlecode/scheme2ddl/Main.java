@@ -94,6 +94,25 @@ public class Main {
         String userName = ((OracleDataSource) context.getBean("dataSource")).getUser();
         isLaunchedByDBA = userName.toLowerCase().matches(".+as +sysdba *");
         //process schemas
+        processSchemas(context);
+
+        if (isLaunchedByDBA){
+            FileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);
+            fileNameConstructor.setTemplate(fileNameConstructor.getTemplateForSysDBA());
+            fileNameConstructor.afterPropertiesSet();
+        }
+
+        ///change bean scope (for compabability with old configs)
+        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
+        BeanDefinition beanDefinition = beanFactory.getBeanDefinition("reader");
+        beanDefinition.setScope("step");
+
+//        beanDefinition.getPropertyValues().addPropertyValue("schemaName", "#{jobParameters['schemaName']}");
+//        beanFactory.initializeBean(context.getBean("reader"), "reader");
+
+    }
+
+    private static void processSchemas(ConfigurableApplicationContext context) {
         List<String> listFromContext = retrieveSchemaListFromContext(context);
         if (schemas == null) {
             if (listFromContext.size() == 0) {
@@ -117,23 +136,7 @@ public class Main {
             listFromContext.add(s.toUpperCase().trim());
         }
         log.info(String.format("Will try to process schema %s %s ", listFromContext.size() > 1 ? "list" : "", listFromContext));
-
-        if (isLaunchedByDBA){
-            FileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);
-            fileNameConstructor.setTemplate(fileNameConstructor.getTemplateForSysDBA());
-            fileNameConstructor.afterPropertiesSet();
-        }
-
-        ///change bean scope (for compabability with old configs)
-        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
-        BeanDefinition beanDefinition = beanFactory.getBeanDefinition("reader");
-        beanDefinition.setScope("step");
-
-//        beanDefinition.getPropertyValues().addPropertyValue("schemaName", "#{jobParameters['schemaName']}");
-//        beanFactory.initializeBean(context.getBean("reader"), "reader");
-
     }
-
 
 
     private static List<String> extactSchemaListFromUserName(ConfigurableApplicationContext context) {

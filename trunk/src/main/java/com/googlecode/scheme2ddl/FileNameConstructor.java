@@ -28,10 +28,6 @@ public class FileNameConstructor implements InitializingBean {
     private String templateForSysDBA = "SCHEMA/types_plural/object_name.ext";
     private String preparedTemplate;
 
-    public FileNameConstructor() {
-        preparedTemplate = prepareTemplate(templateDefault);
-    }
-
     /**
      * prepare template
      * replace keywords with %keyword
