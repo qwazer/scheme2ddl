@@ -25,7 +25,7 @@ public class FileNameConstructor implements InitializingBean {
     public static String kw_types_plural_UPPER = "TYPES_PLURAL";
     public static String kw_objectname_UPPER = "OBJECT_NAME";
     public static String kw_extension_UPPER = "EXT";
-    public static String nonOracleChar = "%"; //char not user in Oracle names
+    public static String nonOracleChar = "%"; //char not used in Oracle names
     public static String templateDefault = "types_plural/object_name.ext";
     private String template;
     private String templateForSysDBA = "SCHEMA/types_plural/object_name.ext";
