@@ -129,8 +129,13 @@ public class Main {
 
         //for compabality with old config
         if (listFromContext.size() == 1) {
-            UserObjectReader userObjectReader = (UserObjectReader) context.getBean("reader");
-            userObjectReader.setSchemaName(listFromContext.get(0));
+            try {
+                UserObjectReader userObjectReader = (UserObjectReader) context.getBean("reader");
+                userObjectReader.setSchemaName(listFromContext.get(0));
+            }
+            catch (ClassCastException e){
+                // this mean that new config used, nothing to do
+            }
         }
     }
 
