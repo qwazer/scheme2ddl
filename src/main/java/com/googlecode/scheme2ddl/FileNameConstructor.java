@@ -60,6 +60,7 @@ public class FileNameConstructor implements InitializingBean {
     }
 
     public static String pluralaze(String type) {
+        type = type.toLowerCase();
         if (type.endsWith("x") || type.endsWith("s")) {
             return type + "es";
         }

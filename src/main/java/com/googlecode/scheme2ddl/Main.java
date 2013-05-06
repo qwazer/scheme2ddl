@@ -96,8 +96,8 @@ public class Main {
         //process schemas
         processSchemas(context);
 
+        FileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);   //will create new one if not exist
         if (isLaunchedByDBA){
-            FileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);
             fileNameConstructor.setTemplate(fileNameConstructor.getTemplateForSysDBA());
             fileNameConstructor.afterPropertiesSet();
         }
