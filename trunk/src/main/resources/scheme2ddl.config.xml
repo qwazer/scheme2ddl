@@ -59,7 +59,7 @@
     <!-- rules for construct filenames  -->
     <bean id="fileNameConstructor" class="com.googlecode.scheme2ddl.FileNameConstructor">
         <!-- Construct your custom layout from keywords
-            Keywords are:
+
                 schema - schema name in lower case
                 type - type name in lower case, for example 'table' or 'index'
                 types_plural - type name in plural form in lower case, for xample 'tables' or 'indexes'
@@ -70,6 +70,7 @@
                 TYPES_PLURAL - type name in plural form in UPPER case, for xample 'tables' or 'indexes'
                 OBJECT_NAME - object name in UPPER case
                 EXT - extension in UPPER case
+
             Keywords escaping is not supported.
             Word in Mixed Case is not keyword
         -->
