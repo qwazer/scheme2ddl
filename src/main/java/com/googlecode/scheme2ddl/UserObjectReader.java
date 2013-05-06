@@ -22,12 +22,13 @@ public class UserObjectReader implements ItemReader<UserObject> {
     private UserObjectDao userObjectDao;
     private boolean processPublicDbLinks = false;
     private boolean processDmbsJobs = false;
-    private String schemaName;
+    private String schemaName; //todo use in log messages
+
 
     public synchronized UserObject read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
         if (list == null) {
             fillList();
-            log.info(String.format("Found %s items for processing in schema %s", list.size(), schemaName));
+            log.info(String.format("Found %s items for processing", list.size()));
         }
         if (list.size() == 0)  {
             return null;
@@ -59,7 +60,7 @@ public class UserObjectReader implements ItemReader<UserObject> {
     public void setProcessDmbsJobs(boolean processDmbsSchedulerJobs) {
         this.processDmbsJobs = processDmbsSchedulerJobs;
     }
-
+    //@Value("#{jobParameters['schemaName']}") //todo use after next spring-batch released
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
     }

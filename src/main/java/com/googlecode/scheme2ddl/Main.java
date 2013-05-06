@@ -128,6 +128,7 @@ public class Main {
         DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
         BeanDefinition beanDefinition = beanFactory.getBeanDefinition("reader");
         beanDefinition.setScope("step");
+
 //        beanDefinition.getPropertyValues().addPropertyValue("schemaName", "#{jobParameters['schemaName']}");
 //        beanFactory.initializeBean(context.getBean("reader"), "reader");
 
@@ -198,11 +199,11 @@ public class Main {
     private static void validateContext(ConfigurableApplicationContext context) {
         String userName = ((OracleDataSource) context.getBean("dataSource")).getUser().toUpperCase();
         List<String> schemaList = (List) context.getBean("schemaList");
-        Assert.state(isLaunchedByDBA || schemaList.size() == 1, "Cannot process multiply schemas if oracle user is not connected as sys dba");
+        Assert.state(isLaunchedByDBA || schemaList.size() == 1, "Cannot process multiply schemas if oracle user is not connected as sysdba");
         if (!isLaunchedByDBA) {
             String schemaName = schemaList.get(0).toUpperCase();
             Assert.state(userName.startsWith(schemaName),
-                    String.format("Cannot process schema '%s' with oracle user '%s', if it's not connected as sys dba", schemaName, userName.toLowerCase()));
+                    String.format("Cannot process schema '%s' with oracle user '%s', if it's not connected as sysdba", schemaName, userName.toLowerCase()));
         }
     }
 
@@ -225,7 +226,7 @@ public class Main {
         msg.append("  -o, --output,          output dir" + lSep);
         msg.append("  -p, --parallel,        number of parallel thread (default 4)" + lSep);
         msg.append("  -s, --schemas,         a comma separated list of schemas for processing" + lSep);
-        msg.append("                         (works only if connected to oracle as sys dba)" + lSep);
+        msg.append("                         (works only if connected to oracle as sysdba)" + lSep);
         msg.append("  -c, --config,          path to scheme2ddl config file (xml)" + lSep);
         msg.append("  --test-connection,-tc  test db connection available" + lSep);
         msg.append("  -version,              print version info and exit" + lSep);
