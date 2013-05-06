@@ -5,6 +5,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author A_Reshetnikov
  * @since Date: 01.05.2013
@@ -27,6 +30,7 @@ public class FileNameConstructor implements InitializingBean {
     private String template;
     private String templateForSysDBA = "SCHEMA/types_plural/object_name.ext";
     private String preparedTemplate;
+    private Map<String, String> extensionMap;
 
     /**
      * prepare template
@@ -52,11 +56,10 @@ public class FileNameConstructor implements InitializingBean {
         return template;
     }
 
-
-    public static String abbreviate(String type){
-        type =  type.replace("DATABASE", "DB");
-        type =  type.replace("database", "db");
-        return  type;
+    public static String abbreviate(String type) {
+        type = type.replace("DATABASE", "DB");
+        type = type.replace("database", "db");
+        return type;
     }
 
     public static String pluralaze(String type) {
@@ -88,8 +91,12 @@ public class FileNameConstructor implements InitializingBean {
         filename = filename.replace(nonOracleChar + kw_objectname_lower, userObject.getName().toLowerCase());
         filename = filename.replace(nonOracleChar + kw_objectname_UPPER, userObject.getName().toUpperCase());
 
-        filename = filename.replace(nonOracleChar + kw_extension_lower, "sql");
-        filename = filename.replace(nonOracleChar + kw_extension_UPPER, "SQL");
+        String extension = extensionMap.get(typeName.toUpperCase());
+        if (extension == null){
+            extension = extensionMap.get("DEFAULT");
+        }
+        filename = filename.replace(nonOracleChar + kw_extension_lower, extension.toLowerCase());
+        filename = filename.replace(nonOracleChar + kw_extension_UPPER, extension.toUpperCase());
 
         return filename;
     }
@@ -106,10 +113,20 @@ public class FileNameConstructor implements InitializingBean {
         this.templateForSysDBA = templateForSysDBA;
     }
 
+    //for compability with old configs
     public void afterPropertiesSet() {
         String s;
         if (this.template == null) s = templateDefault;
         else s = template;
         preparedTemplate = prepareTemplate(s);
+
+        if (extensionMap == null) {
+            extensionMap = new HashMap<String, String>();
+            extensionMap.put("DEFAULT", "sql");
+        }
+    }
+
+    public void setExtensionMap(Map<String, String> extensionMap) {
+        this.extensionMap = extensionMap;
     }
 }
