@@ -2,8 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
-       xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-2.1.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 		  http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
     <import resource="classpath:applicationContext.xml"/>
@@ -19,8 +18,8 @@
 
     <!-- list of schema for processing, used only if oracle user connected as sysdba-->
     <util:list id="schemaList">
-       <!--<value>SCOTT</value>-->
-       <!--<value>HR</value>-->
+        <!--<value>SCOTT</value>-->
+        <!--<value>HR</value>-->
     </util:list>
 
     <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader" scope="step" autowire="autodetect">
@@ -59,8 +58,6 @@
 
     <!-- rules for construct filenames  -->
     <bean id="fileNameConstructor" class="com.googlecode.scheme2ddl.FileNameConstructor">
-        <property name="template" value="types_plural/object_name.ext"/>
-        <property name="templateForSysDBA" value="SCHEMA/types_plural/object_name.ext"/>
         <!-- Construct your custom layout from keywords
             Keywords are:
                 schema - schema name in lower case
@@ -76,8 +73,51 @@
             Keywords escaping is not supported.
             Word in Mixed Case is not keyword
         -->
+        <property name="template" value="types_plural/object_name.ext"/>
+        <property name="templateForSysDBA" value="SCHEMA/types_plural/object_name.ext"/>
 
+        <!-- File extension mapper. File extension depends on object type
+        Use predefined 'TOAD' or 'PL/SQL Developer' mapping or create custom mapping  -->
+        <property name="extensionMap" ref="sql_by_default"/>
     </bean>
+
+    <util:map id="sql_by_default">
+        <entry key="DEFAULT">
+            <value>sql</value>
+        </entry>
+    </util:map>
+
+    <util:map id="toad">
+        <!--todo need carefully test -->
+        <entry key="DEFAULT">
+            <value>sql</value>
+        </entry>
+        <entry key="PROCEDURE">
+            <value>prc</value>
+        </entry>
+        <entry key="FUNCTION">
+            <value>fnc</value>
+        </entry>
+        <entry key="TRIGGER">
+            <value>trg</value>
+        </entry>
+        <entry key="VIEW">
+            <value>vw</value>
+        </entry>
+        <entry key="PACKAGE">   <!--todo is not the same as Package Specs of TOAD -->
+            <value>pks</value>
+        </entry>
+        <entry key="PACKAGE BODY">
+            <value>pkb</value>
+        </entry>
+    </util:map>
+
+    <util:map id="plsqldeveloper">
+        <!--todo need filling and carefully test -->
+        <entry key="DEFAULT">
+            <value>sql</value>
+        </entry>
+    </util:map>
 
 
     <!-- Specify dependable items for every user object type accordingly with http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBIEDIA -->
@@ -169,7 +209,7 @@
         </entry>
 
         <!--Excluded, because all them persist in PACKAGE, TYPE and TABLE -->
-       <entry key="PACKAGE BODY">
+        <entry key="PACKAGE BODY">
             <set>
                 <value>*</value>
             </set>
