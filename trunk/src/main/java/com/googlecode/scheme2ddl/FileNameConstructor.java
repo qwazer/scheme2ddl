@@ -4,6 +4,7 @@ import com.googlecode.scheme2ddl.domain.UserObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -92,8 +93,9 @@ public class FileNameConstructor implements InitializingBean {
         filename = filename.replace(nonOracleChar + kw_objectname_UPPER, userObject.getName().toUpperCase());
 
         String extension = extensionMap.get(typeName.toUpperCase());
-        if (extension == null){
+        if (extension == null) {
             extension = extensionMap.get("DEFAULT");
+            Assert.state(extension != null, String.format("No file extension rule for type %s and no DEFAULT rule", typeName.toUpperCase()));
         }
         filename = filename.replace(nonOracleChar + kw_extension_lower, extension.toLowerCase());
         filename = filename.replace(nonOracleChar + kw_extension_UPPER, extension.toUpperCase());

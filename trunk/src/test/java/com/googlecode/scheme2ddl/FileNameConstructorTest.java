@@ -3,9 +3,13 @@ package com.googlecode.scheme2ddl;
 import com.googlecode.scheme2ddl.domain.UserObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.googlecode.scheme2ddl.FileNameConstructor.abbreviate;
 import static com.googlecode.scheme2ddl.FileNameConstructor.pluralaze;
@@ -84,7 +88,7 @@ public class FileNameConstructorTest {
         fileNameConstructor.setTemplate(template);
         fileNameConstructor.afterPropertiesSet();
         for (UserObject userObject : list) {
-            String fileName = userObject.getSchema().toLowerCase() + "/" + userObject.getSchema().toUpperCase() ;
+            String fileName = userObject.getSchema().toLowerCase() + "/" + userObject.getSchema().toUpperCase();
             assertEquals(fileName, fileNameConstructor.map2FileName(userObject));
         }
     }
@@ -95,7 +99,7 @@ public class FileNameConstructorTest {
         fileNameConstructor.setTemplate(template);
         fileNameConstructor.afterPropertiesSet();
         for (UserObject userObject : list) {
-            String fileName = userObject.getName().toLowerCase() + "/" + userObject.getName().toUpperCase() ;
+            String fileName = userObject.getName().toLowerCase() + "/" + userObject.getName().toUpperCase();
             assertEquals(fileName, fileNameConstructor.map2FileName(userObject));
         }
     }
@@ -106,7 +110,7 @@ public class FileNameConstructorTest {
         fileNameConstructor.setTemplate(template);
         fileNameConstructor.afterPropertiesSet();
         for (UserObject userObject : list) {
-            String fileName = "sql" + "/" + "sql".toUpperCase() ;
+            String fileName = "sql" + "/" + "sql".toUpperCase();
             assertEquals(fileName, fileNameConstructor.map2FileName(userObject));
         }
     }
@@ -126,6 +130,32 @@ public class FileNameConstructorTest {
                     typePlural.toUpperCase() + "/" + typePlural.toUpperCase() + ".TyPEs_PLURAL";
             assertEquals(fileName, fileNameConstructor.map2FileName(userObject));
         }
+    }
+
+    @Test
+    public void testApplyExtensionRules() {
+        Map<String, String> extensionMap = new HashMap<String, String>();
+        extensionMap.put("DEFAULT", "sql");
+        extensionMap.put("VIEW", "vw");
+        fileNameConstructor.setExtensionMap(extensionMap);
+        UserObject userObject = new UserObject();
+        userObject.setName("view01");
+        userObject.setType("view");
+        userObject.setSchema("");
+        String fileName = pluralaze(abbreviate(userObject.getType())).replace(" ", "_") + "/" + userObject.getName() + ".vw";
+        assertEquals(fileName, fileNameConstructor.map2FileName(userObject));
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void testExtensionRulesWrongConfig() {
+        Map<String, String> extensionMap = new HashMap<String, String>();
+        extensionMap.put("VIEW", "vw");
+        fileNameConstructor.setExtensionMap(extensionMap);
+        UserObject userObject = new UserObject();
+        userObject.setName("");
+        userObject.setType("strange type");
+        userObject.setSchema("");
+        fileNameConstructor.map2FileName(userObject);
     }
 
 
