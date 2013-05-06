@@ -25,10 +25,16 @@ public class FileNameConstructor implements InitializingBean {
     public static String nonOracleChar = "%"; //char not user in Oracle names
     public static String templateDefault = "types_plural/object_name.ext";
     private String template;
+    private String templateForSysDBA = "SCHEMA/types_plural/object_name.ext";
     private String preparedTemplate;
 
+    public FileNameConstructor() {
+        preparedTemplate = prepareTemplate(templateDefault);
+    }
+
     /**
-     * prepare
+     * prepare template
+     * replace keywords with %keyword
      *
      * @param template
      * @return
@@ -73,7 +79,7 @@ public class FileNameConstructor implements InitializingBean {
         filename = filename.replace(nonOracleChar + kw_schema_lower, userObject.getSchema().toLowerCase());
         filename = filename.replace(nonOracleChar + kw_schema_UPPER, userObject.getSchema().toUpperCase());
 
-        String typeName = abbreviate(userObject.getType().toLowerCase()).replace(" ", "_");
+        String typeName = abbreviate(userObject.getType()).replace(" ", "_");
 
         //process kw_types_plural before kw_type
         filename = filename.replace(nonOracleChar + kw_types_plural_lower, pluralaze(typeName).toLowerCase());
@@ -95,7 +101,15 @@ public class FileNameConstructor implements InitializingBean {
         this.template = template;
     }
 
-    public void afterPropertiesSet() throws Exception {
+    public String getTemplateForSysDBA() {
+        return templateForSysDBA;
+    }
+
+    public void setTemplateForSysDBA(String templateForSysDBA) {
+        this.templateForSysDBA = templateForSysDBA;
+    }
+
+    public void afterPropertiesSet() {
         String s;
         if (this.template == null) s = templateDefault;
         else s = template;

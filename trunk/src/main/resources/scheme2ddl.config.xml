@@ -16,6 +16,12 @@
         <property name="connectionCachingEnabled" value="true"/>
     </bean>
 
+    <!-- list of schema for processing, used only if oracle user connected as sys dba-->
+    <util:list id="schemaList">
+       <value>SYS</value>
+       <value>SCOTT</value>
+    </util:list>
+
     <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader">
         <property name="userObjectDao" ref="userObjectDao"/>
         <property name="processPublicDbLinks" value="true"/>
@@ -50,9 +56,10 @@
         <property name="morePrettyFormat" value="false"/>
     </bean>
 
-    <!-- rules for format filenames  -->
+    <!-- rules for construct filenames  -->
     <bean id="fileNameConstructor" class="com.googlecode.scheme2ddl.FileNameConstructor">
         <property name="template" value="types_plural/object_name.ext"/>
+        <property name="templateForSysDBA" value="SCHEMA/types_plural/object_name.ext"/>
         <!-- Construct your custom layout from keywords
             Keywords are:
                 schema - schema name in lower case
@@ -65,7 +72,8 @@
                 TYPES_PLURAL - type name in plural form in UPPER case, for xample 'tables' or 'indexes'
                 OBJECT_NAME - object name in UPPER case
                 EXT - extension in UPPER case
-            Keywords escaping is not supported
+            Keywords escaping is not supported.
+            Word in Mixed Case is not keyword
         -->
 
     </bean>

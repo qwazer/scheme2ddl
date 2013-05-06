@@ -18,18 +18,20 @@ import java.util.List;
 public class UserObjectReader implements ItemReader<UserObject> {
 
     private static final Log log = LogFactory.getLog(UserObjectReader.class);
-    private static List<UserObject> list;
+    private List<UserObject> list;
     private UserObjectDao userObjectDao;
     private boolean processPublicDbLinks = false;
     private boolean processDmbsJobs = false;
+    private String schemaName;
 
     public synchronized UserObject read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
         if (list == null) {
             fillList();
-            log.info(String.format("Found %s items for processing", list.size()));
+            log.info(String.format("Found %s items for processing in schema %s", list.size(), schemaName));
         }
-        if (list.size() == 0)
+        if (list.size() == 0)  {
             return null;
+        }
         else
             return list.remove(0);
     }
@@ -56,5 +58,9 @@ public class UserObjectReader implements ItemReader<UserObject> {
 
     public void setProcessDmbsJobs(boolean processDmbsSchedulerJobs) {
         this.processDmbsJobs = processDmbsSchedulerJobs;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 }
