@@ -31,6 +31,8 @@ public class UserObjectJobRunner {
             List<String> schemaList = (List<String>) context.getBean("schemaList");
             Assert.state(schemaList != null && schemaList.size()!=0, "schemaList must be provided.  Please add one to the configuration. ");
 
+            logger.info(String.format("Will try to process schema %s %s ", schemaList.size() > 1 ? "list" : "", schemaList));
+
             for (String schemaName : schemaList){
                 JobParametersBuilder parametersBuilder = new JobParametersBuilder();
                 parametersBuilder.addString("schemaName", schemaName);
@@ -41,9 +43,11 @@ public class UserObjectJobRunner {
                 //write some log
                 writeJobExecutionStatus(jobExecution);
                 if (jobExecution.getStatus().isUnsuccessful()){
-                    throw new Exception("Job unsuccessful");
+                    throw new Exception(String.format("Job %s unsuccessful", jobParameters));
                 }
             }
+
+            logger.info(String.format("Processing schema %s %s completed ", schemaList.size() > 1 ? "list" : "", schemaList));
 
             return 1;
 
@@ -67,12 +71,14 @@ public class UserObjectJobRunner {
 
     private void writeJobExecutionStatus(JobExecution jobExecution) {
         StepExecution step = jobExecution.getStepExecutions().toArray(new StepExecution[]{})[0];
-        logger.info(String.format("Written %d ddls with user objects from total %d",
-                step.getWriteCount(), step.getReadCount()));
-        logger.info(String.format("Skip processing %d user objects from total %d",
-                step.getFilterCount(), step.getReadCount()));
+        JobParameters jobParameters = jobExecution.getJobInstance().getJobParameters();
+        String schemaName = jobParameters.getString("schemaName");
+        logger.info(String.format("Written %d ddls with user objects from total %d in schema %s",
+                step.getWriteCount(), step.getReadCount(), schemaName));
+        logger.info(String.format("Skip processing %d user objects from total %d in schema %s",
+                step.getFilterCount(), step.getReadCount(), schemaName));
         long seconds = ((step.getEndTime().getTime()-step.getStartTime().getTime())/1000);
-        logger.info(String.format("scheme2ddl %s in %d seconds", jobExecution.getStatus().toString().toLowerCase(), seconds));
+        logger.info(String.format("scheme2ddl of schema %s %s in %d seconds", schemaName, jobExecution.getStatus().toString().toLowerCase(), seconds));
     }
 
     public void setLauncher(JobLauncher launcher) {

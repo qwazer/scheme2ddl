@@ -5,7 +5,6 @@ import oracle.jdbc.pool.OracleDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -97,18 +96,10 @@ public class Main {
         processSchemas(context);
 
         FileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);   //will create new one if not exist
-        if (isLaunchedByDBA){
+        if (isLaunchedByDBA) {
             fileNameConstructor.setTemplate(fileNameConstructor.getTemplateForSysDBA());
             fileNameConstructor.afterPropertiesSet();
         }
-
-        ///change bean scope (for compabability with old configs)
-        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
-        BeanDefinition beanDefinition = beanFactory.getBeanDefinition("reader");
-        beanDefinition.setScope("step");
-
-//        beanDefinition.getPropertyValues().addPropertyValue("schemaName", "#{jobParameters['schemaName']}");
-//        beanFactory.initializeBean(context.getBean("reader"), "reader");
 
     }
 
@@ -135,9 +126,13 @@ public class Main {
         for (String s : schemaList) {
             listFromContext.add(s.toUpperCase().trim());
         }
-        log.info(String.format("Will try to process schema %s %s ", listFromContext.size() > 1 ? "list" : "", listFromContext));
-    }
 
+        //for compabality with old config
+        if (listFromContext.size() == 1) {
+            UserObjectReader userObjectReader = (UserObjectReader) context.getBean("reader");
+            userObjectReader.setSchemaName(listFromContext.get(0));
+        }
+    }
 
     private static List<String> extactSchemaListFromUserName(ConfigurableApplicationContext context) {
         OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
