@@ -22,13 +22,13 @@ public class UserObjectReader implements ItemReader<UserObject> {
     private UserObjectDao userObjectDao;
     private boolean processPublicDbLinks = false;
     private boolean processDmbsJobs = false;
-    private String schemaName; //todo use in log messages
+    private String schemaName;
 
 
     public synchronized UserObject read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
         if (list == null) {
             fillList();
-            log.info(String.format("Found %s items for processing", list.size()));
+            log.info(String.format("Found %s items for processing in schema %s", list.size(), schemaName));
         }
         if (list.size() == 0)  {
             return null;
@@ -38,7 +38,7 @@ public class UserObjectReader implements ItemReader<UserObject> {
     }
 
     private synchronized void fillList() {
-        log.info("Start getting of user object list for processing");
+        log.info(String.format("Start getting of user object list in schema %s for processing", schemaName));
         list = userObjectDao.findListForProccessing();
         if (processPublicDbLinks) {
             list.addAll(userObjectDao.findPublicDbLinks());
