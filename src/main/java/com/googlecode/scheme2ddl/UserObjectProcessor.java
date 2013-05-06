@@ -20,7 +20,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     private static final Log log = LogFactory.getLog(UserObjectProcessor.class);
     private UserObjectDao userObjectDao;
     private DDLFormatter ddlFormatter;
-    private FileNameConstructor fileNameConstructor = new FileNameConstructor(); //for backward compatabiliti with old config's
+    private FileNameConstructor fileNameConstructor;
     private Map<String, Set<String>> excludes;
     private Map<String, Set<String>> dependencies;
 

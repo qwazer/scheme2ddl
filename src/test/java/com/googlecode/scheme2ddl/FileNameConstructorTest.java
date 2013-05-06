@@ -44,6 +44,18 @@ public class FileNameConstructorTest {
         list.add(userObject);
 
         userObject = new UserObject();
+        userObject.setName("lib01");
+        userObject.setType("library");
+        userObject.setSchema("dummy");
+        list.add(userObject);
+
+        userObject = new UserObject();
+        userObject.setName("TYPE_01");
+        userObject.setType("TYPE");
+        userObject.setSchema("TYPES");
+        list.add(userObject);
+
+        userObject = new UserObject();
         userObject.setName("oracle/i18n/data/lx10039.glb");
         userObject.setType("JAVA RESOURCE");
         userObject.setSchema("SYS");

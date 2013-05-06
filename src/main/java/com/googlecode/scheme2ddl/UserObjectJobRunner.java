@@ -9,6 +9,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.Assert;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,7 +20,7 @@ public class UserObjectJobRunner {
     protected static final Log logger = LogFactory.getLog(UserObjectJobRunner.class);
     private JobLauncher launcher;
 
-    int start(ConfigurableApplicationContext context) throws Exception {
+    int start(ConfigurableApplicationContext context, boolean launchedByDBA) throws Exception {
         try {
             context.getAutowireCapableBeanFactory().autowireBeanProperties(this,
                     AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
@@ -27,14 +28,23 @@ public class UserObjectJobRunner {
             Assert.state(launcher != null, "A JobLauncher must be provided.  Please add one to the configuration.");
             Job job = (Job) context.getBean("job1");
 
-            JobParameters jobParameters = getJobParameters(context);
+            List<String> schemaList = (List<String>) context.getBean("schemaList");
+            Assert.state(schemaList != null && schemaList.size()!=0, "schemaList must be provided.  Please add one to the configuration. ");
 
-            JobExecution jobExecution = launcher.run(job, jobParameters);
-            //write some log
-            writeJobExecutionStatus(jobExecution);
-            if (jobExecution.getStatus().isUnsuccessful()){
-                throw new Exception("Job unsuccessful");
+            for (String schemaName : schemaList){
+                JobParametersBuilder parametersBuilder = new JobParametersBuilder();
+                parametersBuilder.addString("schemaName", schemaName);
+                parametersBuilder.addString("launchedByDBA", Boolean.toString(launchedByDBA));
+                JobParameters jobParameters = parametersBuilder.toJobParameters();
+                logger.trace(String.format("Start spring batch job with parameters %s", jobParameters));
+                JobExecution jobExecution = launcher.run(job, jobParameters);
+                //write some log
+                writeJobExecutionStatus(jobExecution);
+                if (jobExecution.getStatus().isUnsuccessful()){
+                    throw new Exception("Job unsuccessful");
+                }
             }
+
             return 1;
 
         } catch (Exception e) {
@@ -48,18 +58,10 @@ public class UserObjectJobRunner {
         }
     }
 
-    private static JobParameters getJobParameters(ConfigurableApplicationContext context) {
+    private JobParameters getJobParameters(String schemaName, boolean launchedByDBA) {
         JobParametersBuilder parametersBuilder = new JobParametersBuilder();
-        String userName = ((OracleDataSource) context.getBean("dataSource")).getUser();
-        boolean isLaunchedByDBA = false;
-        String schemaName = userName;
-        if (userName.toLowerCase().matches(".+as +sysdba *")) {
-            System.out.println("Execute as SYSDBA user..."); //todo move to logging level
-            schemaName = userName.split(" ")[0];
-            isLaunchedByDBA = true;
-        }
         parametersBuilder.addString("schemaName", schemaName.toUpperCase());
-        parametersBuilder.addString("launchedByDBA", Boolean.toString(isLaunchedByDBA));
+        parametersBuilder.addString("launchedByDBA", Boolean.toString(launchedByDBA));
         return parametersBuilder.toJobParameters();
     }
 

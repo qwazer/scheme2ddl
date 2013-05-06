@@ -4,12 +4,20 @@ import com.googlecode.scheme2ddl.dao.UserObjectDao;
 import oracle.jdbc.pool.OracleDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.util.Assert;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author A_Reshetnikov
@@ -17,6 +25,7 @@ import java.sql.SQLException;
  */
 public class Main {
 
+    private static final Log log = LogFactory.getLog(Main.class);
     public static String outputPath = null;
     public static int parallelCount = 4;
     private static boolean justPrintUsage = false;
@@ -25,10 +34,9 @@ public class Main {
     private static String customConfigLocation = null;
     private static String defaultConfigLocation = "scheme2ddl.config.xml";
     private static String dbUrl = null;
-
-    //todo add multi schemas
-
-    private static final Log log = LogFactory.getLog(Main.class);
+    private static String schemas;
+    private static boolean isLaunchedByDBA;
+    private static List<String> schemaList;
 
     public static void main(String[] args) throws Exception {
         collectArgs(args);
@@ -45,10 +53,12 @@ public class Main {
 
         modifyContext(context);
 
+        validateContext(context);
+
         if (justTestConnection) {
             testDBConnection(context);
         } else {
-            new UserObjectJobRunner().start(context);
+            new UserObjectJobRunner().start(context, isLaunchedByDBA);
         }
     }
 
@@ -81,6 +91,99 @@ public class Main {
             SimpleAsyncTaskExecutor taskExecutor = (SimpleAsyncTaskExecutor) context.getBean("taskExecutor");
             taskExecutor.setConcurrencyLimit(parallelCount);
         }
+        String userName = ((OracleDataSource) context.getBean("dataSource")).getUser();
+        isLaunchedByDBA = userName.toLowerCase().matches(".+as +sysdba *");
+        //process schemas
+        List<String> listFromContext = retrieveSchemaListFromContext(context);
+        if (schemas == null) {
+            if (listFromContext.size() == 0) {
+                //get default schema from username
+                schemaList = extactSchemaListFromUserName(context);
+            } else {
+                if (isLaunchedByDBA)
+                    schemaList = new ArrayList<String>(listFromContext);
+                else {
+                    log.warn("Ignore 'schemaList' from advanced config, becouse oracle user is not connected as sys dba");
+                    schemaList = extactSchemaListFromUserName(context);
+                }
+            }
+        } else {
+            String[] array = schemas.split(",");
+            schemaList = new ArrayList<String>(Arrays.asList(array));
+        }
+
+        listFromContext.clear();
+        for (String s : schemaList) {
+            listFromContext.add(s.toUpperCase().trim());
+        }
+        log.info(String.format("Will try to process schema %s %s ", listFromContext.size() > 1 ? "list" : "", listFromContext));
+
+        if (isLaunchedByDBA){
+            FileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);
+            fileNameConstructor.setTemplate(fileNameConstructor.getTemplateForSysDBA());
+            fileNameConstructor.afterPropertiesSet();
+        }
+
+        ///change bean scope (for compabability with old configs)
+        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
+        BeanDefinition beanDefinition = beanFactory.getBeanDefinition("reader");
+        beanDefinition.setScope("step");
+//        beanDefinition.getPropertyValues().addPropertyValue("schemaName", "#{jobParameters['schemaName']}");
+//        beanFactory.initializeBean(context.getBean("reader"), "reader");
+
+    }
+
+
+
+    private static List<String> extactSchemaListFromUserName(ConfigurableApplicationContext context) {
+        OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
+        String schemaName = dataSource.getUser().split(" ")[0];
+        List<String> list = new ArrayList<String>();
+        list.add(schemaName);
+        return list;
+    }
+
+    private static void fillSchemaListFromUserName(ConfigurableApplicationContext context) {
+        OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
+        String schemaName = dataSource.getUser().split(" ")[0];
+        schemaList = new ArrayList<String>();
+        schemaList.add(schemaName);
+    }
+
+    /**
+     * @param context
+     * @return existing bean 'schemaList', if this exists, or create and register new bean
+     */
+    private static List<String> retrieveSchemaListFromContext(ConfigurableApplicationContext context) {
+        List list;
+        try {
+            list = (List) context.getBean("schemaList");
+        } catch (NoSuchBeanDefinitionException e) {
+            DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
+            beanFactory.registerBeanDefinition("schemaList", BeanDefinitionBuilder.rootBeanDefinition(ArrayList.class).getBeanDefinition());
+            list = (List) context.getBean("schemaList");
+        }
+        return list;
+    }
+
+    /**
+     * @param context
+     * @return existing bean 'fileNameConstructor', if this exists, or create and register new bean
+     */
+    private static FileNameConstructor retrieveFileNameConstructor(ConfigurableApplicationContext context) {
+        FileNameConstructor fileNameConstructor;
+        try {
+            fileNameConstructor = (FileNameConstructor) context.getBean("fileNameConstructor");
+        } catch (NoSuchBeanDefinitionException e) {
+            DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
+            beanFactory.registerBeanDefinition("fileNameConstructor", BeanDefinitionBuilder.rootBeanDefinition(FileNameConstructor.class).getBeanDefinition());
+            fileNameConstructor = (FileNameConstructor) context.getBean("fileNameConstructor");
+            fileNameConstructor.afterPropertiesSet();
+            //for compatability with old config without fileNameConstructor bean
+            UserObjectProcessor userObjectProcessor = (UserObjectProcessor) context.getBean("processor");
+            userObjectProcessor.setFileNameConstructor(fileNameConstructor);
+        }
+        return fileNameConstructor;
     }
 
     private static String extractUserfromDbUrl(String dbUrl) {
@@ -90,6 +193,17 @@ public class Main {
     private static String extractPasswordfromDbUrl(String dbUrl) {
         //scott/tiger@localhost:1521:ORCL
         return dbUrl.split("/|@")[1];
+    }
+
+    private static void validateContext(ConfigurableApplicationContext context) {
+        String userName = ((OracleDataSource) context.getBean("dataSource")).getUser().toUpperCase();
+        List<String> schemaList = (List) context.getBean("schemaList");
+        Assert.state(isLaunchedByDBA || schemaList.size() == 1, "Cannot process multiply schemas if oracle user is not connected as sys dba");
+        if (!isLaunchedByDBA) {
+            String schemaName = schemaList.get(0).toUpperCase();
+            Assert.state(userName.startsWith(schemaName),
+                    String.format("Cannot process schema '%s' with oracle user '%s', if it's not connected as sys dba", schemaName, userName.toLowerCase()));
+        }
     }
 
     /**
@@ -108,8 +222,10 @@ public class Main {
         msg.append("  -url,                  DB connection URL" + lSep);
         msg.append("                         example: scott/tiger@localhost:1521:ORCL" + lSep);
 
-        msg.append("  -o, --output            output dir" + lSep);
+        msg.append("  -o, --output,          output dir" + lSep);
         msg.append("  -p, --parallel,        number of parallel thread (default 4)" + lSep);
+        msg.append("  -s, --schemas,         a comma separated list of schemas for processing" + lSep);
+        msg.append("                         (works only if connected to oracle as sys dba)" + lSep);
         msg.append("  -c, --config,          path to scheme2ddl config file (xml)" + lSep);
         msg.append("  --test-connection,-tc  test db connection available" + lSep);
         msg.append("  -version,              print version info and exit" + lSep);
@@ -135,6 +251,9 @@ public class Main {
                 i++;
             } else if (arg.equals("-o") || arg.equals("-output") || arg.equals("--output")) {
                 outputPath = args[i + 1];
+                i++;
+            } else if (arg.equals("-s") || arg.equals("-schemas") || arg.equals("--schemas")) {
+                schemas = args[i + 1];
                 i++;
             } else if (arg.equals("-p") || arg.equals("--parallel") || arg.equals("-parallel")) {
                 parallelCount = Integer.parseInt(args[i + 1]);
