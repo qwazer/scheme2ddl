@@ -19,8 +19,7 @@
   # Improved default exclude config - add exlusions of `TABLE PARTITION`, `INDEX PARTITION` and `LOB`
   # Some new advanced config formatter options
     # `morePrettyFormat` in ddlFormatter section
-    # `fileNameCase` in writer section
-NOTE: deprecated in 2.2, use more powerfull `fileNameConstructor` advanced config section
+    # `fileNameCase` in writer section NOTE: deprecated in 2.2, use more powerfull `fileNameConstructor` advanced config section
 
 
 ==What's new in version 2.0==
