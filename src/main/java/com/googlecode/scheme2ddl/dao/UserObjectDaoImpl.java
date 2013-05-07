@@ -41,7 +41,15 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                     " UNION ALL " +
                     " select rname as object_name, 'REFRESH_GROUP' as object_type " +
                     " from dba_refresh a " +
-                    " where a.rowner = '" + schemaName + "' ";
+                    " where a.rowner = '" + schemaName + "' " +
+                    " UNION ALL " +
+                    " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
+                    " from all_constraints " +
+                    " where constraint_type != 'R' and owner = '" + schemaName + "'" +
+                    " UNION ALL " +
+                    " select constraint_name as object_name, 'REF_CONSTRAINT' as object_type" +
+                    " from user_constraints " +
+                    " where constraint_type = 'R' and owner = '" + schemaName + "'";
         else
             sql = "select t.object_name, t.object_type " +
                     "  from user_objects t " +
@@ -51,8 +59,13 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                     "         where t.object_name = unt.table_name)" +
                     " UNION ALL " +
                     " select rname as object_name, 'REFRESH GROUP' as object_type " +
-                    " from user_refresh ";
-
+                    " from user_refresh " +
+                    " UNION ALL " +
+                    " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
+                    " from user_constraints where  constraint_type != 'R'"    +
+                    " UNION ALL " +
+                    " select constraint_name as object_name, 'REF_CONSTRAINT' as object_type" +
+                    " from user_constraints where constraint_type = 'R'";
         return getJdbcTemplate().query(sql, new UserObjectRowMapper());
     }
 
