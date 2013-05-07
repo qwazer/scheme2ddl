@@ -1,4 +1,17 @@
 #labels Featured
+==What's new in version 2.2==
+
+  # Multy schema support (thanks to xorader for initial patch)
+    # `-s` or `-schemas` in command line parameter
+    # `schemaList` in advanced config
+    # support for sysdba connections
+  # New `fileNameConstructor` advanced config section
+    # Construct custom filenames layout from keywords `schema`, `type`, `types_plural`, `object_name`, `ext`ension and them upper case analogues
+    # Rules to map file extension by object type with predefined 'TOAD' or 'PL/SQL Developer' mapping (experimental)
+  # Possibility export CONSTRAINTS and REF_CONSTRAINTS to separate ddl files
+  # Compatability with old config formats 2.0 and 2.1 preserved
+    
+
 ==What's new in version 2.1==
 
   # More verbose error logging with suggestions how to fix error
