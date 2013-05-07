@@ -4,12 +4,14 @@ import com.googlecode.scheme2ddl.domain.UserObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.CallableStatementCallback;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -55,11 +57,34 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
     }
 
     public List<UserObject> findPublicDbLinks() {
-        List<UserObject> list = getJdbcTemplate().query(
-                "select db_link as object_name, 'PUBLIC DATABASE LINK' as object_type " +
-                        "from DBA_DB_LINKS " +
-                        "where owner='PUBLIC'",
-                new UserObjectRowMapper());
+        List<UserObject> list = new ArrayList<UserObject>();
+        try {
+            list = getJdbcTemplate().query(
+                    "select db_link as object_name, 'PUBLIC DATABASE LINK' as object_type " +
+                            "from DBA_DB_LINKS " +
+                            "where owner='PUBLIC'",
+                    new UserObjectRowMapper());
+        } catch (BadSqlGrammarException sqlGrammarException) {
+            if (sqlGrammarException.getSQLException().getErrorCode() == 942) {
+                String userName = null;
+                try {
+                    userName = getDataSource().getConnection().getMetaData().getUserName();
+                } catch (SQLException e) {
+                }
+                log.error("Cannot process 'PUBLIC DATABASE LINK' becouse " + userName + " no access to view it" +
+                        "\n Possible decisions:\n\n" +
+                        " 1) Exclude processPublicDbLinks option in advansed config\n    " +
+                        " <bean id=\"reader\" ...>\n" +
+                        "        <property name=\"processPublicDbLinks\" value=\"false\"/>\n" +
+                        "        ...\n" +
+                        "    </bean>\n" +
+                        "\n" +
+                        " 2) Or try give access to user " + userName + " with sql command\n " +
+                        " GRANT SELECT_CATALOG_ROLE TO " + userName + "; \n\n");
+            }
+            throw sqlGrammarException;
+        }
+
         for (UserObject userObject : list) {
             userObject.setSchema("PUBLIC");
         }
