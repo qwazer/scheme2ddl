@@ -14,11 +14,12 @@ Sample custom config placed in distribution package.
 ==What can be configured==
 
 || *name* ||  *details* ||
-|| dataSource || connection to oracle ||
-|| reader || try to process Public Db Links and Dmbs Jobs ||
-|| writer || output path || 
-|| taskExecutor || number of threads ||
+|| dataSource || Connection to Oracle ||
+|| reader || Try to process Public Db Links and Dmbs Jobs ||
+|| writer || Output path || 
+|| taskExecutor || Number of threads ||
 || transformParams_for_dbms_metadata || ||
-|| ddlFormatter || some prettify options ||
-|| dependencies || for example, indexes of tables ||
-|| excludes || patterns to exclude proccessing ||
+|| fileNameConstructor|| Custom templates for construct filename <br> Ability to map file extension like 'TOAD' or 'PL/SQL Developer' (experimental) ||
+|| ddlFormatter || Some prettify options ||
+|| dependencies || For example, indexes of tables ||
+|| excludes || Patterns to exclude proccessing ||
