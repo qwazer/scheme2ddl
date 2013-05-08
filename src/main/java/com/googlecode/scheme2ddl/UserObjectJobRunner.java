@@ -41,7 +41,7 @@ public class UserObjectJobRunner {
                 logger.trace(String.format("Start spring batch job with parameters %s", jobParameters));
                 JobExecution jobExecution = launcher.run(job, jobParameters);
                 //write some log
-                writeJobExecutionStatus(jobExecution);
+                writeJobExecutionStatus(jobExecution, jobParameters);
                 if (jobExecution.getStatus().isUnsuccessful()){
                     throw new Exception(String.format("Job %s unsuccessful", jobParameters));
                 }
@@ -69,9 +69,8 @@ public class UserObjectJobRunner {
         return parametersBuilder.toJobParameters();
     }
 
-    private void writeJobExecutionStatus(JobExecution jobExecution) {
+    private void writeJobExecutionStatus(JobExecution jobExecution, JobParameters jobParameters) {
         StepExecution step = jobExecution.getStepExecutions().toArray(new StepExecution[]{})[0];
-        JobParameters jobParameters = jobExecution.getJobInstance().getJobParameters();
         String schemaName = jobParameters.getString("schemaName");
         logger.info(String.format("Written %d ddls with user objects from total %d in schema %s",
                 step.getWriteCount(), step.getReadCount(), schemaName));

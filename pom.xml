@@ -23,9 +23,17 @@
     </distributionManagement>
 
     <properties>
-        <spring.framework.version>2.5.6</spring.framework.version>
-        <spring.batch.version>2.1.9.RELEASE</spring.batch.version>
+        <spring.framework.version>3.2.0.RELEASE</spring.framework.version>
+        <spring.batch.version>2.2.0.RC1</spring.batch.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>org.springframework.maven.milestone</id>
+            <name>Maven Central Compatible Spring Milestone Repository</name>
+            <url>http://maven.springframework.org/milestone</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
@@ -70,6 +78,15 @@
                         <version>1.4</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                        <source>1.5</source>
+                        <target>1.5</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>
