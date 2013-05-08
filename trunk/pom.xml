@@ -6,7 +6,7 @@
 
     <groupId>com.googlecode</groupId>
     <artifactId>scheme2ddl</artifactId>
-    <version>2.2.1</version>
+    <version>2.2.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <url>http://scheme2ddl.googlecode.com</url>
@@ -28,6 +28,7 @@
     </properties>
 
     <repositories>
+        <!-- todo remove, when spring-batch 2.2.0 will be released in maven central -->
         <repository>
             <id>org.springframework.maven.milestone</id>
             <name>Maven Central Compatible Spring Milestone Repository</name>
