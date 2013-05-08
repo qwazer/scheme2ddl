@@ -7,7 +7,11 @@
     <job id="job1" xmlns="http://www.springframework.org/schema/batch">
         <step id="step1" parent="simpleStep">
             <tasklet task-executor="taskExecutor" throttle-limit="100000">  <!-- actual limit defined in taskExecutor bean-->
-                <chunk reader="reader" processor="processor" writer="writer" />
+                <chunk reader="reader" processor="processor" writer="writer" retry-limit="5">
+                    <retryable-exception-classes>
+                        org.springframework.jdbc.CannotGetJdbcConnectionException
+                    </retryable-exception-classes>
+                </chunk>
             </tasklet>
         </step>
     </job>
