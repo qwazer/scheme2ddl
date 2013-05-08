@@ -30,6 +30,7 @@ public class Main {
     private static boolean justPrintUsage = false;
     private static boolean justPrintVersion = false;
     private static boolean justTestConnection = false;
+    private static boolean skipPublicDbLinks = false;
     private static String customConfigLocation = null;
     private static String defaultConfigLocation = "scheme2ddl.config.xml";
     private static String dbUrl = null;
@@ -221,18 +222,18 @@ public class Main {
         msg.append("internally call to dbms_metadata.get_ddl " + lSep);
         msg.append("more config options in scheme2ddl.config.xml " + lSep);
         msg.append("Options: " + lSep);
-        msg.append("  -help, -h              print this message" + lSep);
+        msg.append("  -help, -h               print this message" + lSep);
         // msg.append("  -verbose, -v           be extra verbose" + lSep);
-        msg.append("  -url,                  DB connection URL" + lSep);
-        msg.append("                         example: scott/tiger@localhost:1521:ORCL" + lSep);
+        msg.append("  -url,                   DB connection URL" + lSep);
+        msg.append("                          example: scott/tiger@localhost:1521:ORCL" + lSep);
 
-        msg.append("  -o, --output,          output dir" + lSep);
-        msg.append("  -p, --parallel,        number of parallel thread (default 4)" + lSep);
-        msg.append("  -s, --schemas,         a comma separated list of schemas for processing" + lSep);
-        msg.append("                         (works only if connected to oracle as sysdba)" + lSep);
-        msg.append("  -c, --config,          path to scheme2ddl config file (xml)" + lSep);
-        msg.append("  --test-connection,-tc  test db connection available" + lSep);
-        msg.append("  -version,              print version info and exit" + lSep);
+        msg.append("  -o, --output,           output dir" + lSep);
+        msg.append("  -p, --parallel,         number of parallel thread (default 4)" + lSep);
+        msg.append("  -s, --schemas,          a comma separated list of schemas for processing" + lSep);
+        msg.append("                          (works only if connected to oracle as sysdba)" + lSep);
+        msg.append("  -c, --config,           path to scheme2ddl config file (xml)" + lSep);
+        msg.append("  -tc,--test-connection,  test db connection available" + lSep);
+        msg.append("  -version,               print version info and exit" + lSep);
         System.out.println(msg.toString());
     }
 

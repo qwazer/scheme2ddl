@@ -6,10 +6,11 @@
 
     <job id="job1" xmlns="http://www.springframework.org/schema/batch">
         <step id="step1" parent="simpleStep">
-            <tasklet task-executor="taskExecutor" throttle-limit="100000">  <!-- actual limit defined in taskExecutor bean-->
+            <tasklet task-executor="taskExecutor"
+                     throttle-limit="100000">  <!-- actual limit defined in taskExecutor bean-->
                 <chunk reader="reader" processor="processor" writer="writer" retry-limit="5">
                     <retryable-exception-classes>
-                        org.springframework.jdbc.CannotGetJdbcConnectionException
+                        <include class="org.springframework.jdbc.CannotGetJdbcConnectionException"/>
                     </retryable-exception-classes>
                 </chunk>
             </tasklet>
@@ -49,7 +50,7 @@
             <bean class="org.springframework.batch.core.repository.dao.MapJobInstanceDao"/>
         </constructor-arg>
         <constructor-arg>
-            <bean class="org.springframework.batch.core.repository.dao.MapJobExecutionDao" />
+            <bean class="org.springframework.batch.core.repository.dao.MapJobExecutionDao"/>
         </constructor-arg>
         <constructor-arg>
             <bean class="org.springframework.batch.core.repository.dao.MapStepExecutionDao"/>
