@@ -4,7 +4,7 @@
   # Update spring-batch to 2.2.0.RC1 to fix issue #6 and related [https://jira.springsource.org/browse/BATCH-1774 BATCH-1774] 
   # Compiled for java 1.5
   # Add retry logic if slow or unstable network connection to oracle
-  # Change logic of processing public database links. If them not available, continue processing and log warning message.
+  # Change logic of processing public database links. If information about public database links not available, continue processing with warning message.
 
 
 ==What's new in version 2.2==
