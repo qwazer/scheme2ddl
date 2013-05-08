@@ -84,9 +84,9 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                     userName = getDataSource().getConnection().getMetaData().getUserName();
                 } catch (SQLException e) {
                 }
-                log.error("Cannot process 'PUBLIC DATABASE LINK' becouse " + userName + " no access to view it" +
+                log.warn("WARNING: Cannot process 'PUBLIC DATABASE LINK' becouse " + userName + " no access to view it" +
                         "\n Possible decisions:\n\n" +
-                        " 1) Exclude processPublicDbLinks option in advansed config\n    " +
+                        " 1) Exclude processPublicDbLinks option in advansed config to disable this warning\n    " +
                         " <bean id=\"reader\" ...>\n" +
                         "        <property name=\"processPublicDbLinks\" value=\"false\"/>\n" +
                         "        ...\n" +
@@ -95,7 +95,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                         " 2) Or try give access to user " + userName + " with sql command\n " +
                         " GRANT SELECT_CATALOG_ROLE TO " + userName + "; \n\n");
             }
-            throw sqlGrammarException;
+            return list;
         }
 
         for (UserObject userObject : list) {
