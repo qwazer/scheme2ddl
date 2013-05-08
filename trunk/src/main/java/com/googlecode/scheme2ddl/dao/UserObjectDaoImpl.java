@@ -86,7 +86,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                 }
                 log.warn("WARNING: processing of 'PUBLIC DATABASE LINK' will be skipped because " + userName + " no access to view it" +
                         "\n Possible decisions:\n\n" +
-                        " 1) Exclude processPublicDbLinks option in advansed config to disable this warning\n    " +
+                        " 1) Exclude processPublicDbLinks option in advanced config to disable this warning\n    " +
                         " <bean id=\"reader\" ...>\n" +
                         "        <property name=\"processPublicDbLinks\" value=\"false\"/>\n" +
                         "        ...\n" +
