@@ -17,7 +17,7 @@
     # Construct custom filenames layout from keywords `schema`, `type`, `types_plural`, `object_name`, `ext`ension and them upper case analogues
     # Rules to map file extension by object type with predefined 'TOAD' or 'PL/SQL Developer' mapping (experimental)
   # Possibility export CONSTRAINTS and REF_CONSTRAINTS to separate ddl files
-  # Compatability with old config formats 2.0 and 2.1 preserved
+  # Compatability with old config formats 2.0 and 2.1 preserved, but for multi schema processing use new config format.
     
 
 ==What's new in version 2.1==
