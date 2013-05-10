@@ -53,7 +53,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                     " where constraint_type != 'R' and owner = '" + schemaName + "'" +
                     " UNION ALL " +
                     " select constraint_name as object_name, 'REF_CONSTRAINT' as object_type" +
-                    " from user_constraints " +
+                    " from all_constraints " +
                     " where constraint_type = 'R' and owner = '" + schemaName + "'";
         else
             sql = "select t.object_name, t.object_type " +
