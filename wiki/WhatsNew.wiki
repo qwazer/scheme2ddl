@@ -1,4 +1,7 @@
 #labels Featured
+==What's new in version 2.2.2==
+  # fix issue #7 
+
 ==What's new in version 2.2.1==
 
   # Update spring-batch to 2.2.0.RC1 to fix issue #6 and related [https://jira.springsource.org/browse/BATCH-1774 BATCH-1774] 
