@@ -3,7 +3,6 @@ package com.googlecode.scheme2ddl.dao;
 import com.googlecode.scheme2ddl.domain.UserObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.CallableStatementCallback;
@@ -26,11 +25,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
 
     private static final Log log = LogFactory.getLog(UserObjectDaoImpl.class);
     private Map<String, Boolean> transformParams;
-
-    @Value("#{jobParameters['schemaName']}")
     private String schemaName;
-
-    @Value("#{jobParameters['launchedByDBA']}")
     private boolean isLaunchedByDBA = false;
 
     public List<UserObject> findListForProccessing() {
