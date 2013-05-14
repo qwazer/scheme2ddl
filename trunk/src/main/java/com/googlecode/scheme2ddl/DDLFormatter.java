@@ -11,19 +11,17 @@ public class DDLFormatter {
     private boolean isMorePrettyFormat = false;
 
     public String formatDDL(String ddl) {
-        // Get a new line specific to the system
-        String newline = System.getProperty("line.separator");
-	ddl = ddl + newline;
+
+        ddl = ddl + "\n";
 
         if (noFormat) return ddl;
 
-
+        String newline = System.getProperty("line.separator");
         if (isMorePrettyFormat) {
             ddl = ddl.replaceAll(newline + "GRANT ", newline + newline + "  GRANT ");
             ddl = ddl.replaceAll(newline + "COMMENT ", newline + newline + "   COMMENT ");
             ddl = ddl.replaceAll(newline + "  CREATE ", newline + "CREATE ");
-        }
-        else if (statementOnNewLine) {
+        } else if (statementOnNewLine) {
             ddl = ddl.replace(newline, ";");
             ddl = ddl.replace(";GRANT", ";" + newline + "GRANT");
             ddl = ddl.replace(";COMMENT", ";" + newline + "COMMENT");
