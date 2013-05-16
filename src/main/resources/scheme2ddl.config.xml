@@ -25,6 +25,8 @@
     <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader" scope="step">
         <property name="processPublicDbLinks" value="true"/>
         <property name="processDmbsJobs" value="true"/>
+        <!--  process each constraint in separate files (constraints already included to tables DDL scripts in default transformParams_for_dbms_metadata) -->
+        <property name="processConstraint" value="false"/>
     </bean>
 
     <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
