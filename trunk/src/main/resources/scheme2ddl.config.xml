@@ -206,6 +206,8 @@
             <set>
                 <value>SYSTP*</value>
                 <value>*==</value>
+                <!--a pipelined function that returns a PL/SQL collection type Oracle will automagically generate a compatible SQL collection type. Exclude them-->
+                <value>SYS_PLSQL_*</value>
             </set>
         </entry>
     </util:map>
