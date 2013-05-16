@@ -22,10 +22,9 @@
         <!--<value>HR</value>-->
     </util:list>
 
-    <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader" scope="step" autowire="autodetect">
+    <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader" scope="step">
         <property name="processPublicDbLinks" value="true"/>
         <property name="processDmbsJobs" value="true"/>
-        <property name="schemaName" value="#{jobParameters['schemaName']}"/>
     </bean>
 
     <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
