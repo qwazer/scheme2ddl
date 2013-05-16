@@ -201,8 +201,6 @@
         <entry key="PACKAGE BODY"><set><value>*</value></set></entry>
         <entry key="TYPE BODY"><set><value>*</value></set></entry>
         <entry key="INDEX"><set><value>*</value></set></entry>
-        <entry key="CONSTRAINT"><set><value>*</value></set></entry>
-        <entry key="REF_CONSTRAINT"><set><value>*</value></set></entry>
         <!--For removing system types http://www.sql.ru/forum/actualthread.aspx?bid=3&tid=542661&hl=-->
         <entry key="TYPE">
             <set>
