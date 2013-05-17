@@ -1,5 +1,8 @@
 #labels Featured
 ==What's new in version 2.2.2==
+  # fix issue #12
+
+==What's new in version 2.2.2==
   # fix issue #7 
 
 ==What's new in version 2.2.1==
