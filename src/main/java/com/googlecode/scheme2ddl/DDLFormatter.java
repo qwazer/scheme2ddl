@@ -22,7 +22,7 @@ public class DDLFormatter {
             ddl = ddl.replaceAll(newline + "COMMENT ", newline + newline + "   COMMENT ");
             ddl = ddl.replaceAll(newline + "  CREATE ", newline + "CREATE ");
         } else if (statementOnNewLine) {
-            ddl = ddl.replace(newline, ";");
+          //  ddl = ddl.replace(newline, ";");
             ddl = ddl.replace(";GRANT", ";" + newline + "GRANT");
             ddl = ddl.replace(";COMMENT", ";" + newline + "COMMENT");
             ddl = ddl.replace(";CREATE", ";" + newline + "CREATE");
