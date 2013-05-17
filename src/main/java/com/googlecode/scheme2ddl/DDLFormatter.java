@@ -16,7 +16,7 @@ public class DDLFormatter {
 
         if (noFormat) return ddl;
 
-        String newline = "\n";
+        String newline = System.getProperty("line.separator");
         if (isMorePrettyFormat) {
             ddl = ddl.replaceAll(newline + "GRANT ", newline + newline + "  GRANT ");
             ddl = ddl.replaceAll(newline + "COMMENT ", newline + newline + "   COMMENT ");

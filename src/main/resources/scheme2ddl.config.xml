@@ -22,11 +22,10 @@
         <!--<value>HR</value>-->
     </util:list>
 
-    <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader" scope="step">
+    <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader" scope="step" autowire="autodetect">
         <property name="processPublicDbLinks" value="true"/>
         <property name="processDmbsJobs" value="true"/>
-        <!--  process each constraint in separate files (constraints already included to tables DDL scripts in default transformParams_for_dbms_metadata) -->
-        <property name="processConstraint" value="false"/>
+        <property name="schemaName" value="#{jobParameters['schemaName']}"/>
     </bean>
 
     <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
@@ -201,13 +200,13 @@
         <entry key="PACKAGE BODY"><set><value>*</value></set></entry>
         <entry key="TYPE BODY"><set><value>*</value></set></entry>
         <entry key="INDEX"><set><value>*</value></set></entry>
+        <entry key="CONSTRAINT"><set><value>*</value></set></entry>
+        <entry key="REF_CONSTRAINT"><set><value>*</value></set></entry>
         <!--For removing system types http://www.sql.ru/forum/actualthread.aspx?bid=3&tid=542661&hl=-->
         <entry key="TYPE">
             <set>
                 <value>SYSTP*</value>
                 <value>*==</value>
-                <!--a pipelined function that returns a PL/SQL collection type Oracle will automagically generate a compatible SQL collection type. Exclude them-->
-                <value>SYS_PLSQL_*</value>
             </set>
         </entry>
     </util:map>

@@ -8,11 +8,6 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -24,14 +19,9 @@ public class UserObjectReader implements ItemReader<UserObject> {
 
     private static final Log log = LogFactory.getLog(UserObjectReader.class);
     private List<UserObject> list;
-
-    @Autowired
     private UserObjectDao userObjectDao;
     private boolean processPublicDbLinks = false;
     private boolean processDmbsJobs = false;
-    private boolean processConstraint = false;
-
-    @Value("#{jobParameters['schemaName']}")
     private String schemaName;
 
 
@@ -40,9 +30,10 @@ public class UserObjectReader implements ItemReader<UserObject> {
             fillList();
             log.info(String.format("Found %s items for processing in schema %s", list.size(), schemaName));
         }
-        if (list.size() == 0) {
+        if (list.size() == 0)  {
             return null;
-        } else
+        }
+        else
             return list.remove(0);
     }
 
@@ -52,11 +43,8 @@ public class UserObjectReader implements ItemReader<UserObject> {
         if (processPublicDbLinks) {
             list.addAll(userObjectDao.findPublicDbLinks());
         }
-        if (processDmbsJobs) {
+        if (processDmbsJobs){
             list.addAll(userObjectDao.findDmbsJobs());
-        }
-        if (processConstraint){
-            list.addAll(userObjectDao.findConstaints());
         }
 
     }
@@ -72,11 +60,7 @@ public class UserObjectReader implements ItemReader<UserObject> {
     public void setProcessDmbsJobs(boolean processDmbsSchedulerJobs) {
         this.processDmbsJobs = processDmbsSchedulerJobs;
     }
-
-    public void setProcessConstraint(boolean processConstraint) {
-        this.processConstraint = processConstraint;
-    }
-
+    //@Value("#{jobParameters['schemaName']}") //todo use after next spring-batch released
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
     }

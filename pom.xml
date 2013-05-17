@@ -24,7 +24,7 @@
 
     <properties>
         <spring.framework.version>3.2.0.RELEASE</spring.framework.version>
-        <spring.batch.version>2.2.0.RC2</spring.batch.version>
+        <spring.batch.version>2.2.0.RC1</spring.batch.version>
     </properties>
 
     <repositories>
