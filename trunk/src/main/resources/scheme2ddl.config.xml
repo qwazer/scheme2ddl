@@ -47,10 +47,9 @@
     </util:map>
 
 
-    <!-- format option for DDL -->
+    <!-- format option for DDL, actually perform only trim for resulting DDL -->
     <bean id="ddlFormatter" class="com.googlecode.scheme2ddl.DDLFormatter">
-        <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT.
-         Formatting option can be unsafe because it based on regexp rules -->
+        <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT. -->
         <property name="noFormat" value="false"/>
     </bean>
 
