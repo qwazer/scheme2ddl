@@ -19,10 +19,12 @@ public class DDLFormatter {
         this.noFormat = noFormat;
     }
 
+    @Deprecated
     public void setStatementOnNewLine(Boolean statementOnNewLine) {
         this.statementOnNewLine = statementOnNewLine;
     }
 
+    @Deprecated
     public void setMorePrettyFormat(boolean morePrettyFormat) {
         isMorePrettyFormat = morePrettyFormat;
     }
