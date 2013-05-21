@@ -52,9 +52,6 @@
         <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT.
          Formatting option can be unsafe because it based on regexp rules -->
         <property name="noFormat" value="false"/>
-        <property name="statementOnNewLine" value="true"/>
-        <!-- Enabled 'morePrettyFormat' option disables the 'statementOnNewLine' option -->
-        <property name="morePrettyFormat" value="false"/>
     </bean>
 
     <!-- rules for construct filenames  -->
