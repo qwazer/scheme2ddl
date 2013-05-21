@@ -11,23 +11,8 @@ public class DDLFormatter {
     private boolean isMorePrettyFormat = false;
 
     public String formatDDL(String ddl) {
-
-        ddl = ddl + "\n";
-
         if (noFormat) return ddl;
-
-        String newline = "\n";
-        if (isMorePrettyFormat) {
-            ddl = ddl.replaceAll(newline + "GRANT ", newline + newline + "  GRANT ");
-            ddl = ddl.replaceAll(newline + "COMMENT ", newline + newline + "   COMMENT ");
-            ddl = ddl.replaceAll(newline + "  CREATE ", newline + "CREATE ");
-        } else if (statementOnNewLine) {
-          //  ddl = ddl.replace(newline, ";");
-            ddl = ddl.replace(";GRANT", ";" + newline + "GRANT");
-            ddl = ddl.replace(";COMMENT", ";" + newline + "COMMENT");
-            ddl = ddl.replace(";CREATE", ";" + newline + "CREATE");
-        }
-        return ddl;
+        return ddl.trim() + "\n";
     }
 
     public void setNoFormat(Boolean noFormat) {

@@ -157,7 +157,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                 }
                 try {
                     if (rs.next()) {
-                        return rs.getString(1).trim();
+                        return rs.getString(1);
                     }
                 } finally {
                     rs.close();
@@ -187,7 +187,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                 }
                 try {
                     if (rs.next()) {
-                        return rs.getString(1).trim();
+                        return rs.getString(1);
                     }
                 } finally {
                     rs.close();
