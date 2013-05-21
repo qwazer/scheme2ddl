@@ -26,10 +26,8 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
 
     private static final Log log = LogFactory.getLog(UserObjectDaoImpl.class);
     private Map<String, Boolean> transformParams;
-
     @Value("#{jobParameters['schemaName']}")
     private String schemaName;
-
     @Value("#{jobParameters['launchedByDBA']}")
     private boolean isLaunchedByDBA = false;
 
@@ -106,7 +104,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
     public List<UserObject> findConstaints() {
         String sql;
         if (isLaunchedByDBA)
-            sql =   " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
+            sql = " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
                     " from all_constraints " +
                     " where constraint_type != 'R' and owner = '" + schemaName + "'" +
                     " UNION ALL " +
@@ -114,8 +112,8 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                     " from all_constraints " +
                     " where constraint_type = 'R' and owner = '" + schemaName + "'";
         else
-            sql =   " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
-                    " from user_constraints where  constraint_type != 'R'"    +
+            sql = " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
+                    " from user_constraints where  constraint_type != 'R'" +
                     " UNION ALL " +
                     " select constraint_name as object_name, 'REF_CONSTRAINT' as object_type" +
                     " from user_constraints where constraint_type = 'R'";
@@ -172,13 +170,14 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
     public String findDependentDLLByTypeName(final String type, final String name) {
 
         return (String) getJdbcTemplate().execute(new ConnectionCallback() {
-            final String query = "select dbms_metadata.get_dependent_ddl(?, ?) from dual";
+            final String query = "select dbms_metadata.get_dependent_ddl(?, ?, ?) from dual";
 
             public Object doInConnection(Connection connection) throws SQLException, DataAccessException {
                 applyTransformParameters(connection);
                 PreparedStatement ps = connection.prepareStatement(query);
                 ps.setString(1, type);
                 ps.setString(2, name);
+                ps.setString(3, isLaunchedByDBA ? schemaName : null);
                 ResultSet rs;
                 try {
                     rs = ps.executeQuery();
