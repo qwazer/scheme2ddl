@@ -10,7 +10,7 @@ public class DDLFormatter {
     private boolean statementOnNewLine;
     private boolean isMorePrettyFormat = false;
 
-    static String newline = System.getProperty("line.separator");
+    static String newline = System.getProperty("line.separator");   //todo make it platform independent
 
     public String formatDDL(String ddl) {
         if (noFormat)

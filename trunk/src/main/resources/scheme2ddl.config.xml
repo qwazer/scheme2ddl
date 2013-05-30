@@ -40,7 +40,7 @@
 
     <!-- settings for processing SQL objects -->
     <util:map id="settingsUserObjectProcessor">
-        <entry key="isExportDataTable" value="false"/>
+        <entry key="isExportDataTable" value="false"/>   <!--todo document it -->
         <!-- In all filters (includesDataTables, excludesDataTables, excludes) will used the full object name
              like "SCHEMA_NAME.OBJECT_NAME", if processSchemas is not empty  -->
         <entry key="isUsedSchemaNamesInFilters" value="false"/>
@@ -51,6 +51,7 @@
         <entry key="SEGMENT_ATTRIBUTES" value="FALSE"/>
         <entry key="SQLTERMINATOR" value="TRUE"/>
 
+        <!-- todo before release rollback to previous default behavior, may be created new quick switch for processing containt in separate files-->
         <!-- If TRUE, emit all non-referential table constraints. Defaults to TRUE. -->
         <entry key="CONSTRAINTS" value="FALSE"/>
         <!-- If TRUE, emit all referential constraints (foreign keys). Defaults to TRUE. -->
