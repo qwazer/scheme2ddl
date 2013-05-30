@@ -40,6 +40,10 @@
         <property name="ddlFormatter" ref="ddlFormatter"/>
         <property name="excludes" ref="excludes"/>
         <property name="dependencies" ref="dependencies"/>
+        <property name="settingsUserObjectProcessor" ref="settingsUserObjectProcessor"/>
+        <property name="dependenciesInSeparateFiles" ref="dependenciesInSeparateFiles"/>
+        <property name="excludesDataTables" ref="excludesDataTables"/>
+        <property name="includesDataTables" ref="includesDataTables"/>
     </bean>
 
 

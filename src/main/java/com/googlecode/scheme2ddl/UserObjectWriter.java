@@ -37,6 +37,19 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
                 userObject.getSchema().toLowerCase(),
                 userObject.getName().toLowerCase(),
                 file.getAbsolutePath()));
+
+        for (String typeDDL : userObject.getDependentDDLsKeySet()) {
+            String absoluteFileNameDependent = outputPath + "/" + userObject.getDependentFilename(typeDDL);
+            absoluteFileNameDependent = FilenameUtils.separatorsToSystem(absoluteFileNameDependent);
+            File fileDependent = new File(absoluteFileNameDependent);
+            FileUtils.writeStringToFile(fileDependent, userObject.getDependentDDL(typeDDL));
+            log.info(String.format("Saved dependent '%s' of the '%s.%s' object to file %s",
+                        typeDDL,
+                        userObject.getSchema().toLowerCase(),
+                        userObject.getName().toLowerCase(),
+                        fileDependent.getAbsolutePath()
+                    ));
+        }
     }
 
 
