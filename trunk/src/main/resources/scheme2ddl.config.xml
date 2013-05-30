@@ -25,8 +25,8 @@
     <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader" scope="step">
         <property name="processPublicDbLinks" value="true"/>
         <property name="processDmbsJobs" value="true"/>
-        <!--  process each constraint in separate files (constraints already included to tables DDL scripts in default transformParams_for_dbms_metadata) -->
-        <property name="processConstraint" value="false"/>
+        <!-- The "processUserAndPermissions" workes only for sysdba users -->
+        <property name="processUserAndPermissions" value="true"/>
     </bean>
 
     <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
@@ -38,12 +38,25 @@
         <property name="concurrencyLimit" value="4"/>
     </bean>
 
+    <!-- settings for processing SQL objects -->
+    <util:map id="settingsUserObjectProcessor">
+        <entry key="isExportDataTable" value="false"/>
+        <!-- In all filters (includesDataTables, excludesDataTables, excludes) will used the full object name
+             like "SCHEMA_NAME.OBJECT_NAME", if processSchemas is not empty  -->
+        <entry key="isUsedSchemaNamesInFilters" value="false"/>
+    </util:map>
 
     <!-- http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBJBFGE -->
     <util:map id="transformParams_for_dbms_metadata">
         <entry key="SEGMENT_ATTRIBUTES" value="FALSE"/>
         <entry key="SQLTERMINATOR" value="TRUE"/>
-        <entry key="CONSTRAINTS_AS_ALTER" value="TRUE"/>
+
+        <!-- If TRUE, emit all non-referential table constraints. Defaults to TRUE. -->
+        <entry key="CONSTRAINTS" value="FALSE"/>
+        <!-- If TRUE, emit all referential constraints (foreign keys). Defaults to TRUE. -->
+        <entry key="REF_CONSTRAINTS" value="FALSE"/>
+        <!-- If TRUE, emit table constraints as separate ALTER TABLE (and, if necessary, CREATE INDEX) statements. If FALSE, specify table constraints as part of the CREATE TABLE statement. Defaults to FALSE. Requires that CONSTRAINTS be TRUE. -->
+        <entry key="CONSTRAINTS_AS_ALTER" value="FALSE"/>
     </util:map>
 
 
@@ -51,6 +64,8 @@
     <bean id="ddlFormatter" class="com.googlecode.scheme2ddl.DDLFormatter">
         <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT. -->
         <property name="noFormat" value="false"/>
+        <!-- The 'isMorePrettyFormat' option adds a smart whitespace indentation and clever new lines  -->
+        <property name="isMorePrettyFormat" value="false"/>
     </bean>
 
     <!-- rules for construct filenames  -->
@@ -125,9 +140,11 @@
         <entry key="TABLE">
             <set>
                 <value>COMMENT</value>
-                <value>INDEX</value>
+                <!--value>INDEX</value-->
                 <value>OBJECT_GRANT</value>
                 <value>TRIGGER</value>
+                <value>CONSTRAINT</value>
+                <value>REF_CONSTRAINT</value>
             </set>
         </entry>
         <entry key="VIEW">
@@ -139,7 +156,7 @@
         <entry key="MATERIALIZED VIEW">
             <set>
                 <value>COMMENT</value>
-                <value>INDEX</value>
+                <!--value>INDEX</value-->
                 <value>MATERIALIZED_VIEW_LOG</value>
                 <value>OBJECT_GRANT</value>
             </set>
@@ -169,7 +186,39 @@
                 <value>OBJECT_GRANT</value>
             </set>
         </entry>
+        <entry key="SEQUENCE">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
     </util:map>
+
+    <!-- This dependencies will export in separate files. Require for it:
+        1) Disable the "REF_CONSTRAINTS" and the "CONSTRAINTS" options in "transformParams_for_dbms_metadata" above
+        2) Presence this dependencies in "dependencies" map set above
+    -->
+    <util:map id="dependenciesInSeparateFiles">
+        <entry key="TABLE">
+            <set>
+                <value>CONSTRAINT</value>
+                <value>REF_CONSTRAINT</value>
+            </set>
+        </entry>
+    </util:map>
+
+    <!-- The "includesDataTables" uses for overriding "excludesDataTables" and for limiting number of data tables rows -->
+    <!-- "includesDataTables" has more priority then "excludesDataTables" -->
+    <util:map id="includesDataTables">
+        <entry key="SCOTT.TAB2"><util:properties><prop key="maxRowsExport">3</prop></util:properties></entry>   <!-- The "maxRowsExport" setting limits number of rows  -->
+        <entry key="*TAB1"><util:properties/></entry>   <!-- The "maxRowsExport" is unlimited by default -->
+    </util:map>
+
+    <!-- Below tables data will exlude from export processing -->
+    <util:list id="excludesDataTables">
+        <value>TAB3</value>
+        <value>SCOTT.TAB1</value>   <!-- SCOTT.TAB1 dont excludes, because contains in includesDataTables -->
+    </util:list>
+
 
     <!-- Key is the object type,
          Value - is set of patterns for exlude
@@ -193,10 +242,12 @@
         <entry key="INDEX PARTITION"><set><value>*</value></set></entry>
         <entry key="LOB"><set><value>*</value></set></entry>
 
-        <!--Excluded, because all them persist in PACKAGE, TYPE and TABLE -->
+        <!--Excluded, because all them persist in PACKAGE and TYPE -->
         <entry key="PACKAGE BODY"><set><value>*</value></set></entry>
         <entry key="TYPE BODY"><set><value>*</value></set></entry>
+        <!-- Require for export in separate files
         <entry key="INDEX"><set><value>*</value></set></entry>
+        -->
         <!--For removing system types http://www.sql.ru/forum/actualthread.aspx?bid=3&tid=542661&hl=-->
         <entry key="TYPE">
             <set>
@@ -204,8 +255,26 @@
                 <value>*==</value>
                 <!--a pipelined function that returns a PL/SQL collection type Oracle will automagically generate a compatible SQL collection type. Exclude them-->
                 <value>SYS_PLSQL_*</value>
+                <!-- require set the 'isUsedSchemaNamesInFilters' to 'true'
+                <value>CTXSYS.SYS_PLSQL*</value>
+                -->
             </set>
         </entry>
+        <entry key="EDITION"><set><value>*</value></set></entry>
+        <entry key="LOB"><set><value>*</value></set></entry>
+        <entry key="QUEUE"><set><value>*</value></set></entry>
+        <entry key="EVALUATION CONTEXT"><set><value>*</value></set></entry>
+        <entry key="RULE SET"><set><value>*</value></set></entry>
+        <!-- require set the 'isUsedSchemaNamesInFilters' to 'true'
+        <entry key="TABLE">
+            <set>
+                <value>ORDDATA.ORDDCM_PREFS_DEF_VALUES_TAB</value>
+                <value>ORDDATA.ORDDCM_PREFS_VALID_VALUES_TAB</value>
+                <value>SYSMAN.MGMT_DELTA_SUMMARY_ERRORS</value>
+                <value>SYSMAN.PARAM_VALUES_TAB</value>
+            </set>
+        </entry>
+        -->
     </util:map>
 
 

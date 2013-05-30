@@ -29,7 +29,7 @@ public class UserObjectReader implements ItemReader<UserObject> {
     private UserObjectDao userObjectDao;
     private boolean processPublicDbLinks = false;
     private boolean processDmbsJobs = false;
-    private boolean processConstraint = false;
+    private boolean processUserAndPermissions = false;
 
     @Value("#{jobParameters['schemaName']}")
     private String schemaName;
@@ -55,10 +55,6 @@ public class UserObjectReader implements ItemReader<UserObject> {
         if (processDmbsJobs) {
             list.addAll(userObjectDao.findDmbsJobs());
         }
-        if (processConstraint){
-            list.addAll(userObjectDao.findConstaints());
-        }
-
     }
 
     public void setUserObjectDao(UserObjectDao userObjectDao) {
@@ -73,11 +69,11 @@ public class UserObjectReader implements ItemReader<UserObject> {
         this.processDmbsJobs = processDmbsSchedulerJobs;
     }
 
-    public void setProcessConstraint(boolean processConstraint) {
-        this.processConstraint = processConstraint;
-    }
-
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
+    }
+
+    public void setProcessUserAndPermissions(boolean processUserAndPermissions) {
+        this.processUserAndPermissions = processUserAndPermissions;
     }
 }

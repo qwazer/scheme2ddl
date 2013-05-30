@@ -98,10 +98,12 @@ public class Main {
 
         FileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);   //will create new one if not exist
         if (isLaunchedByDBA) {
+            System.out.println("Execute as SYSDBA user...");
             fileNameConstructor.setTemplate(fileNameConstructor.getTemplateForSysDBA());
             fileNameConstructor.afterPropertiesSet();
+        } else {
+            System.out.println("Execute for user schema only: " + userName);
         }
-
     }
 
     private static void processSchemas(ConfigurableApplicationContext context) {

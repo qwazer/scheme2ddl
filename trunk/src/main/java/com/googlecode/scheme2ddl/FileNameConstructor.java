@@ -75,12 +75,16 @@ public class FileNameConstructor implements InitializingBean {
     }
 
     public String map2FileName(UserObject userObject) {
+        return map2FileNameRaw(userObject.getSchema(), userObject.getType(), userObject.getName());
+    }
+
+    public String map2FileNameRaw(String schema, String type, String name) {
         String filename = preparedTemplate;
 
-        filename = filename.replace(nonOracleChar + kw_schema_lower, userObject.getSchema().toLowerCase());
-        filename = filename.replace(nonOracleChar + kw_schema_UPPER, userObject.getSchema().toUpperCase());
+        filename = filename.replace(nonOracleChar + kw_schema_lower, schema.toLowerCase());
+        filename = filename.replace(nonOracleChar + kw_schema_UPPER, schema.toUpperCase());
 
-        String typeName = abbreviate(userObject.getType()).replace(" ", "_");
+        String typeName = abbreviate(type).replace(" ", "_");
 
         //process kw_types_plural before kw_type
         filename = filename.replace(nonOracleChar + kw_types_plural_lower, pluralaze(typeName).toLowerCase());
@@ -89,8 +93,8 @@ public class FileNameConstructor implements InitializingBean {
         filename = filename.replace(nonOracleChar + kw_type_lower, typeName.toLowerCase());
         filename = filename.replace(nonOracleChar + kw_type_UPPER, typeName.toUpperCase());
 
-        filename = filename.replace(nonOracleChar + kw_objectname_lower, userObject.getName().toLowerCase());
-        filename = filename.replace(nonOracleChar + kw_objectname_UPPER, userObject.getName().toUpperCase());
+        filename = filename.replace(nonOracleChar + kw_objectname_lower, name.toLowerCase());
+        filename = filename.replace(nonOracleChar + kw_objectname_UPPER, name.toUpperCase());
 
         String extension = extensionMap.get(typeName.toUpperCase());
         if (extension == null) {

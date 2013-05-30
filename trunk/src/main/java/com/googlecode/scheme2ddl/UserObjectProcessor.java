@@ -8,6 +8,8 @@ import org.springframework.batch.item.ItemProcessor;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.Properties;
 
 import static com.googlecode.scheme2ddl.TypeNamesUtil.map2TypeForDBMS;
 
@@ -21,8 +23,14 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     private UserObjectDao userObjectDao;
     private DDLFormatter ddlFormatter;
     private FileNameConstructor fileNameConstructor;
-    private Map<String, Set<String>> excludes;
-    private Map<String, Set<String>> dependencies;
+    private Map<String, Set<String>>    excludes;
+    private Map<String, Set<String>>    dependencies;
+    private Map<String, Boolean>        settingsUserObjectProcessor;
+    private Map<String, Set<String>>    dependenciesInSeparateFiles;
+    private ArrayList<String>           excludesDataTables;
+    private Map<String, Properties>     includesDataTables;
+    private boolean isUsedSchemaNamesInFilters = false;
+    private boolean isExportDataTable = false;
 
     public UserObject process(UserObject userObject) throws Exception {
 
@@ -32,14 +40,29 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
         }
         userObject.setDdl(map2Ddl(userObject));
         userObject.setFileName(fileNameConstructor.map2FileName(userObject));
+
+        //if (userObject.getType.equals("TABLE")) {
+            /*
+             * if "isExportDataTable" { blablabla }
+             *   patch for export data table will later
+             */
+        //}
         return userObject;
     }
 
     private boolean needToExclude(UserObject userObject) {
         if (excludes == null || excludes.size() == 0) return false;
+
+        String fullTableName;
+        if (isUsedSchemaNamesInFilters && userObject.getSchema() != null) {
+            fullTableName = userObject.getSchema() + "." + userObject.getName();
+        } else {
+            fullTableName = userObject.getName();
+        }
+
         if (excludes.get("*") != null) {
             for (String pattern : excludes.get("*")) {
-                if (matchesByPattern(userObject.getName(), pattern))
+                if (matchesByPattern(fullTableName, pattern))
                     return true;
             }
         }
@@ -47,7 +70,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
             if (typeName.equalsIgnoreCase(userObject.getType())) {
                 if (excludes.get(typeName) == null) return true;
                 for (String pattern : excludes.get(typeName)) {
-                    if (matchesByPattern(userObject.getName(), pattern))
+                    if (matchesByPattern(fullTableName, pattern))
                         return true;
                 }
             }
@@ -71,7 +94,21 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
         Set<String> dependedTypes = dependencies.get(userObject.getType());
         if (dependedTypes != null) {
             for (String dependedType : dependedTypes) {
-                res += userObjectDao.findDependentDLLByTypeName(dependedType, userObject.getName());
+                String resultDDL = userObjectDao.findDependentDLLByTypeName(dependedType, userObject.getName());
+
+                if (dependenciesInSeparateFiles != null
+                        && dependenciesInSeparateFiles.get(userObject.getType()) != null
+                        && dependenciesInSeparateFiles.get(userObject.getType()).contains(dependedType))
+                {
+                    if (resultDDL != null && !resultDDL.equals("")) {
+                        userObject.setDependentDDL(dependedType,  ddlFormatter.formatDDL(resultDDL),
+                                fileNameConstructor.map2FileNameRaw(userObject.getSchema(), dependedType, userObject.getName()));
+                    }
+                } else {
+                    if (ddlFormatter.getIsMorePrettyFormat())
+                        res += ddlFormatter.newline;
+                    res += resultDDL;
+                }
             }
         }
         return ddlFormatter.formatDDL(res);
@@ -82,8 +119,20 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
         this.excludes = excludes;
     }
 
+    public void setExcludesDataTables(ArrayList excludesDataTables) {
+        this.excludesDataTables = excludesDataTables;
+    }
+
+    public void setIncludesDataTables(Map includesDataTables) {
+        this.includesDataTables = includesDataTables;
+    }
+
     public void setDependencies(Map<String, Set<String>> dependencies) {
         this.dependencies = dependencies;
+    }
+
+    public void setDependenciesInSeparateFiles(Map<String, Set<String>> dependenciesInSeparateFiles) {
+        this.dependenciesInSeparateFiles = dependenciesInSeparateFiles;
     }
 
     public void setUserObjectDao(UserObjectDao userObjectDao) {
@@ -97,4 +146,16 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     public void setFileNameConstructor(FileNameConstructor fileNameConstructor) {
         this.fileNameConstructor = fileNameConstructor;
     }
+
+    public void setSettingsUserObjectProcessor(Map<String, Boolean> settingsUserObjectProcessor) {
+        this.settingsUserObjectProcessor = settingsUserObjectProcessor;
+
+        if (settingsUserObjectProcessor.get("isUsedSchemaNamesInFilters")) {
+            isUsedSchemaNamesInFilters = true;
+        }
+        if (settingsUserObjectProcessor.get("isExportDataTable")) {
+            isExportDataTable = true;
+        }
+    }
+
 }

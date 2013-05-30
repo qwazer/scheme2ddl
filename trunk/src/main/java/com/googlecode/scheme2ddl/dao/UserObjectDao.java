@@ -17,8 +17,6 @@ public interface UserObjectDao {
 
     List<UserObject> findDmbsJobs();
 
-    List<UserObject> findConstaints();
-
     String findPrimaryDDL(String type, String name);
 
     String findDependentDLLByTypeName(String type, String name);

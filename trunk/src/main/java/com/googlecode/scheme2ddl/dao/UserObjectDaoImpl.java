@@ -101,25 +101,6 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
         return getJdbcTemplate().query(sql, new UserObjectRowMapper());
     }
 
-    public List<UserObject> findConstaints() {
-        String sql;
-        if (isLaunchedByDBA)
-            sql = " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
-                    " from all_constraints " +
-                    " where constraint_type != 'R' and owner = '" + schemaName + "'" +
-                    " UNION ALL " +
-                    " select constraint_name as object_name, 'REF_CONSTRAINT' as object_type" +
-                    " from all_constraints " +
-                    " where constraint_type = 'R' and owner = '" + schemaName + "'";
-        else
-            sql = " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
-                    " from user_constraints where  constraint_type != 'R'" +
-                    " UNION ALL " +
-                    " select constraint_name as object_name, 'REF_CONSTRAINT' as object_type" +
-                    " from user_constraints where constraint_type = 'R'";
-        return getJdbcTemplate().query(sql, new UserObjectRowMapper());
-    }
-
     public String findPrimaryDDL(final String type, final String name) {
         if (isLaunchedByDBA)
             return executeDbmsMetadataGetDdl("select dbms_metadata.get_ddl(?, ?, ?) from dual", type, name, schemaName);
@@ -243,6 +224,20 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
             //  ps.setBoolean(2, transformParams.get(parameterName) );  //In general this doesn't work
             ps.execute();
         }
+        /*
+         * Need to (for INDEXES):
+         *      dbms_metadata.SET_FILTER(some_handle, 'SYSTEM_GENERATED', FALSE);
+         * but require to rewrite many code for it (for "some_handle").
+         * So, will continue workes with INDEXES like objects (not like "Dependent DDL")
+         * ...
+         *  Хотел INDEXES тоже засунуть в dependentDDL, но для этого нужно вычленить из executeDbmsMetadataGetDdl()
+         * объекты автоматически сгенерённые Oracle, но это не делается просто через transformParams_for_dbms_metadata.
+         * В итоге приезжают автоматически-сгенерённые индексы (типа '"SCOTT"."SYS_IL0000092542C00002$$"') на таблицы
+         * со столбцами типа LOB, к примеру. Потом обратный экспорт в Oracle таких конструкций не работает, к примеру:
+         *     CREATE UNIQUE INDEX "SCOTT"."SYS_IL0000092542C00002$$" ON "SCOTT"."TAB1" ( ;
+         * Поэтому мы объекты типа INDEX будем выгружать отдельно. Если интересно создай для любой
+         * таблицы LOB столбец и выгрузи по старой схеме - увидишь бяку.
+         */
     }
 
     public void setTransformParams(Map<String, Boolean> transformParams) {
