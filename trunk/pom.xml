@@ -24,17 +24,9 @@
 
     <properties>
         <spring.framework.version>3.2.0.RELEASE</spring.framework.version>
-        <spring.batch.version>2.2.0.RC2</spring.batch.version>
+        <spring.batch.version>2.2.0.RELEASE</spring.batch.version>
     </properties>
 
-    <repositories>
-        <!-- todo remove, when spring-batch 2.2.0 will be released in maven central -->
-        <repository>
-            <id>org.springframework.maven.milestone</id>
-            <name>Maven Central Compatible Spring Milestone Repository</name>
-            <url>http://maven.springframework.org/milestone</url>
-        </repository>
-    </repositories>
 
     <build>
         <plugins>
