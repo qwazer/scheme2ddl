@@ -20,7 +20,7 @@ public class UserObjectJobRunner {
     protected static final Log logger = LogFactory.getLog(UserObjectJobRunner.class);
     private JobLauncher launcher;
 
-    int start(ConfigurableApplicationContext context, boolean launchedByDBA) throws Exception {
+    int start(ConfigurableApplicationContext context, boolean launchedByDBA, String outputPath) throws Exception {
         try {
             context.getAutowireCapableBeanFactory().autowireBeanProperties(this,
                     AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
@@ -37,6 +37,7 @@ public class UserObjectJobRunner {
                 JobParametersBuilder parametersBuilder = new JobParametersBuilder();
                 parametersBuilder.addString("schemaName", schemaName);
                 parametersBuilder.addString("launchedByDBA", Boolean.toString(launchedByDBA));
+                parametersBuilder.addString("outputPath", outputPath);
                 JobParameters jobParameters = parametersBuilder.toJobParameters();
                 logger.trace(String.format("Start spring batch job with parameters %s", jobParameters));
                 JobExecution jobExecution = launcher.run(job, jobParameters);
@@ -62,10 +63,11 @@ public class UserObjectJobRunner {
         }
     }
 
-    private JobParameters getJobParameters(String schemaName, boolean launchedByDBA) {
+    private JobParameters getJobParameters(String schemaName, boolean launchedByDBA, String outputPath) {
         JobParametersBuilder parametersBuilder = new JobParametersBuilder();
         parametersBuilder.addString("schemaName", schemaName.toUpperCase());
         parametersBuilder.addString("launchedByDBA", Boolean.toString(launchedByDBA));
+        parametersBuilder.addString("outputPath", outputPath);
         return parametersBuilder.toJobParameters();
     }
 

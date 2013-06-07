@@ -41,12 +41,15 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
         userObject.setDdl(map2Ddl(userObject));
         userObject.setFileName(fileNameConstructor.map2FileName(userObject));
 
-        //if (userObject.getType.equals("TABLE")) {
-            /*
-             * if "isExportDataTable" { blablabla }
-             *   patch for export data table will later
-             */
-        //}
+        if (isExportDataTable && userObject.getType().equals("TABLE")) {
+            int maxRowsExport = getMaxRowsExportOfTable(userObject);
+
+            if (maxRowsExport != -1) {
+                userObjectDao.exportDataTable(userObject, maxRowsExport, fileNameConstructor);
+            } else {
+                log.debug(String.format("Skipping processing of data table of: %s ", userObject));
+            }
+        }
         return userObject;
     }
 
@@ -78,6 +81,48 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
         return false;
     }
 
+    /* http://docs.oracle.com/javase/1.5.0/docs/api/java/util/Properties.html
+     * http://docs.oracle.com/javase/6/docs/api/java/util/Map.html
+     *
+     * Return values:
+     *  0  - need to export unlimited rows of the object's table
+     *  -1 - do not export the whole table data
+     *  >0 - limit exporting table rows by this value
+     */
+    private int getMaxRowsExportOfTable(UserObject userObject) {
+        String fullTableName;
+
+        if (isUsedSchemaNamesInFilters && userObject.getSchema() != null) {
+            fullTableName = userObject.getSchema() + "." + userObject.getName();
+        } else {
+            fullTableName = userObject.getName();
+        }
+
+        if (includesDataTables != null && includesDataTables.size() > 0) {
+            for (String tableNamePattern : includesDataTables.keySet()) {
+                if (matchesByPattern(fullTableName, tableNamePattern)) {
+                    Properties props = includesDataTables.get(tableNamePattern);
+                    String maxRowsExport = props.getProperty("maxRowsExport");
+
+                    if (maxRowsExport == null) {
+                        return 0;
+                    }
+                    return Integer.parseInt(maxRowsExport);
+                }
+            }
+        }
+
+        if (excludesDataTables == null || excludesDataTables.size() == 0)
+            return 0;
+
+        for (String tableNamePattern : excludesDataTables) {
+            if (matchesByPattern(fullTableName, tableNamePattern))
+                return -1;
+        }
+        return 0;
+    }
+
+
     private boolean matchesByPattern(String s, String pattern) {
         pattern = pattern.replace("*", "(.*)").toLowerCase();
         return s.toLowerCase().matches(pattern);
@@ -86,9 +131,10 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     private String map2Ddl(UserObject userObject) {
         if (userObject.getType().equals("DBMS JOB")) {
             return userObjectDao.findDbmsJobDDL(userObject.getName());
-        }
-        if (userObject.getType().equals("PUBLIC DATABASE LINK")) {
+        } else if (userObject.getType().equals("PUBLIC DATABASE LINK")) {
             return userObjectDao.findDDLInPublicScheme(map2TypeForDBMS(userObject.getType()), userObject.getName());
+        } else if (userObject.getType().equals("USER")) {
+            return ddlFormatter.formatDDL(userObjectDao.generateUserDDL(userObject.getName()));
         }
         String res = userObjectDao.findPrimaryDDL(map2TypeForDBMS(userObject.getType()), userObject.getName());
         Set<String> dependedTypes = dependencies.get(userObject.getType());
