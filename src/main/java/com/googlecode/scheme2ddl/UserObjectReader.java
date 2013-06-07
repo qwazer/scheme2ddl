@@ -55,6 +55,9 @@ public class UserObjectReader implements ItemReader<UserObject> {
         if (processDmbsJobs) {
             list.addAll(userObjectDao.findDmbsJobs());
         }
+        if (processUserAndPermissions) {
+            list.addAll(userObjectDao.addUser());
+        }
     }
 
     public void setUserObjectDao(UserObjectDao userObjectDao) {

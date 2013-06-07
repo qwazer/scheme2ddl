@@ -40,7 +40,8 @@
 
     <!-- settings for processing SQL objects -->
     <util:map id="settingsUserObjectProcessor">
-        <entry key="isExportDataTable" value="false"/>   <!--todo document it -->
+        <!-- Enables exporting of data tables (and LOB data too in separate files) -->
+        <entry key="isExportDataTable" value="false"/>
         <!-- In all filters (includesDataTables, excludesDataTables, excludes) will used the full object name
              like "SCHEMA_NAME.OBJECT_NAME", if processSchemas is not empty  -->
         <entry key="isUsedSchemaNamesInFilters" value="false"/>
@@ -77,6 +78,7 @@
                 type - type name in lower case, for example 'table' or 'index'
                 types_plural - type name in plural form in lower case, for xample 'tables' or 'indexes'
                 object_name - object name in lower case
+                row_id - row identificator name for LOB data (this id is case sensitive)
                 ext - extension in lower case
                 SCHEMA - schema name in UPPER case
                 TYPE - type name in UPPER case, for example 'table' or 'index'
@@ -89,6 +91,10 @@
         -->
         <property name="template" value="types_plural/object_name.ext"/>
         <property name="templateForSysDBA" value="SCHEMA/types_plural/object_name.ext"/>
+
+        <property name="templateDataLob" value="types_plural/object_name/row_id.ext"/>
+        <property name="templateDataLobForSysDBA" value="SCHEMA/types_plural/object_name/row_id.ext"/>
+
 
         <!-- File extension map rules.
         Use predefined 'TOAD' or 'PL/SQL Developer' mapping or create custom mapping -->
