@@ -17,27 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.googlecode.scheme2ddl.TypeNamesUtil.map2TypeForConfig;
-import com.googlecode.scheme2ddl.FileNameConstructor;
-import static com.googlecode.scheme2ddl.FileNameConstructor.map2FileNameStatic;
-import com.googlecode.scheme2ddl.UserObjectWriter;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-// Needed since we will be using Oracle's BLOB, part of Oracle's JDBC extended
-// classes. Keep in mind that we could have included Java's JDBC interfaces
-// java.sql.Blob which Oracle does implement. The oracle.sql.BLOB class
-// provided by Oracle does offer better performance and functionality.
-import oracle.sql.*;
-// Needed for Oracle JDBC Extended Classes
-import oracle.jdbc.*;
-
-/*
- *  The usefull documentation: http://docs.oracle.com/cd/B19306_01/appdev.102/b14258/d_metada.htm
- */
 
 /**
  * @author A_Reshetnikov
@@ -51,8 +30,6 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
     private String schemaName;
     @Value("#{jobParameters['launchedByDBA']}")
     private boolean isLaunchedByDBA = false;
-    @Value("#{jobParameters['outputPath']}")
-    private String outputPath;
 
     public List<UserObject> findListForProccessing() {
         String sql;
@@ -124,103 +101,31 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
         return getJdbcTemplate().query(sql, new UserObjectRowMapper());
     }
 
+    public List<UserObject> findConstaints() {
+        String sql;
+        if (isLaunchedByDBA)
+            sql = " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
+                    " from all_constraints " +
+                    " where constraint_type != 'R' and owner = '" + schemaName + "'" +
+                    " UNION ALL " +
+                    " select constraint_name as object_name, 'REF_CONSTRAINT' as object_type" +
+                    " from all_constraints " +
+                    " where constraint_type = 'R' and owner = '" + schemaName + "'";
+        else
+            sql = " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
+                    " from user_constraints where  constraint_type != 'R'" +
+                    " UNION ALL " +
+                    " select constraint_name as object_name, 'REF_CONSTRAINT' as object_type" +
+                    " from user_constraints where constraint_type = 'R'";
+        return getJdbcTemplate().query(sql, new UserObjectRowMapper());
+    }
+
     public String findPrimaryDDL(final String type, final String name) {
         if (isLaunchedByDBA)
             return executeDbmsMetadataGetDdl("select dbms_metadata.get_ddl(?, ?, ?) from dual", type, name, schemaName);
         else
             return executeDbmsMetadataGetDdl("select dbms_metadata.get_ddl(?, ?) from dual", type, name, null);
     }
-
-    public List<UserObject> addUser() {
-        UserObject userObject = new UserObject();
-        List<UserObject> list = new ArrayList<UserObject>();
-
-        if (!isLaunchedByDBA) {
-            return list;
-        }
-
-        userObject.setName(schemaName);
-        userObject.setType("USER");
-        userObject.setSchema(schemaName);
-
-        list.add(userObject);
-        return list;
-    }
-
-    public String generateUserDDL(final String name) {
-        return (String) getJdbcTemplate().execute(new ConnectionCallback() {
-            public String doInConnection(Connection connection) throws SQLException, DataAccessException {
-                String result = "-- User Creation\n";
-                applyTransformParameters(connection);
-
-                /* Generate -- User Creation */
-                PreparedStatement ps = connection.prepareStatement("SELECT DBMS_METADATA.GET_DDL('USER', ?) FROM dual");
-                ps.setString(1, name);
-                ResultSet rs;
-
-                try {
-                    rs = ps.executeQuery();
-                } catch (SQLException e) {
-                    log.trace(String.format("Error during SELECT DBMS_METADATA.GET_DDL('USER', '%s') from dual", name));
-                    return "";
-                }
-                try {
-                    while (rs.next()) {
-                        result += rs.getString(1).trim();
-                    }
-                } finally {
-                    rs.close();
-                    ps.close();
-                }
-
-                /* Generate -- User Role */
-                result += "\n\n-- User Role\n";
-                ps = connection.prepareStatement("SELECT 'GRANT \"'||u.name||'\" TO \"'||upper(?)||'\"'|| CASE WHEN min(sa.option$) = 1 THEN ' WITH ADMIN OPTION;' ELSE ';' END ddl_string FROM sys.sysauth$ sa, sys.user$ u WHERE sa.grantee# = (select u.user# FROM sys.user$ u WHERE u.name = UPPER(?)) AND u.user# = sa.privilege# AND sa.grantee# != 1 GROUP BY u.name");
-                ps.setString(1, name);
-                ps.setString(2, name);
-
-                try {
-                    rs = ps.executeQuery();
-                } catch (SQLException e) {
-                    log.trace(String.format("Error during create User Role for: %s", name));
-                    return result;
-                }
-
-                try {
-                    while (rs.next()) {
-                        result += rs.getString(1).trim() + "\n  ";
-                    }
-                } finally {
-                    rs.close();
-                    ps.close();
-                }
-
-                /* Generate -- User System Privileges */
-                result += "\n\n-- User System Privileges\n";
-                ps = connection.prepareStatement("SELECT CASE WHEN COUNT(1) != 0 THEN DBMS_METADATA.GET_GRANTED_DDL('SYSTEM_GRANT', ?) ELSE NULL END ddl_string FROM sys.sysauth$ sa WHERE sa.grantee# = (SELECT u.user# FROM sys.user$ u WHERE u.name = UPPER(?))");
-                ps.setString(1, name);
-                ps.setString(2, name);
-
-                try {
-                    rs = ps.executeQuery();
-                } catch (SQLException e) {
-                    log.trace(String.format("Error during create User System Privileges for: %s", name));
-                    return result;
-                }
-
-                try {
-                    while (rs.next()) {
-                        result += rs.getString(1).trim();
-                    }
-                } finally {
-                    rs.close();
-                    ps.close();
-                }
-
-                return result;
-            }
-        });
-     }
 
     private String executeDbmsMetadataGetDdl(final String query, final String type, final String name, final String schema) {
         return (String) getJdbcTemplate().execute(new ConnectionCallback() {
@@ -338,12 +243,6 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
             //  ps.setBoolean(2, transformParams.get(parameterName) );  //In general this doesn't work
             ps.execute();
         }
-        /*
-         * Need to (for INDEXES):
-         *      dbms_metadata.SET_FILTER(some_handle, 'SYSTEM_GENERATED', FALSE);
-         * but require to rewrite many code for it (for "some_handle").
-         * So, will continue workes with INDEXES like objects (not like "Dependent DDL")
-         */
     }
 
     public void setTransformParams(Map<String, Boolean> transformParams) {
@@ -375,253 +274,4 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
             return userObject;
         }
     }
-
-    public void exportDataTable(UserObject userObject, final int maxRowsExport, final FileNameConstructor fileNameConstructor) {
-        final String tableName = userObject.getName();
-        final String schema_name = schemaName;
-        final String preparedTemplate = fileNameConstructor.getPreparedTemplate();
-        final String preparedTemplateDataLob = fileNameConstructor.getPreparedTemplateDataLob();
-
-        String result_execute = (String) getJdbcTemplate().execute(new ConnectionCallback() {
-            public String doInConnection(Connection connection) throws SQLException, DataAccessException {
-                try {
-                    generateInsertStatements(connection, schema_name, tableName, maxRowsExport, preparedTemplate, preparedTemplateDataLob, outputPath);
-                } catch (IOException e) {
-                    logger.error("Error with write to data file of '" + tableName + "' table: " + e.getMessage(), e);
-                }
-                return null;
-            }
-        });
-    }
-
-    /*
-     *  generate DATA_TABLE/<tableName>.sql file (with CLOB/BLOB files additional)
-     *
-     *  TODO:
-     *        - Require to create new java-jar-util for import CLOB/BLOB-files back to Oracle tables
-     *  The usefull links:
-     *        - http://www.idevelopment.info/data/Programming/java/jdbc/LOBS/BLOBFileExample.java
-     *        - http://www.sql.ru/faq/faq_topic.aspx?fid=469
-     *        - http://asktom.oracle.com/pls/asktom/f?p=100:11:::::P11_QUESTION_ID:6379798216275
-     *        - http://stackoverflow.com/questions/8348427/how-to-write-update-oracle-blob-in-a-reliable-way
-     *        - http://stackoverflow.com/questions/862355/overcomplicated-oracle-jdbc-blob-handling
-     */
-    private static void generateInsertStatements(Connection conn, String schema_name, String tableName, final int maxRowsExport, final String preparedTemplate, final String preparedTemplateDataLob, final String outputPath)
-            throws SQLException, DataAccessException, IOException
-    {
-        final String fullTableName;
-        final String absoluteFileName = FilenameUtils.separatorsToSystem(outputPath + "/"
-                + map2FileNameStatic(schema_name, "DATA_TABLE", tableName, preparedTemplate, null, "sql"));
-
-        if (schema_name == null) {
-            fullTableName = tableName;
-        } else {
-            fullTableName = schema_name + "." + tableName;
-        }
-
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        boolean isPresentUnknownType = false;
-        String primaryKeyColumn = null;
-        boolean isPrimaryKeyColumnSearched = false;
-        int numRows = 0;
-
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT * FROM " + fullTableName);
-        ResultSetMetaData rsmd = rs.getMetaData();
-        int numColumns = rsmd.getColumnCount();
-        int[] columnTypes = new int[numColumns];
-        String[] columnNamesArray = new String[numColumns];
-
-        String columnNames = "";
-        for (int i = 0; i < numColumns; i++) {
-            columnTypes[i] = rsmd.getColumnType(i + 1);
-            if (i != 0) {
-                columnNames += ",";
-            }
-            columnNames += rsmd.getColumnName(i + 1);
-            columnNamesArray[i] = rsmd.getColumnName(i + 1);
-        }
-
-        File file = new File(absoluteFileName);
-        FileUtils.touch(file);  // create new file with directories hierarchy
-        log.info(String.format("Export data table '%s' to file %s", fullTableName.toLowerCase(), file.getAbsolutePath()));
-
-        PrintWriter p = new PrintWriter(new FileWriter(file));
-        p.println("REM INSERTING into " + fullTableName);
-        p.println("set sqlt off;");
-        p.println("set sqlblanklines on;");
-        p.println("set define off;");
-
-        Date d = null;
-        while (rs.next()) {
-            if (maxRowsExport > 0 && ++numRows > maxRowsExport) {
-                break;
-            }
-            String columnValues = "";
-            for (int i = 0; i < numColumns; i++) {
-                if (i != 0) {
-                    columnValues += ",";
-                }
-
-                switch (columnTypes[i]) {
-                    case Types.BIGINT:
-                    case Types.BIT:
-                    case Types.BOOLEAN:
-                    case Types.DECIMAL:
-                    case Types.DOUBLE:
-                    case Types.FLOAT:
-                    case Types.INTEGER:
-                    case Types.SMALLINT:
-                    case Types.TINYINT:
-                        String v = rs.getString(i + 1);
-                        columnValues += v;
-                        break;
-
-                    case Types.DATE:
-                        d = rs.getDate(i + 1);
-                    case Types.TIME:
-                        if (d == null) d = rs.getTime(i + 1);
-                    case Types.TIMESTAMP:
-                        if (d == null) d = rs.getTimestamp(i + 1);
-
-                        if (d == null) {
-                            columnValues += "null";
-                        }
-                        else {
-                            columnValues += "TO_DATE('"
-                                      + dateFormat.format(d)
-                                      + "', 'YYYY/MM/DD HH24:MI:SS')";
-                        }
-                        break;
-                    case Types.VARCHAR:
-                    case Types.CHAR:
-                    case Types.NUMERIC:
-                        v = rs.getString(i + 1);
-                        if (v != null) {
-                            columnValues += "'" + v.replaceAll("'", "''") + "'";
-                        }
-                        else {
-                            columnValues += "null";
-                        }
-                        break;
-                    case Types.CLOB:
-                    case Types.BLOB:
-                        /* LOB data will exported below to separate file */
-                        columnValues += "null";
-
-                        /*
-                         *  finding the Primary Key in this table
-                         */
-                        if (primaryKeyColumn == null) {
-                            if (!isPrimaryKeyColumnSearched) {
-                                DatabaseMetaData meta = conn.getMetaData();
-                                ResultSet rs_meta = meta.getPrimaryKeys(null, schema_name, tableName);
-                                if (rs_meta.next()) {
-                                    primaryKeyColumn = rs_meta.getString("COLUMN_NAME");
-                                }
-                                isPrimaryKeyColumnSearched = true;
-                                if (primaryKeyColumn == null) {
-                                    /* primary key was not found. CLOB/BLOB columns can not be exported */
-                                    log.info(String.format("   ---> Can not save the '%s' blob column of the '%s' table, because can't find Primary Key for this table!!!", columnNamesArray[i], fullTableName));
-                                    break;
-                                } else {
-                                    /* Create <column name>.primary_key file with primary key column name for this LOB. */
-                                    String primaryKeyFileName = FilenameUtils.separatorsToSystem(outputPath + "/"
-                                            + map2FileNameStatic(schema_name, "DATA_TABLE", tableName, preparedTemplateDataLob, columnNamesArray[i], "primary_key"));
-                                    File filePK = new File(primaryKeyFileName);
-                                    FileUtils.writeStringToFile(filePK, primaryKeyColumn);
-                                    log.info(String.format("Export data table LOB '%s' column primary key '%s' to file: %s",
-                                                fullTableName.toLowerCase(), columnNamesArray[i], filePK.getAbsolutePath()));
-
-                                }
-                            } else {
-                                /*
-                                 * The Primary Key has not been found (was be searched already).
-                                 * Skip exporting any LOB data for this table
-                                 */
-                                break;
-                            }
-                        }
-
-                        /*
-                         * Import CLOB/BLOB data to "<column_name>.<current Primary Key value>.lob_data" file
-                         */
-                        String outputBinaryFileName = FilenameUtils.separatorsToSystem(outputPath + "/"
-                                + map2FileNameStatic(schema_name, "DATA_TABLE", tableName, preparedTemplateDataLob, columnNamesArray[i] + "." + rs.getString(primaryKeyColumn), "lob_data"));
-                        File outputBinaryFile = new File(outputBinaryFileName);
-                        log.debug(String.format("Export data table LOB '%s' column '%s' with id '%s' to file: %s",
-                                    fullTableName.toLowerCase(), columnNamesArray[i], rs.getString(primaryKeyColumn), outputBinaryFile.getAbsolutePath()));
-
-                        if (columnTypes[i] == Types.CLOB) {
-                            CLOB clob;
-                            clob = ((OracleResultSet) rs).getCLOB(i + 1);
-                            if (clob != null) {
-                                FileUtils.touch(outputBinaryFile);  // create new file with directories hierarchy
-                                Writer fileWriter = new BufferedWriter(new FileWriter(outputBinaryFile));
-
-                                // can't use clob.getAsciiStream(), because it will broke UTF-8 characters in CLOB
-                                Reader clobReader = clob.getCharacterStream();
-
-                                try {
-                                    int chunkSize = clob.getChunkSize();
-                                    int bytesRead;
-                                    char[] buf = new char[chunkSize];
-                                    while ((bytesRead = clobReader.read(buf, 0, chunkSize)) != -1) {
-                                        fileWriter.write(buf, 0, bytesRead);
-                                    }
-                                } finally {
-                                    clobReader.close();
-                                    fileWriter.close();
-                                }
-                            }
-                        } else {
-                            BLOB blob;
-                            blob = ((OracleResultSet) rs).getBLOB(i + 1);
-                            if (blob != null) {
-                                FileUtils.touch(outputBinaryFile);  // create new file with directories hierarchy
-                                FileOutputStream outputFileOutputStream = new FileOutputStream(outputBinaryFile);
-                                InputStream blobInputStream = blob.getBinaryStream();
-
-                                try {
-                                    int chunkSize = blob.getChunkSize();
-                                    int bytesRead;
-                                    byte[] buf = new byte[chunkSize];
-                                    while ((bytesRead = blobInputStream.read(buf)) != -1) {
-                                        outputFileOutputStream.write(buf, 0, bytesRead);
-                                    }
-                                } finally {
-                                    blobInputStream.close();
-                                    outputFileOutputStream.close();
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        try {
-                            v = rs.getString(i + 1);
-                        } catch (Exception e) {
-                            if (!isPresentUnknownType) {
-                                log.info(String.format("   !!!> Error with take data from the '%s' table and '%s' column with unknown column type: %s", fullTableName, columnNamesArray[i], rsmd.getColumnTypeName(i + 1)));
-                                isPresentUnknownType = true;
-                            }
-                            v = null;
-                        }
-
-                        if (v != null) {
-                            columnValues += "'" + v.replaceAll("'", "''") + "'";
-                        }
-                        else {
-                            columnValues += "null";
-                        }
-                        break;
-                }
-            }
-            p.println(String.format("INSERT INTO %s (%s) values (%s);",
-                                    fullTableName,
-                                    columnNames,
-                                    columnValues));
-        }
-        p.close();
-    }
-
 }
