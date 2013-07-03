@@ -58,7 +58,7 @@ public class Main {
         if (justTestConnection) {
             testDBConnection(context);
         } else {
-            new UserObjectJobRunner().start(context, isLaunchedByDBA, outputPath);
+            new UserObjectJobRunner().start(context, isLaunchedByDBA);
         }
     }
 
@@ -83,11 +83,9 @@ public class Main {
             dataSource.setUser(user);
             dataSource.setPassword(password);
         }
-        UserObjectWriter writer = (UserObjectWriter) context.getBean("writer");
         if (outputPath != null) {
+            UserObjectWriter writer = (UserObjectWriter) context.getBean("writer");
             writer.setOutputPath(outputPath);
-        } else {
-            outputPath = writer.getOutputPath();
         }
         if (parallelCount > 0) {
             SimpleAsyncTaskExecutor taskExecutor = (SimpleAsyncTaskExecutor) context.getBean("taskExecutor");
@@ -100,13 +98,10 @@ public class Main {
 
         FileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);   //will create new one if not exist
         if (isLaunchedByDBA) {
-            System.out.println("Execute as SYSDBA user...");
             fileNameConstructor.setTemplate(fileNameConstructor.getTemplateForSysDBA());
-            fileNameConstructor.setTemplateDataLob(fileNameConstructor.getTemplateDataLobForSysDBA());
             fileNameConstructor.afterPropertiesSet();
-        } else {
-            System.out.println("Execute for user schema only: " + userName);
         }
+
     }
 
     private static void processSchemas(ConfigurableApplicationContext context) {
