@@ -51,6 +51,7 @@
     <bean id="ddlFormatter" class="com.googlecode.scheme2ddl.DDLFormatter">
         <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT. -->
         <property name="noFormat" value="false"/>
+        <property name="isMorePrettyFormat" value="false"/>
     </bean>
 
     <!-- rules for construct filenames  -->
