@@ -2,6 +2,8 @@ package com.googlecode.scheme2ddl;
 
 import com.googlecode.scheme2ddl.dao.UserObjectDao;
 import com.googlecode.scheme2ddl.domain.UserObject;
+import com.googlecode.scheme2ddl.exception.CannotGetDDLException;
+import com.googlecode.scheme2ddl.exception.NonSkippableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -23,6 +25,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     private FileNameConstructor fileNameConstructor;
     private Map<String, Set<String>> excludes;
     private Map<String, Set<String>> dependencies;
+    private boolean stopOnWarning;
 
     public UserObject process(UserObject userObject) throws Exception {
 
@@ -60,29 +63,37 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
         return s.toLowerCase().matches(pattern);
     }
 
-    private String map2Ddl(UserObject userObject) {
-        if (userObject.getType().equals("DBMS JOB")) {
-            return userObjectDao.findDbmsJobDDL(userObject.getName());
-        }
-        if (userObject.getType().equals("PUBLIC DATABASE LINK")) {
-            return userObjectDao.findDDLInPublicScheme(map2TypeForDBMS(userObject.getType()), userObject.getName());
-        }
-        String res = userObjectDao.findPrimaryDDL(map2TypeForDBMS(userObject.getType()), userObject.getName());
-        Set<String> dependedTypes = dependencies.get(userObject.getType());
-        if (dependedTypes != null) {
-            for (String dependedType : dependedTypes) {
-                res += userObjectDao.findDependentDLLByTypeName(dependedType, userObject.getName());
+    private String map2Ddl(UserObject userObject) throws CannotGetDDLException, NonSkippableException {
+        try {
+            if (userObject.getType().equals("DBMS JOB")) {
+                return userObjectDao.findDbmsJobDDL(userObject.getName());
             }
+            if (userObject.getType().equals("PUBLIC DATABASE LINK")) {
+                return userObjectDao.findDDLInPublicScheme(map2TypeForDBMS(userObject.getType()), userObject.getName());
+            }
+            String res = userObjectDao.findPrimaryDDL(map2TypeForDBMS(userObject.getType()), userObject.getName());
+            Set<String> dependedTypes = dependencies.get(userObject.getType());
+            if (dependedTypes != null) {
+                for (String dependedType : dependedTypes) {
+                    res += userObjectDao.findDependentDLLByTypeName(dependedType, userObject.getName());
+                }
+            }
+            return ddlFormatter.formatDDL(res);
+        } catch (Exception e) {
+            log.warn(String.format("Cannot get DDL for object %s with error message %s", userObject, e.getMessage()));
+            if (stopOnWarning) {
+                throw new NonSkippableException(e);
+            } else
+                throw new CannotGetDDLException(e);
         }
-        return ddlFormatter.formatDDL(res);
-    }
 
+    }
 
     public void setExcludes(Map excludes) {
         this.excludes = excludes;
     }
 
-    public void setDependencies(Map<String, Set<String>> dependencies) {
+    public void setDependencies(Map dependencies) {
         this.dependencies = dependencies;
     }
 
@@ -96,5 +107,9 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
 
     public void setFileNameConstructor(FileNameConstructor fileNameConstructor) {
         this.fileNameConstructor = fileNameConstructor;
+    }
+
+    public void setStopOnWarning(boolean stopOnWarning) {
+        this.stopOnWarning = stopOnWarning;
     }
 }

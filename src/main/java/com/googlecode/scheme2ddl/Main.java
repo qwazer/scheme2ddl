@@ -31,6 +31,7 @@ public class Main {
     private static boolean justPrintVersion = false;
     private static boolean justTestConnection = false;
     private static boolean skipPublicDbLinks = false;
+    private static boolean stopOnWarning = false;
     private static String customConfigLocation = null;
     private static String defaultConfigLocation = "scheme2ddl.config.xml";
     private static String dbUrl = null;
@@ -100,6 +101,11 @@ public class Main {
         if (isLaunchedByDBA) {
             fileNameConstructor.setTemplate(fileNameConstructor.getTemplateForSysDBA());
             fileNameConstructor.afterPropertiesSet();
+        }
+
+        if (stopOnWarning){
+            UserObjectProcessor processor = (UserObjectProcessor) context.getBean("processor");
+            processor.setStopOnWarning(stopOnWarning);
         }
 
     }
@@ -231,6 +237,7 @@ public class Main {
         msg.append("  -s, --schemas,          a comma separated list of schemas for processing" + lSep);
         msg.append("                          (works only if connected to oracle as sysdba)" + lSep);
         msg.append("  -c, --config,           path to scheme2ddl config file (xml)" + lSep);
+        msg.append("  --stop-on-warning,      stop on getting DDL error (skip by default)" + lSep);
         msg.append("  -tc,--test-connection,  test db connection available" + lSep);
         msg.append("  -version,               print version info and exit" + lSep);
         System.out.println(msg.toString());
@@ -273,6 +280,8 @@ public class Main {
                 i++;
             } else if (arg.equals("-tc") || arg.equals("--test-connection")) {
                 justTestConnection = true;
+            }else if (arg.equals("--stop-on-warning")) {
+                stopOnWarning = true;
             } else if (arg.equals("-c") || arg.equals("--config")) {
                 customConfigLocation = args[i + 1];
                 i++;

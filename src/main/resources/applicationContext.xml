@@ -12,7 +12,10 @@
         <step id="step1" parent="simpleStep">
             <tasklet task-executor="taskExecutor"
                      throttle-limit="100000">  <!-- actual limit defined in taskExecutor bean-->
-                <chunk reader="reader" processor="processor" writer="writer" retry-limit="5">
+                <chunk reader="reader" processor="processor" writer="writer" retry-limit="5" skip-limit="1000000">
+                    <skippable-exception-classes>
+                        <include class="com.googlecode.scheme2ddl.exception.CannotGetDDLException"/>
+                    </skippable-exception-classes>
                     <retryable-exception-classes>
                         <include class="org.springframework.jdbc.CannotGetJdbcConnectionException"/>
                     </retryable-exception-classes>
@@ -40,6 +43,7 @@
         <property name="ddlFormatter" ref="ddlFormatter"/>
         <property name="excludes" ref="excludes"/>
         <property name="dependencies" ref="dependencies"/>
+        <property name="stopOnWarning" value="false"/>
     </bean>
 
 
