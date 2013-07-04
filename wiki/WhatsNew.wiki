@@ -1,4 +1,12 @@
 #labels Featured
+==What's new in version 2.3==
+  # Change skip logic
+     # By default all sql error from oracle skipped and printed in final report
+     # new CLI option `--stop-on-warning`,      stop on getting DDL error 
+  # fix issue #10, issue  #11, issue #13
+  # broke compatibility with old (2.1.X) custom config.
+ If you got Exception `"$Proxy12 cannot be cast to com.googlecode.scheme2ddl.UserObjectProcessor"` add new `<bean id="fileNameConstructor">` and `<util:map id="sql_by_default">` to your custom config 
+
 ==What's new in version 2.2.2==
   # fix issue #12
 
