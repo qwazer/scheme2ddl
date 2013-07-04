@@ -6,11 +6,8 @@ import com.googlecode.scheme2ddl.exception.CannotGetDDLException;
 import org.aspectj.lang.annotation.*;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.beans.factory.annotation.Value;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Collect statistics about skipped objects and
@@ -30,7 +27,6 @@ public class StatAspect {
         this.listSkippedBySQLError = Collections.synchronizedList(new ArrayList<UserObject>());
     }
 
-
     @AfterReturning(pointcut = "execution(* com.googlecode.scheme2ddl.UserObjectProcessor.process(..)) &&"
             + "args(userObject)",
             returning = "retVal")
@@ -47,7 +43,6 @@ public class StatAspect {
         listSkippedBySQLError.add(userObject);
     }
 
-
     @Before("execution(* org.springframework.batch.core.launch.JobLauncher.run(..))")
     public void clearStatistic() {
         this.listExludedByConfig = Collections.synchronizedList(new ArrayList<UserObject>());
@@ -58,9 +53,78 @@ public class StatAspect {
             " args(job, jobParameters)")
     public void printStatistic(Job job, JobParameters jobParameters) {
         String schemaName = jobParameters.getString("schemaName");
-      //  System.out.println("schemaName = " + schemaName);
-      //  System.out.println("listExludedByConfig = " + listExludedByConfig); //todo pretty print
-      //  System.out.println("listSkippedBySQLError = " + listSkippedBySQLError);   //todo pretty print
+        prettyPrint(schemaName);
+        //  System.out.println("schemaName = " + schemaName);
+        //  System.out.println("listExludedByConfig = " + listExludedByConfig); //todo pretty print
+        //  System.out.println("listSkippedBySQLError = " + listSkippedBySQLError);   //todo pretty print
+    }
+
+    /**
+     * report something like this:
+     * <pre>
+     *    -------------------------------------------------------
+     *       R E P O R T     S K I P P E D     O B J E C T S
+     *    -------------------------------------------------------
+     *    | skip rule |        object type        |    count    |
+     *    -------------------------------------------------------
+     *    |  config   |  INDEX                    |      2      |
+     *    | sql error |  PUBLIC DATABASE LINK     |      4      |
+     * </pre>
+     *
+     * @param schemaName
+     * @param listExludedByConfig
+     * @param listSkippedBySQLError
+     */
+    public void prettyPrint(String schemaName) {
+        String lSep = System.getProperty("line.separator");
+        StringBuilder sb = new StringBuilder();
+        sb.append(lSep);
+        sb.append("-------------------------------------------------------");
+        sb.append(lSep);
+        sb.append("   R E P O R T     S K I P P E D     O B J E C T S     ");
+        sb.append(lSep);
+        sb.append("-------------------------------------------------------");
+
+        if (listExludedByConfig.size() + listSkippedBySQLError.size() == 0) {
+            sb.append("  No skipped objects  ");
+            sb.append(lSep);
+            return;
+        }
+
+        sb.append(lSep);
+        sb.append("| skip rule |  object type              |    count    |");
+        sb.append(lSep);
+        sb.append("-------------------------------------------------------");
+        sb.append(lSep);
+
+        prettyPrintList(sb, " config  ", listExludedByConfig);
+        prettyPrintList(sb, "sql error", listSkippedBySQLError);
+
+        System.out.println(sb.toString());
+
+    }
+
+    private void prettyPrintList(StringBuilder sb, String ruleName, List<UserObject> listExludedByConfig) {
+        String lSep = System.getProperty("line.separator");
+        Map<String, Integer> groupByType = groupByType(listExludedByConfig);
+        for (String type : groupByType.keySet()) {
+            Formatter formatter = new Formatter();
+            sb.append(formatter.format("| %s |  %-24s |      %-6s |", ruleName, type, groupByType.get(type)).toString());
+            sb.append(lSep);
+        }
+    }
+
+    private Map<String, Integer> groupByType(List<UserObject> list) {
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        for (UserObject userObject : list) {
+
+            if (map.containsKey(userObject.getType())) {
+                map.put(userObject.getType(), map.get(userObject.getType()) + 1);
+            } else {
+                map.put(userObject.getType(), 1);
+            }
+        }
+        return map;
     }
 
 }
