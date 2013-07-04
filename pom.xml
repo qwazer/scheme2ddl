@@ -6,7 +6,7 @@
 
     <groupId>com.googlecode</groupId>
     <artifactId>scheme2ddl</artifactId>
-    <version>2.2.4-SNAPSHOT</version>
+    <version>2.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <url>http://scheme2ddl.googlecode.com</url>
@@ -23,8 +23,9 @@
     </distributionManagement>
 
     <properties>
-        <spring.framework.version>3.2.0.RELEASE</spring.framework.version>
+        <spring.framework.version>3.2.3.RELEASE</spring.framework.version>
         <spring.batch.version>2.2.0.RELEASE</spring.batch.version>
+        <org.aspectj.version>1.7.3</org.aspectj.version>
     </properties>
 
 
@@ -116,6 +117,19 @@
             <artifactId>ojdbc5</artifactId>
             <version>11.2.0.3.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>${spring.framework.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${org.aspectj.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>junit</groupId>

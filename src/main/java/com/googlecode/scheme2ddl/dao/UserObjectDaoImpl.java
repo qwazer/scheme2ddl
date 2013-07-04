@@ -141,18 +141,18 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                 try {
                     rs = ps.executeQuery();
                 } catch (SQLException e) {
-                    log.error(String.format("Error during select dbms_metadata.get_ddl('%s', '%s') from dual\n" +
-                            "Try to exclude type '%s' in advanced config excludes section\n", type, name, map2TypeForConfig(type)));
-                    log.error(String.format("Sample:\n\n" +
-                            " <util:map id=\"excludes\">\n" +
-                            "...\n" +
-                            "         <entry key=\"%s\">\n" +
-                            "            <set>\n" +
-                            "                <value>%s</value>\n" +
-                            "            </set>\n" +
-                            "        </entry>\n" +
-                            "...\n" +
-                            "</util:map>", map2TypeForConfig(type), name));
+//                    log.trace(String.format("Error during select dbms_metadata.get_ddl('%s', '%s') from dual\n" +
+//                            "Try to exclude type '%s' in advanced config excludes section\n", type, name, map2TypeForConfig(type)));
+//                    log.trace(String.format("Sample:\n\n" +
+//                            " <util:map id=\"excludes\">\n" +
+//                            "...\n" +
+//                            "         <entry key=\"%s\">\n" +
+//                            "            <set>\n" +
+//                            "                <value>%s</value>\n" +
+//                            "            </set>\n" +
+//                            "        </entry>\n" +
+//                            "...\n" +
+//                            "</util:map>", map2TypeForConfig(type), name));
                     throw e;
                 }
                 try {
