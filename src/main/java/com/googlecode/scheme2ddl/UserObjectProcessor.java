@@ -196,10 +196,14 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     public void setSettingsUserObjectProcessor(Map<String, Boolean> settingsUserObjectProcessor) {
         this.settingsUserObjectProcessor = settingsUserObjectProcessor;
 
-        if (settingsUserObjectProcessor.get("isUsedSchemaNamesInFilters")) {
+        if (settingsUserObjectProcessor.get("isUsedSchemaNamesInFilters") != null
+                && settingsUserObjectProcessor.get("isUsedSchemaNamesInFilters"))
+        {
             isUsedSchemaNamesInFilters = true;
         }
-        if (settingsUserObjectProcessor.get("isExportDataTable")) {
+        if (settingsUserObjectProcessor.get("isExportDataTable") != null
+                && settingsUserObjectProcessor.get("isExportDataTable"))
+        {
             isExportDataTable = true;
         }
     }

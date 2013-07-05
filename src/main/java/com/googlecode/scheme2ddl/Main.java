@@ -17,6 +17,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.Properties;
 
 /**
  * @author A_Reshetnikov
@@ -97,6 +101,10 @@ public class Main {
         isLaunchedByDBA = userName.toLowerCase().matches(".+as +sysdba *");
         //process schemas
         processSchemas(context);
+        parseDependenciesInSeparateFiles(context);
+        parseSettingsUserObjectProcessor(context);
+        parseIncludesDataTables(context);
+        parseExcludesDataTables(context);
 
         FileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);   //will create new one if not exist
         if (isLaunchedByDBA) {
@@ -193,6 +201,96 @@ public class Main {
             userObjectProcessor.setFileNameConstructor(fileNameConstructor);
         }
         return fileNameConstructor;
+    }
+
+    /**
+     * @param context
+     * Create and register new bean "dependenciesInSeparateFiles", if this not exists.
+     */
+    private static void parseDependenciesInSeparateFiles(ConfigurableApplicationContext context) {
+        Map<String, Set<String>> dependenciesInSeparateFiles;
+        Map<String, Set<String>> tmp_dependencies = new HashMap();  // need for get Class of this object later
+
+        try {
+            dependenciesInSeparateFiles = (Map<String, Set<String>>) context.getBean("dependenciesInSeparateFiles");
+        } catch (NoSuchBeanDefinitionException e) {
+            // Require for compatability with old config without "dependenciesInSeparateFiles" bean
+            DefaultListableBeanFactory beanfactory = (DefaultListableBeanFactory) context.getBeanFactory();
+            beanfactory.registerBeanDefinition("dependenciesInSeparateFiles", BeanDefinitionBuilder.rootBeanDefinition(tmp_dependencies.getClass()).getBeanDefinition());
+            dependenciesInSeparateFiles = (Map<String, Set<String>>) context.getBean("dependenciesInSeparateFiles");
+        }
+
+        UserObjectProcessor userobjectprocessor = (UserObjectProcessor) context.getBean("processor");
+        //userobjectprocessor.afterSetDependenciesInSeparateFiles();
+        userobjectprocessor.setDependenciesInSeparateFiles(dependenciesInSeparateFiles);
+    }
+
+    /**
+     * @param context
+     * Create and register new bean "settingsUserObjectProcessor", if this not exists.
+     */
+    private static void parseSettingsUserObjectProcessor(ConfigurableApplicationContext context) {
+        Map<String, String> settingsUserObjectProcessor;
+        Map<String, Boolean> tmp_settings = new HashMap<String, Boolean>(); // need for get Class of this object later
+
+        try {
+            settingsUserObjectProcessor = (Map<String, String>) context.getBean("settingsUserObjectProcessor");
+            // convert Map<String, String> into Map<String, Boolean>
+            for (String key : settingsUserObjectProcessor.keySet()) {
+                tmp_settings.put(key, Boolean.valueOf(settingsUserObjectProcessor.get(key)));
+            }
+        } catch (NoSuchBeanDefinitionException e) {
+            // Require for compatability with old config without "settingsUserObjectProcessor" bean
+            DefaultListableBeanFactory beanfactory = (DefaultListableBeanFactory) context.getBeanFactory();
+            beanfactory.registerBeanDefinition("settingsUserObjectProcessor", BeanDefinitionBuilder.rootBeanDefinition(tmp_settings.getClass()).getBeanDefinition());
+            tmp_settings = (Map<String, Boolean>) context.getBean("settingsUserObjectProcessor");
+        }
+
+        UserObjectProcessor userobjectprocessor = (UserObjectProcessor) context.getBean("processor");
+        //userobjectprocessor.afterSetSettingsUserObjectProcessor();
+        userobjectprocessor.setSettingsUserObjectProcessor(tmp_settings);
+    }
+
+    /**
+     * @param context
+     * Create and register new bean "includesDataTables", if this not exists.
+     */
+    private static void parseIncludesDataTables(ConfigurableApplicationContext context) {
+        Map<String, Properties> includesDataTables;
+        Map<String, Properties> tmp_includes = new HashMap();  // need for get Class of this object later
+
+        try {
+            includesDataTables = (Map<String, Properties>) context.getBean("includesDataTables");
+        } catch (NoSuchBeanDefinitionException e) {
+            // Require for compatability with old config without "includesDataTables" bean
+            DefaultListableBeanFactory beanfactory = (DefaultListableBeanFactory) context.getBeanFactory();
+            beanfactory.registerBeanDefinition("includesDataTables", BeanDefinitionBuilder.rootBeanDefinition(tmp_includes.getClass()).getBeanDefinition());
+            includesDataTables = (Map<String, Properties>) context.getBean("includesDataTables");
+        }
+
+        UserObjectProcessor userobjectprocessor = (UserObjectProcessor) context.getBean("processor");
+        userobjectprocessor.setIncludesDataTables(includesDataTables);
+    }
+
+    /**
+     * @param context
+     * Create and register new bean "excludesDataTables", if this not exists.
+     */
+    private static void parseExcludesDataTables(ConfigurableApplicationContext context) {
+        ArrayList<String> excludesDataTables;
+        ArrayList<String> tmp_excludes = new ArrayList<String>();  // need for get Class of this object later
+
+        try {
+            excludesDataTables = (ArrayList<String>) context.getBean("excludesDataTables");
+        } catch (NoSuchBeanDefinitionException e) {
+            // Require for compatability with old config without "excludesDataTables" bean
+            DefaultListableBeanFactory beanfactory = (DefaultListableBeanFactory) context.getBeanFactory();
+            beanfactory.registerBeanDefinition("excludesDataTables", BeanDefinitionBuilder.rootBeanDefinition(tmp_excludes.getClass()).getBeanDefinition());
+            excludesDataTables = (ArrayList<String>) context.getBean("excludesDataTables");
+        }
+
+        UserObjectProcessor userobjectprocessor = (UserObjectProcessor) context.getBean("processor");
+        userobjectprocessor.setExcludesDataTables(excludesDataTables);
     }
 
     private static String extractUserfromDbUrl(String dbUrl) {
