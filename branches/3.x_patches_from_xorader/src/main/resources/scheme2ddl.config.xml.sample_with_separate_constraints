@@ -55,7 +55,11 @@
              If TRUE, emit table constraints as separate ALTER TABLE (and, if necessary, CREATE INDEX) statements.
              If FALSE, specify table constraints as part of the CREATE TABLE statement.
              Defaults to FALSE. Requires that CONSTRAINTS be TRUE. -->
-        <entry key="CONSTRAINTS_AS_ALTER" value="TRUE"/>
+        <entry key="CONSTRAINTS_AS_ALTER" value="FALSE"/>
+        <!-- If TRUE, emit all non-referential table constraints. Defaults to TRUE. -->
+        <entry key="CONSTRAINTS" value="FALSE"/>
+        <!-- If TRUE, emit all referential constraints (foreign keys). Defaults to TRUE. -->
+        <entry key="REF_CONSTRAINTS" value="FALSE"/>
     </util:map>
 
 
@@ -143,9 +147,11 @@
         <entry key="TABLE">
             <set>
                 <value>COMMENT</value>
-                <value>INDEX</value>
+                <!--value>INDEX</value-->
                 <value>OBJECT_GRANT</value>
                 <value>TRIGGER</value>
+                <value>CONSTRAINT</value>
+                <value>REF_CONSTRAINT</value>
             </set>
         </entry>
         <entry key="VIEW">
@@ -157,7 +163,7 @@
         <entry key="MATERIALIZED VIEW">
             <set>
                 <value>COMMENT</value>
-                <value>INDEX</value>
+                <!--value>INDEX</value-->
                 <value>MATERIALIZED_VIEW_LOG</value>
                 <value>OBJECT_GRANT</value>
             </set>
@@ -190,6 +196,19 @@
         <entry key="SEQUENCE">
             <set>
                 <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+    </util:map>
+
+    <!-- This dependencies will export in separate files. Require for it:
+        1) Disable the "CONSTRAINTS_AS_ALTER", "REF_CONSTRAINTS" and the "CONSTRAINTS" options in "transformParams_for_dbms_metadata" above
+        2) Presence this dependencies in "dependencies" map set above
+    -->
+    <util:map id="dependenciesInSeparateFiles">
+        <entry key="TABLE">
+            <set>
+                <value>CONSTRAINT</value>
+                <value>REF_CONSTRAINT</value>
             </set>
         </entry>
     </util:map>
@@ -233,7 +252,7 @@
         <!--Excluded, because all them persist in PACKAGE and TYPE -->
         <entry key="PACKAGE BODY"><set><value>*</value></set></entry>
         <entry key="TYPE BODY"><set><value>*</value></set></entry>
-        <entry key="INDEX"><set><value>*</value></set></entry>
+        <!-- Require exclude "INDEX" for exporting them in separate files: <entry key="INDEX"><set><value>*</value></set></entry> -->
         <!--For removing system types http://www.sql.ru/forum/actualthread.aspx?bid=3&tid=542661&hl=-->
         <entry key="TYPE">
             <set>
