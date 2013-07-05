@@ -252,7 +252,7 @@
         <!--Excluded, because all them persist in PACKAGE and TYPE -->
         <entry key="PACKAGE BODY"><set><value>*</value></set></entry>
         <entry key="TYPE BODY"><set><value>*</value></set></entry>
-        <!-- Require exclude "INDEX" for exporting them in separate files: <entry key="INDEX"><set><value>*</value></set></entry> -->
+        <!-- Require include "INDEX" for exporting them in separate files: <entry key="INDEX"><set><value>*</value></set></entry> -->
         <!--For removing system types http://www.sql.ru/forum/actualthread.aspx?bid=3&tid=542661&hl=-->
         <entry key="TYPE">
             <set>
