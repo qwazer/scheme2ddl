@@ -79,4 +79,10 @@ public class UserObjectReader implements ItemReader<UserObject> {
     public void setProcessUserAndPermissions(boolean processUserAndPermissions) {
         this.processUserAndPermissions = processUserAndPermissions;
     }
+
+    @Deprecated
+    public void setProcessConstraint(boolean processConstraint) {
+        //for compatability with old configs
+        System.out.println(" +++ Warning! The 'processConstraint' parameter not used anymore. Use new map 'dependenciesInSeparateFiles' instead.");
+    }
 }
