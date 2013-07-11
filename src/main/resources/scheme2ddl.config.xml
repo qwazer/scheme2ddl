@@ -251,6 +251,7 @@
         <entry key="QUEUE"><set><value>*</value></set></entry>
         <entry key="EVALUATION CONTEXT"><set><value>*</value></set></entry>
         <entry key="RULE SET"><set><value>*</value></set></entry>
+        <entry key="PROGRAM"><set><value>*</value></set></entry>
         <!-- require set the 'isUsedSchemaNamesInFilters' to 'true'
         <entry key="TABLE">
             <set>
