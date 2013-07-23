@@ -221,15 +221,6 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
         return (String) getJdbcTemplate().execute(sql, new CallableStatementCallbackImpl());
     }
 
-    public boolean isConnectionAvailable() {
-        try {
-            getJdbcTemplate().queryForInt("select 1 from dual");
-        } catch (DataAccessException e) {
-            return false;
-        }
-        return true;
-    }
-
     public void applyTransformParameters(Connection connection) throws SQLException {
         for (String parameterName : transformParams.keySet()) {
             connection.setAutoCommit(false);
