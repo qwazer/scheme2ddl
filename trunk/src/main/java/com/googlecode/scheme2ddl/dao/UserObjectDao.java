@@ -27,6 +27,4 @@ public interface UserObjectDao {
 
     String findDbmsJobDDL(String name);
 
-    boolean isConnectionAvailable();
-
 }

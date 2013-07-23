@@ -1,5 +1,6 @@
 package com.googlecode.scheme2ddl;
 
+import com.googlecode.scheme2ddl.dao.ConnectionDao;
 import com.googlecode.scheme2ddl.dao.UserObjectDao;
 import oracle.jdbc.pool.OracleDataSource;
 import org.apache.commons.logging.Log;
@@ -64,9 +65,9 @@ public class Main {
     }
 
     private static void testDBConnection(ConfigurableApplicationContext context) throws SQLException {
-        UserObjectDao dao = (UserObjectDao) context.getBean("userObjectDao");
+        ConnectionDao connectionDao = (ConnectionDao) context.getBean("connectionDao");
         OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
-        if (dao.isConnectionAvailable()) {
+        if (connectionDao.isConnectionAvailable()) {
             System.out.println("OK success connection to " + dataSource.getURL());
         } else {
             System.out.println("FAIL connect to " + dataSource.getURL());
