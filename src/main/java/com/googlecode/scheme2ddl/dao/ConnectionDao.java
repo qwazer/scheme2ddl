@@ -9,4 +9,6 @@ package com.googlecode.scheme2ddl.dao;
 public interface ConnectionDao {
 
     boolean isConnectionAvailable();
+
+    boolean hasSelectCatalogRole();
 }
