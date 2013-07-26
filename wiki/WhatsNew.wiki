@@ -1,4 +1,8 @@
 #labels Featured
+==What's new in version 2.3.1==
+  # fix issue #14, now proccessing of multy schemas (or foreign schema) is possible with non sysdba connection
+  # fix issue #19
+
 ==What's new in version 2.3==
   # Change skip logic
      # By default all sql error from oracle skipped and printed in final report
