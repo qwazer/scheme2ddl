@@ -95,6 +95,10 @@ public class Main {
         }
         String userName = ((OracleDataSource) context.getBean("dataSource")).getUser();
         isLaunchedByDBA = userName.toLowerCase().matches(".+as +sysdba *");
+        if (!isLaunchedByDBA){
+            ConnectionDao connectionDao = (ConnectionDao) context.getBean("connectionDao");
+            isLaunchedByDBA = connectionDao.hasSelectCatalogRole(); //todo rename isLaunchedByDBA -> processForeignSchema
+        }
         //process schemas
         processSchemas(context);
 
