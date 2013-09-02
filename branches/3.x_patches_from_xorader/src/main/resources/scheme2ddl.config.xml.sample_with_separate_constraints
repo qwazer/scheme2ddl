@@ -213,11 +213,17 @@
         </entry>
     </util:map>
 
-    <!-- The "includesDataTables" uses for overriding "excludesDataTables" and for limiting number of data tables rows -->
-    <!-- "includesDataTables" has more priority then "excludesDataTables" -->
+    <!--
+         The "includesDataTables" uses for overriding "excludesDataTables" and for limiting number of data tables rows.
+         The "includesDataTables" has more priority then "excludesDataTables".
+         The "maxRowsExport" setting limits number of rows and can take three values:
+            0  - (default value) need to export unlimited rows of the object's table
+            -1 - do not export the whole table data
+            >0 - limit exporting table rows by this value
+    -->
     <util:map id="includesDataTables">
-        <entry key="SCOTT.TAB2"><util:properties><prop key="maxRowsExport">3</prop></util:properties></entry>   <!-- The "maxRowsExport" setting limits number of rows  -->
-        <entry key="*TAB1"><util:properties/></entry>   <!-- The "maxRowsExport" is unlimited by default -->
+        <entry key="SCOTT.TAB2"><util:properties><prop key="maxRowsExport">3</prop></util:properties></entry>
+        <entry key="*TAB1"><util:properties/></entry>
     </util:map>
 
     <!-- Below tables data will exlude from export processing -->
