@@ -208,7 +208,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
             sql = "DECLARE\n" +
                     " callstr VARCHAR2(4096);\n" +
                     "BEGIN\n" +
-                    "  dbms_ijob.full_export(" + name + ", callstr);\n" +
+                    "  dbms_job.full_export(" + name + ", callstr);\n" +
                     ":done := callstr; END;";
         else
             sql = "DECLARE\n" +
