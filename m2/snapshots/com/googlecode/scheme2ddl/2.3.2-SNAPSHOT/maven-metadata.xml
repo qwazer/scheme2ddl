@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>com.googlecode</groupId>
+  <artifactId>scheme2ddl</artifactId>
+  <version>2.3.2-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <timestamp>20131019.111617</timestamp>
+      <buildNumber>1</buildNumber>
+    </snapshot>
+    <lastUpdated>20131019111617</lastUpdated>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>jar</extension>
+        <value>2.3.2-20131019.111617-1</value>
+        <updated>20131019111617</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>2.3.2-20131019.111617-1</value>
+        <updated>20131019111617</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>
