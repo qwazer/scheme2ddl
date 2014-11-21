@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		  http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+    <import resource="classpath:applicationContext.xml"/>
+
+
+    <bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource">
+        <property name="URL" value="jdbc:oracle:thin:@MyOracleHost:1521:MyDB"/>
+        <!-- You can choose a DBA user. For example: value="sys as sysdba" -->
+        <property name="user" value="scott"/>
+        <property name="password" value="tiger"/>
+        <property name="connectionCachingEnabled" value="true"/>
+    </bean>
+
+    <!-- list of schema for processing, used only if oracle user connected as sysdba-->
+    <util:list id="schemaList">
+        <!--<value>SCOTT</value>-->
+        <!--<value>HR</value>-->
+    </util:list>
+
+    <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader" scope="step">
+        <property name="processPublicDbLinks" value="true"/>
+        <property name="processDmbsJobs" value="true"/>
+        <!--  process each constraint in separate files (constraints already included to tables DDL scripts in default transformParams_for_dbms_metadata) -->
+        <property name="processConstraint" value="false"/>
+    </bean>
+
+    <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
+        <property name="outputPath" value="output"/>
+    </bean>
+
+
+    <bean id="taskExecutor" class="org.springframework.core.task.SimpleAsyncTaskExecutor">
+        <property name="concurrencyLimit" value="4"/>
+    </bean>
+
+
+    <!-- http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBJBFGE -->
+    <util:map id="transformParams_for_dbms_metadata">
+        <entry key="SEGMENT_ATTRIBUTES" value="FALSE"/>
+        <entry key="SQLTERMINATOR" value="TRUE"/>
+        <entry key="CONSTRAINTS_AS_ALTER" value="TRUE"/>
+    </util:map>
+
+
+    <!-- format option for DDL, actually perform only trim for resulting DDL -->
+    <bean id="ddlFormatter" class="com.googlecode.scheme2ddl.DDLFormatter">
+        <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT. -->
+        <property name="noFormat" value="false"/>
+        <property name="isMorePrettyFormat" value="false"/>
+    </bean>
+
+    <!-- rules for construct filenames  -->
+    <bean id="fileNameConstructor" class="com.googlecode.scheme2ddl.FileNameConstructor">
+        <!-- Construct your custom layout from keywords
+
+                schema - schema name in lower case
+                type - type name in lower case, for example 'table' or 'index'
+                types_plural - type name in plural form in lower case, for xample 'tables' or 'indexes'
+                object_name - object name in lower case
+                ext - extension in lower case
+                SCHEMA - schema name in UPPER case
+                TYPE - type name in UPPER case, for example 'table' or 'index'
+                TYPES_PLURAL - type name in plural form in UPPER case, for xample 'tables' or 'indexes'
+                OBJECT_NAME - object name in UPPER case
+                EXT - extension in UPPER case
+
+            Keywords escaping is not supported.
+            Word in Mixed Case is not keyword
+        -->
+        <property name="template" value="types_plural/object_name.ext"/>
+        <property name="templateForSysDBA" value="SCHEMA/types_plural/object_name.ext"/>
+
+        <!-- File extension map rules.
+        Use predefined 'TOAD' or 'PL/SQL Developer' mapping or create custom mapping -->
+        <property name="extensionMap" ref="sql_by_default"/>
+    </bean>
+
+    <util:map id="sql_by_default">
+        <entry key="DEFAULT">
+            <value>sql</value>
+        </entry>
+    </util:map>
+
+    <!-- File extension map rules like TOAD -->
+    <util:map id="toad">
+        <!--todo need carefully test -->
+        <entry key="DEFAULT">
+            <value>sql</value>
+        </entry>
+        <entry key="PROCEDURE">
+            <value>prc</value>
+        </entry>
+        <entry key="FUNCTION">
+            <value>fnc</value>
+        </entry>
+        <entry key="TRIGGER">
+            <value>trg</value>
+        </entry>
+        <entry key="VIEW">
+            <value>vw</value>
+        </entry>
+        <entry key="PACKAGE">   <!--todo is not the same as Package Specs of TOAD -->
+            <value>pks</value>
+        </entry>
+        <entry key="PACKAGE BODY">
+            <value>pkb</value>
+        </entry>
+    </util:map>
+
+    <!-- File extension map rules like PL/SQL Developer -->
+    <util:map id="plsqldeveloper">
+        <!--todo need filling and carefully test -->
+        <entry key="DEFAULT">
+            <value>sql</value>
+        </entry>
+    </util:map>
+
+
+    <!-- Specify dependable items for every user object type accordingly with http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#BGBIEDIA -->
+    <util:map id="dependencies">
+        <entry key="TABLE">
+            <set>
+                <value>COMMENT</value>
+                <value>INDEX</value>
+                <value>OBJECT_GRANT</value>
+                <value>TRIGGER</value>
+            </set>
+        </entry>
+        <entry key="VIEW">
+            <set>
+                <value>COMMENT</value>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="MATERIALIZED VIEW">
+            <set>
+                <value>COMMENT</value>
+                <value>INDEX</value>
+                <value>MATERIALIZED_VIEW_LOG</value>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="FUNCTION">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="PROCEDURE">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="PACKAGE">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="SYNONYM">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+        <entry key="TYPE">
+            <set>
+                <value>OBJECT_GRANT</value>
+            </set>
+        </entry>
+    </util:map>
+
+    <!-- Key is the object type,
+         Value - is set of patterns for exlude
+         Currently only '*' wildcard supported -->
+    <util:map id="excludes">
+        <entry key="*">
+            <set>
+                <value>*_*_temp_*</value>
+            </set>
+        </entry>
+        <!--
+        <entry key="VIEW">
+            <set>
+                <value>example_exlude_prefix_*</value>
+                <value>*_example_exlude_suffix</value>
+            </set>
+        </entry>
+        -->
+
+        <entry key="TABLE PARTITION"><set><value>*</value></set></entry>
+        <entry key="INDEX PARTITION"><set><value>*</value></set></entry>
+        <entry key="LOB"><set><value>*</value></set></entry>
+
+        <!--Excluded, because all them persist in PACKAGE, TYPE and TABLE -->
+        <entry key="PACKAGE BODY"><set><value>*</value></set></entry>
+        <entry key="TYPE BODY"><set><value>*</value></set></entry>
+        <entry key="INDEX"><set><value>*</value></set></entry>
+        <!--For removing system types http://www.sql.ru/forum/actualthread.aspx?bid=3&tid=542661&hl=-->
+        <entry key="TYPE">
+            <set>
+                <value>SYSTP*</value>
+                <value>*==</value>
+                <!--a pipelined function that returns a PL/SQL collection type Oracle will automagically generate a compatible SQL collection type. Exclude them-->
+                <value>SYS_PLSQL_*</value>
+            </set>
+        </entry>
+    </util:map>
+
+
+</beans>
