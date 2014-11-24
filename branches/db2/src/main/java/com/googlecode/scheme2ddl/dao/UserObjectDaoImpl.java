@@ -46,15 +46,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
                     " from dba_refresh a " +
                     " where a.rowner = '" + schemaName + "' ";
         else
-            sql = "select t.object_name, t.object_type " +
-                    "  from user_objects t " +
-                    " where t.generated = 'N' " +
-                    "   and not exists (select 1 " +
-                    "          from user_nested_tables unt" +
-                    "         where t.object_name = unt.table_name)" +
-                    " UNION ALL " +
-                    " select rname as object_name, 'REFRESH GROUP' as object_type " +
-                    " from user_refresh ";
+            sql = "select tabname as object_name, 'table' as object_type from syscat.tables where tabschema = 'MY' ";
         return getJdbcTemplate().query(sql, new UserObjectRowMapper());
     }
 
@@ -94,11 +86,12 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
     }
 
     public List<UserObject> findDmbsJobs() {
-        String tableName = isLaunchedByDBA ? "dba_jobs" : "user_jobs";
-        String whereClause = isLaunchedByDBA ? "schema_user = '" + schemaName + "'" : "schema_user != 'SYSMAN'";
-        String sql = "select job || '' as object_name, 'DBMS JOB' as object_type " +
-                "from  " + tableName + " where " + whereClause;
-        return getJdbcTemplate().query(sql, new UserObjectRowMapper());
+//        String tableName = isLaunchedByDBA ? "dba_jobs" : "user_jobs";
+//        String whereClause = isLaunchedByDBA ? "schema_user = '" + schemaName + "'" : "schema_user != 'SYSMAN'";
+//        String sql = "select job || '' as object_name, 'DBMS JOB' as object_type " +
+//                "from  " + tableName + " where " + whereClause;
+//        return getJdbcTemplate().query(sql, new UserObjectRowMapper());
+        return new ArrayList<UserObject>();
     }
 
     public List<UserObject> findConstaints() {

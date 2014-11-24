@@ -1,7 +1,6 @@
 package com.googlecode.scheme2ddl;
 
 import com.googlecode.scheme2ddl.dao.ConnectionDao;
-import com.googlecode.scheme2ddl.dao.UserObjectDao;
 import oracle.jdbc.pool.OracleDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

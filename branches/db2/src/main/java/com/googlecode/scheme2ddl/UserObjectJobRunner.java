@@ -1,6 +1,5 @@
 package com.googlecode.scheme2ddl;
 
-import oracle.jdbc.pool.OracleDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.*;

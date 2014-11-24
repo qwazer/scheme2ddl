@@ -34,10 +34,16 @@
         <spring.framework.version>3.2.4.RELEASE</spring.framework.version>
         <spring.batch.version>2.2.1.RELEASE</spring.batch.version>
         <org.aspectj.version>1.7.3</org.aspectj.version>
+        <project.finalName>${profile.name}-${project.artifactId}-${project.version}</project.finalName>
     </properties>
 
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -59,6 +65,7 @@
                             <resource>META-INF/spring.schemas</resource>
                         </transformer>
                     </transformers>
+                    <finalName>${project.finalName}</finalName>
                 </configuration>
                 <executions>
                     <execution>
@@ -66,6 +73,25 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.9.1</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/${profile.name}/java</source>
+                            </sources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -86,8 +112,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                        <source>1.5</source>
-                        <target>1.5</target>
+                    <source>1.5</source>
+                    <target>1.5</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -115,17 +141,7 @@
             <version>1.2.17</version>
             <scope>runtime</scope>
         </dependency>
-        <!--Unfortunately due the binary license there is no public repository with the Oracle Driver JAR.
-        Will try to download it from otn-maven-repo
 
- Download latest jar from http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html.
- mvn install:install-file -Dfile=ojdbc5.jar -DgroupId=com.oracle -DartifactId=ojdbc5 -Dversion=11.2.0.3.0 -Dpackaging=jar -DgeneratePom=true
--->
-        <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>ojdbc5</artifactId>
-            <version>11.2.0.3.0</version>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
@@ -147,5 +163,77 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+
+        <profile>
+            <id>oracle</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+
+            <properties>
+                <profile.name>oracle</profile.name>
+            </properties>
+
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/oracle/resources</directory>
+                    </resource>
+                </resources>
+            </build>
+
+
+            <dependencies>
+                <!--Unfortunately due the binary license there is no public repository with the Oracle Driver JAR.
+                    Will try to download it from otn-maven-repo
+
+                    Download latest jar from http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html.
+                    mvn install:install-file -Dfile=ojdbc5.jar -DgroupId=com.oracle -DartifactId=ojdbc5 -Dversion=11.2.0.3.0 -Dpackaging=jar -DgeneratePom=true
+                -->
+                <dependency>
+                    <groupId>com.oracle</groupId>
+                    <artifactId>ojdbc5</artifactId>
+                    <version>11.2.0.3.0</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>db2</id>
+
+            <properties>
+                <profile.name>db2</profile.name>
+            </properties>
+
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/db2/resources</directory>
+                    </resource>
+                </resources>
+            </build>
+
+
+            <dependencies>
+                <!--Unfortunately due the binary license there is no public repository with the Oracle Driver JAR.
+    Will try to download it from otn-maven-repo
+
+    Download latest jar from http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html.
+    mvn install:install-file -Dfile=db2jcc4-4.9.78.jar -DgroupId=com.ibm.db2 -DartifactId=db2jcc4 -Dversion=4.9.78 -Dpackaging=jar -DgeneratePom=true
+-->
+                <dependency>
+                    <groupId>com.ibm.db2</groupId>
+                    <artifactId>db2jcc4</artifactId>
+                    <version>4.9.78</version>
+                </dependency>
+                <!--<dependency>-->
+                <!--<groupId>com.ibm</groupId>-->
+                <!--<artifactId>db2jcc_license_cu</artifactId>-->
+                <!--<version>3.1.57</version>-->
+                <!--</dependency>-->
+            </dependencies>
+        </profile>
+    </profiles>
 
 </project>
