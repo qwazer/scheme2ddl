@@ -1,6 +1,7 @@
 package com.googlecode.scheme2ddl.dao;
 
 import com.googlecode.scheme2ddl.domain.Db2LookInfo;
+import com.googlecode.scheme2ddl.domain.Db2LookInfoComparator;
 import com.googlecode.scheme2ddl.domain.UserObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -125,15 +126,15 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
              con= getDataSource().getConnection();
             CallableStatement cstmt;
             ResultSet rs;
-            String db2lookinfoParams = "-e -t " + schemaName + "." + name;
+            String db2lookinfoParams = "-e -t " + schemaName + "." + name +" -xd";
             cstmt = con.prepareCall("call SYSPROC.DB2LK_GENERATE_DDL(?, ?)");
             cstmt.setString(1, db2lookinfoParams);
             cstmt.registerOutParameter (2, Types.INTEGER);
             cstmt.executeUpdate();
             opToken = cstmt.getInt(2);
 
-            List<Db2LookInfo> list = getJdbcTemplate().query("select OP_SEQUENCE, SQL_STMT, OBJ_SCHEMA, OBJ_TYPE, OBJ_NAME, SQL_OPERATION FROM SYSTOOLS.DB2LOOK_INFO where OP_TOKEN=? and OBJ_SCHEMA=? and OBJ_TYPE=? and OBJ_NAME=?",
-                      new Object[]{opToken, schemaName, type, name},
+            List<Db2LookInfo> list = getJdbcTemplate().query("select OP_SEQUENCE, SQL_STMT, OBJ_SCHEMA, OBJ_TYPE, OBJ_NAME, SQL_OPERATION FROM SYSTOOLS.DB2LOOK_INFO where OP_TOKEN=? and OBJ_SCHEMA=? ",
+                      new Object[]{opToken, schemaName},
                     new RowMapper<Db2LookInfo>() {
                         public Db2LookInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
                             Db2LookInfo db2LookInfo = new Db2LookInfo();
@@ -156,10 +157,9 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
                         }
                     });
 
-            //todo list.sort();
+            list.sort(new Db2LookInfoComparator());
             for (Db2LookInfo db2LookInfo : list){
-                System.out.println("db2LookInfo = " + db2LookInfo);
-                result = result + db2LookInfo.getSqlStmt();
+                result = result + db2LookInfo.getSqlStmt() + "\n;";  //todo config format options
             }
 
 
@@ -249,7 +249,7 @@ cstmt.close();
     }
 
     public String findDependentDLLByTypeName(final String type, final String name) {
-        return "2";
+        return "";
 
 //        return (String) getJdbcTemplate().execute(new ConnectionCallback() {
 //            final String query = "select dbms_metadata.get_dependent_ddl(?, ?, ?) from dual";
