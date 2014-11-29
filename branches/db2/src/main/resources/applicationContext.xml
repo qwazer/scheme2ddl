@@ -11,6 +11,8 @@
     <context:annotation-config/>
     <aop:aspectj-autoproxy/>
 
+    <import resource="daoContext.xml"/>
+
     <job id="job1" xmlns="http://www.springframework.org/schema/batch">
         <step id="step1" parent="simpleStep">
             <tasklet task-executor="taskExecutor"
@@ -36,14 +38,6 @@
         <property name="commitInterval" value="1"/>
     </bean>
 
-    <bean id="userObjectDao" class="com.googlecode.scheme2ddl.dao.UserObjectDaoImpl" scope="step">
-        <property name="dataSource" ref="dataSource"/>
-        <property name="transformParams" ref="transformParams_for_dbms_metadata"/>
-    </bean>
-
-    <bean id="connectionDao" class="com.googlecode.scheme2ddl.dao.ConnectionDaoImpl">
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
 
     <bean id="processor" class="com.googlecode.scheme2ddl.UserObjectProcessor" autowire="autodetect">
         <property name="userObjectDao" ref="userObjectDao"/>

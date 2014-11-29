@@ -74,19 +74,21 @@ public class Main {
     private static void modifyContext(ConfigurableApplicationContext context) {
     //    DB2Driver   todo
 
-     //   if (dbUrl != null) {
+        if (dbUrl != null) {
             String url = "jdbc:db2://" + dbUrl;
-           // String user = extractUserfromDbUrl(dbUrl);
-         //   String password = extractPasswordfromDbUrl(dbUrl);
+            final String user = extractUserfromDbUrl(dbUrl);
+            final String password = extractPasswordfromDbUrl(dbUrl);
+            final String serverName = extractServerNamefromDbUrl(dbUrl);
+            final int  serverPort = extractPortFromDbUrl(dbUrl);
+            final String databaseName = extractDbNameFromDbUrl(dbUrl);
             DB2DataSource dataSource = (DB2DataSource) context.getBean("dataSource");
-            dataSource.setServerName("db2");
-            dataSource.setPortNumber(50000);
-            dataSource.setDatabaseName("");
+            dataSource.setServerName(serverName);
+            dataSource.setPortNumber(serverPort);
+            dataSource.setDatabaseName(databaseName);
             dataSource.setDriverType(4);
-            // for OracleDataSource in connectionCachingEnabled mode need explicitly set user and password
-            dataSource.setUser("");
-            dataSource.setPassword("");
-   //     }
+            dataSource.setUser(user);
+            dataSource.setPassword(password);
+        }
         if (outputPath != null) {
             UserObjectWriter writer = (UserObjectWriter) context.getBean("writer");
             writer.setOutputPath(outputPath);
@@ -205,6 +207,21 @@ public class Main {
 
     private static String extractUserfromDbUrl(String dbUrl) {
         return dbUrl.split("/")[0];
+    }
+
+    private static String extractServerNamefromDbUrl(String dbUrl) {
+        //user/pass@serverName:port:DbName
+        return dbUrl.split("@")[1].split("/|:")[0];
+    }
+
+    protected static int extractPortFromDbUrl(String dbUrl) {
+        //user/pass@serverName:port:DbName
+        return Integer.parseInt(dbUrl.split("@")[1].split("/|:")[1]);
+    }
+
+    private static String extractDbNameFromDbUrl(String dbUrl) {
+        //user/pass@serverName:port:DbName
+        return dbUrl.split("@")[1].split("/|:")[2];
     }
 
     private static String extractPasswordfromDbUrl(String dbUrl) {
