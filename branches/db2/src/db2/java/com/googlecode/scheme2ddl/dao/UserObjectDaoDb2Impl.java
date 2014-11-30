@@ -47,7 +47,7 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
                     " from dba_refresh a " +
                     " where a.rowner = '" + schemaName + "' ";
         else
-            sql = "select OBJECT_NAME, OBJECT_TYPE from SYSIBMADM.USER_OBJECTS where OBJECT_SCHEMA = '"+schemaName+"' ";
+            sql = "select OBJECT_NAME, OBJECT_TYPE from SYSIBMADM.ALL_OBJECTS where OBJECT_SCHEMA = '"+schemaName+"' ";
         return getJdbcTemplate().query(sql, new UserObjectRowMapper());
     }
 
@@ -126,36 +126,70 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
              con= getDataSource().getConnection();
             CallableStatement cstmt;
             ResultSet rs;
-            String db2lookinfoParams = "-e -t " + schemaName + "." + name +" -xd";
+            String db2lookinfoParams;
+            if (type.equals("TABLE")) db2lookinfoParams = "-e -t " + schemaName + "." + name +" -xd";
+            else if (type.equals("VIEW")) db2lookinfoParams = "-e -v " + schemaName + "." + name +" -xd";
+            else  db2lookinfoParams = "-e -xd";
             cstmt = con.prepareCall("call SYSPROC.DB2LK_GENERATE_DDL(?, ?)");
             cstmt.setString(1, db2lookinfoParams);
             cstmt.registerOutParameter (2, Types.INTEGER);
             cstmt.executeUpdate();
             opToken = cstmt.getInt(2);
 
-            List<Db2LookInfo> list = getJdbcTemplate().query("select OP_SEQUENCE, SQL_STMT, OBJ_SCHEMA, OBJ_TYPE, OBJ_NAME, SQL_OPERATION FROM SYSTOOLS.DB2LOOK_INFO where OP_TOKEN=? and OBJ_SCHEMA=? ",
-                      new Object[]{opToken, schemaName},
-                    new RowMapper<Db2LookInfo>() {
-                        public Db2LookInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            Db2LookInfo db2LookInfo = new Db2LookInfo();
-                            db2LookInfo.setObjName(rs.getString("OBJ_NAME"));
-                            db2LookInfo.setObjType(rs.getString("OBJ_TYPE"));
-                            db2LookInfo.setObjSchema(rs.getString("OBJ_SCHEMA").trim());
-                            db2LookInfo.setOpSequence(rs.getLong("OP_SEQUENCE"));
-                            db2LookInfo.setSqlOperation(rs.getString("SQL_OPERATION"));
-                            db2LookInfo.setSqlStmtClob(rs.getClob("SQL_STMT"));
+            List<Db2LookInfo> list = null;
+            if (type.equals("TABLE") || type.equals("VIEW"))   {
+                list = getJdbcTemplate().query("select OP_SEQUENCE, SQL_STMT, OBJ_SCHEMA, OBJ_TYPE, OBJ_NAME, SQL_OPERATION " +
+                                "FROM SYSTOOLS.DB2LOOK_INFO where OP_TOKEN=? and OBJ_SCHEMA=? ",
+                        new Object[]{opToken, schemaName},
+                        new RowMapper<Db2LookInfo>() {
+                            public Db2LookInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                                Db2LookInfo db2LookInfo = new Db2LookInfo();
+                                db2LookInfo.setObjName(rs.getString("OBJ_NAME"));
+                                db2LookInfo.setObjType(rs.getString("OBJ_TYPE"));
+                                db2LookInfo.setObjSchema(rs.getString("OBJ_SCHEMA").trim());
+                                db2LookInfo.setOpSequence(rs.getLong("OP_SEQUENCE"));
+                                db2LookInfo.setSqlOperation(rs.getString("SQL_OPERATION"));
+                                db2LookInfo.setSqlStmtClob(rs.getClob("SQL_STMT"));
 
-                            if (db2LookInfo.getSqlStmtClob() != null) {
+                                if (db2LookInfo.getSqlStmtClob() != null) {
 
-                                if ((int) db2LookInfo.getSqlStmtClob().length() > 0) {
-                                    String s = db2LookInfo.getSqlStmtClob().getSubString(1, (int) db2LookInfo.getSqlStmtClob().length());
-                                    db2LookInfo.setSqlStmt(s);
+                                    if ((int) db2LookInfo.getSqlStmtClob().length() > 0) {
+                                        String s = db2LookInfo.getSqlStmtClob().getSubString(1, (int) db2LookInfo.getSqlStmtClob().length());
+                                        db2LookInfo.setSqlStmt(s);
+                                    }
                                 }
-                            }
 
-                            return db2LookInfo;
-                        }
-                    });
+                                return db2LookInfo;
+                            }
+                        });
+            }   else {
+                list = getJdbcTemplate().query("select OP_SEQUENCE, SQL_STMT, OBJ_SCHEMA, OBJ_TYPE, OBJ_NAME, SQL_OPERATION " +
+                                "FROM SYSTOOLS.DB2LOOK_INFO where OP_TOKEN=? and OBJ_SCHEMA=? and OBJ_TYPE=? and OBJ_NAME=?",
+                        new Object[]{opToken, schemaName, type, name},
+                        new RowMapper<Db2LookInfo>() {
+                            public Db2LookInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                                Db2LookInfo db2LookInfo = new Db2LookInfo();
+                                db2LookInfo.setObjName(rs.getString("OBJ_NAME"));
+                                db2LookInfo.setObjType(rs.getString("OBJ_TYPE"));
+                                db2LookInfo.setObjSchema(rs.getString("OBJ_SCHEMA").trim());
+                                db2LookInfo.setOpSequence(rs.getLong("OP_SEQUENCE"));
+                                db2LookInfo.setSqlOperation(rs.getString("SQL_OPERATION"));
+                                db2LookInfo.setSqlStmtClob(rs.getClob("SQL_STMT"));
+
+                                if (db2LookInfo.getSqlStmtClob() != null) {
+
+                                    if ((int) db2LookInfo.getSqlStmtClob().length() > 0) {
+                                        String s = db2LookInfo.getSqlStmtClob().getSubString(1, (int) db2LookInfo.getSqlStmtClob().length());
+                                        db2LookInfo.setSqlStmt(s);
+                                    }
+                                }
+
+                                return db2LookInfo;
+                            }
+                        });
+            }
+
+
 
             list.sort(new Db2LookInfoComparator());
             for (Db2LookInfo db2LookInfo : list){
@@ -249,7 +283,79 @@ cstmt.close();
     }
 
     public String findDependentDLLByTypeName(final String type, final String name) {
-        return "";
+
+
+        if (type.equals("VIEW"))   {
+            int opToken = 0;
+            Connection con =null;
+
+            String result = "";
+
+            try {
+                con= getDataSource().getConnection();
+                CallableStatement cstmt;
+                ResultSet rs;
+                String db2lookinfoParams = "-e -t " + schemaName + "." + name +" -xd";
+
+                cstmt = con.prepareCall("call SYSPROC.DB2LK_GENERATE_DDL(?, ?)");
+                cstmt.setString(1, db2lookinfoParams);
+                cstmt.registerOutParameter (2, Types.INTEGER);
+                cstmt.executeUpdate();
+                opToken = cstmt.getInt(2);
+
+                List<Db2LookInfo> list = null;
+
+                    list = getJdbcTemplate().query("select OP_SEQUENCE, SQL_STMT, OBJ_SCHEMA, OBJ_TYPE, OBJ_NAME, SQL_OPERATION " +
+                                    "FROM SYSTOOLS.DB2LOOK_INFO where OP_TOKEN=? and OBJ_SCHEMA=? ",
+                            new Object[]{opToken, schemaName},
+                            new RowMapper<Db2LookInfo>() {
+                                public Db2LookInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                                    Db2LookInfo db2LookInfo = new Db2LookInfo();
+                                    db2LookInfo.setObjName(rs.getString("OBJ_NAME"));
+                                    db2LookInfo.setObjType(rs.getString("OBJ_TYPE"));
+                                    db2LookInfo.setObjSchema(rs.getString("OBJ_SCHEMA").trim());
+                                    db2LookInfo.setOpSequence(rs.getLong("OP_SEQUENCE"));
+                                    db2LookInfo.setSqlOperation(rs.getString("SQL_OPERATION"));
+                                    db2LookInfo.setSqlStmtClob(rs.getClob("SQL_STMT"));
+
+                                    if (db2LookInfo.getSqlStmtClob() != null) {
+
+                                        if ((int) db2LookInfo.getSqlStmtClob().length() > 0) {
+                                            String s = db2LookInfo.getSqlStmtClob().getSubString(1, (int) db2LookInfo.getSqlStmtClob().length());
+                                            db2LookInfo.setSqlStmt(s);
+                                        }
+                                    }
+
+                                    return db2LookInfo;
+                                }
+                            });
+
+
+                list.sort(new Db2LookInfoComparator());
+                for (Db2LookInfo db2LookInfo : list){
+                    result = result + db2LookInfo.getSqlStmt() + "\n;";  //todo config format options
+                }
+
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            finally {
+                if (con!=null){
+                    try {
+                        con.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return result ;
+        }
+
+
+        else
+            return "";
 
 //        return (String) getJdbcTemplate().execute(new ConnectionCallback() {
 //            final String query = "select dbms_metadata.get_dependent_ddl(?, ?, ?) from dual";
