@@ -6,7 +6,7 @@
 
     <groupId>com.googlecode</groupId>
     <artifactId>scheme2ddl</artifactId>
-    <version>2.3.3.db2-SNAPSHOT</version>
+    <version>2.3.4.db2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <url>http://scheme2ddl.googlecode.com</url>
@@ -65,7 +65,7 @@
                             <resource>META-INF/spring.schemas</resource>
                         </transformer>
                     </transformers>
-                    <finalName>${project.finalName}</finalName>
+                    <!--<finalName>${project.finalName}</finalName>-->
                 </configuration>
                 <executions>
                     <execution>
