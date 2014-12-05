@@ -1,5 +1,6 @@
 package com.googlecode.scheme2ddl.dao;
 
+import com.googlecode.scheme2ddl.domain.Db2LookInfo;
 import com.googlecode.scheme2ddl.domain.UserObject;
 
 import java.util.Collection;
@@ -20,6 +21,8 @@ public interface UserObjectDao {
     List<UserObject> findConstaints();
 
     String findPrimaryDDL(String type, String name);
+
+    List<Db2LookInfo> findDDL(UserObject userObject);
 
     String findDependentDLLByTypeName(String type, String name);
 

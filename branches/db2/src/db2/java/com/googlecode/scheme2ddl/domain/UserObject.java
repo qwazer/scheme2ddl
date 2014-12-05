@@ -11,6 +11,7 @@ public class UserObject {
     private String schema;
     private String ddl;
     private String fileName;
+    private long opToken;
 
 
     public String getName() {
@@ -53,6 +54,13 @@ public class UserObject {
         this.fileName = fileName;
     }
 
+    public long getOpToken() {
+        return opToken;
+    }
+
+    public void setOpToken(long opToken) {
+        this.opToken = opToken;
+    }
 
     @Override
     public String toString() {

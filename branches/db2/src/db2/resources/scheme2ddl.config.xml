@@ -50,7 +50,7 @@
     <!-- format option for DDL, actually perform only trim for resulting DDL -->
     <bean id="ddlFormatter" class="com.googlecode.scheme2ddl.DDLFormatter">
         <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT. -->
-        <property name="noFormat" value="false"/>
+        <property name="noFormat" value="true"/>
         <property name="isMorePrettyFormat" value="false"/>
     </bean>
 

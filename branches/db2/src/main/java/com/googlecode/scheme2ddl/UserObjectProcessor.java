@@ -1,6 +1,8 @@
 package com.googlecode.scheme2ddl;
 
 import com.googlecode.scheme2ddl.dao.UserObjectDao;
+import com.googlecode.scheme2ddl.domain.Db2LookInfo;
+import com.googlecode.scheme2ddl.domain.Db2LookInfoComparator;
 import com.googlecode.scheme2ddl.domain.UserObject;
 import com.googlecode.scheme2ddl.exception.CannotGetDDLException;
 import com.googlecode.scheme2ddl.exception.NonSkippableException;
@@ -8,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ItemProcessor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -65,20 +68,17 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
 
     private String map2Ddl(UserObject userObject) throws CannotGetDDLException, NonSkippableException {
         try {
-            if (userObject.getType().equals("DBMS JOB")) {
-                return userObjectDao.findDbmsJobDDL(userObject.getName());
+
+            List<Db2LookInfo> list = userObjectDao.findDDL(userObject);
+
+            String result = "";
+            list.sort(new Db2LookInfoComparator());
+            for (Db2LookInfo db2LookInfo : list){
+                result = result + db2LookInfo.getSqlStmt() + "\n;";  //todo config format options
             }
-            if (userObject.getType().equals("PUBLIC DATABASE LINK")) {
-                return userObjectDao.findDDLInPublicScheme(map2TypeForDBMS(userObject.getType()), userObject.getName());
-            }
-            String res = userObjectDao.findPrimaryDDL(map2TypeForDBMS(userObject.getType()), userObject.getName());
-            Set<String> dependedTypes = dependencies.get(userObject.getType());
-            if (dependedTypes != null) {
-                for (String dependedType : dependedTypes) {
-                    res += userObjectDao.findDependentDLLByTypeName(dependedType, userObject.getName());
-                }
-            }
-            return ddlFormatter.formatDDL(res);
+
+
+            return ddlFormatter.formatDDL(result);
         } catch (Exception e) {
             log.warn(String.format("Cannot get DDL for object %s with error message %s", userObject, e.getMessage()));
             if (stopOnWarning) {

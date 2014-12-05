@@ -32,23 +32,15 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
     private boolean isLaunchedByDBA = false;
 
     public List<UserObject> findListForProccessing() {
+
+
+        long opToken = call_DB2LK_GENERATE_DDL("-e -xd -z " + schemaName);
+
         final String sql;
-        if (isLaunchedByDBA)
-            //todo
-            sql = "select t.object_name, t.object_type " +
-                    "  from dba_objects t " +
-                    " where t.generated = 'N' " +
-                    "   and t.owner = '" + schemaName + "' " +
-                    "   and not exists (select 1 " +
-                    "          from user_nested_tables unt" +
-                    "         where t.object_name = unt.table_name)" +
-                    " UNION ALL " +
-                    " select rname as object_name, 'REFRESH_GROUP' as object_type " +
-                    " from dba_refresh a " +
-                    " where a.rowner = '" + schemaName + "' ";
-        else
-            sql = "select OBJECT_NAME, OBJECT_TYPE from SYSIBMADM.ALL_OBJECTS where OBJECT_SCHEMA = '"+schemaName+"' ";
-        return getJdbcTemplate().query(sql, new UserObjectRowMapper());
+           // sql = "select OBJECT_NAME, OBJECT_TYPE from SYSIBMADM.ALL_OBJECTS where OBJECT_SCHEMA = '"+schemaName+"' ";
+            sql = "SELECT DISTINCT OBJ_TYPE, OBJ_NAME, OP_TOKEN  " +
+                    "FROM SYSTOOLS.DB2LOOK_INFO WHERE OP_TOKEN=? AND OBJ_SCHEMA=? ";
+        return getJdbcTemplate().query(sql, new Object[]{opToken, schemaName}, new UserObjectRowMapper());
     }
 
     public List<UserObject> findPublicDbLinks() {
@@ -112,6 +104,38 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
                     " select constraint_name as object_name, 'REF_CONSTRAINT' as object_type" +
                     " from user_constraints where constraint_type = 'R'";
         return getJdbcTemplate().query(sql, new UserObjectRowMapper());
+    }
+
+
+
+    private long call_DB2LK_GENERATE_DDL(String db2lookinfoParams){   //todo rename
+        long opToken = 0;
+        Connection con =null;
+
+        try {
+            con = getDataSource().getConnection();
+            CallableStatement cstmt;
+            ResultSet rs;
+            cstmt = con.prepareCall("CALL SYSPROC.DB2LK_GENERATE_DDL(?, ?)");
+            cstmt.setString(1, db2lookinfoParams);
+            cstmt.registerOutParameter(2, Types.BIGINT);
+            cstmt.executeUpdate();
+            opToken = cstmt.getLong(2);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (con!=null){
+                try {
+                    con.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return opToken;
+
     }
 
     public String findPrimaryDDL(final String type, final String name) {
@@ -214,33 +238,35 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
 
     }
 
-    private String executeDbmsMetadataGetDdl(final String query, final String type, final String name, final String schema) {
+    public List<Db2LookInfo> findDDL(UserObject userObject) {
+        return  getJdbcTemplate().query("select OP_SEQUENCE, SQL_STMT, OBJ_SCHEMA, OBJ_TYPE, OBJ_NAME, SQL_OPERATION " +
+                        "FROM SYSTOOLS.DB2LOOK_INFO where OP_TOKEN=? and OBJ_SCHEMA=? and OBJ_TYPE=? and OBJ_NAME=?",
+                new Object[]{userObject.getOpToken(), schemaName, userObject.getType(), userObject.getName()},
+                new RowMapper<Db2LookInfo>() {
+                    public Db2LookInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        Db2LookInfo db2LookInfo = new Db2LookInfo();
+                        db2LookInfo.setObjName(rs.getString("OBJ_NAME"));
+                        db2LookInfo.setObjType(rs.getString("OBJ_TYPE"));
+                        db2LookInfo.setObjSchema(rs.getString("OBJ_SCHEMA").trim());
+                        db2LookInfo.setOpSequence(rs.getLong("OP_SEQUENCE"));
+                        db2LookInfo.setSqlOperation(rs.getString("SQL_OPERATION"));
+                        db2LookInfo.setSqlStmtClob(rs.getClob("SQL_STMT"));
 
-        /*
-        int ifcaret;
-int ifcareas;
-int xsbytes;
-String errbuff;
-Connection con;
-CallableStatement cstmt;
-ResultSet rs;
-…
-cstmt = con.prepareCall("CALL DSN8.DSN8ED2(?,?,?,?,?)");                1
-                                  // Create a CallableStatement object
-cstmt.setString (1, "DISPLAY THREAD(*)");                               2
-                                  // Set input parameter (DB2 command)
-cstmt.registerOutParameter (2, Types.INTEGER);                          3
-                                  // Register output parameters
-cstmt.registerOutParameter (3, Types.INTEGER);
-cstmt.registerOutParameter (4, Types.INTEGER);
-cstmt.registerOutParameter (5, Types.VARCHAR);
-cstmt.executeUpdate();            // Call the stored procedure          4
-ifcaret = cstmt.getInt(2);        // Get the output parameter values    6
-ifcareas = cstmt.getInt(3);
-xsbytes = cstmt.getInt(4);
-errbuff = cstmt.getString(5);
-cstmt.close();
-         */
+                        if (db2LookInfo.getSqlStmtClob() != null) {
+
+                            if ((int) db2LookInfo.getSqlStmtClob().length() > 0) {
+                                String s = db2LookInfo.getSqlStmtClob().getSubString(1, (int) db2LookInfo.getSqlStmtClob().length());
+                                db2LookInfo.setSqlStmt(s);
+                            }
+                        }
+
+                        return db2LookInfo;
+                    }
+                });
+
+    }
+
+    private String executeDbmsMetadataGetDdl(final String query, final String type, final String name, final String schema) {
 
 
         return (String) getJdbcTemplate().execute(new ConnectionCallback() {
@@ -447,8 +473,9 @@ cstmt.close();
     private class UserObjectRowMapper implements RowMapper {
         public UserObject mapRow(ResultSet rs, int rowNum) throws SQLException {
             UserObject userObject = new UserObject();
-            userObject.setName(rs.getString("object_name"));
-            userObject.setType(rs.getString("object_type"));
+            userObject.setName(rs.getString("OBJ_NAME"));
+            userObject.setType(rs.getString("OBJ_TYPE"));
+            userObject.setOpToken(rs.getLong("OP_TOKEN"));
             userObject.setSchema(schemaName == null ? "" : schemaName);
             return userObject;
         }
