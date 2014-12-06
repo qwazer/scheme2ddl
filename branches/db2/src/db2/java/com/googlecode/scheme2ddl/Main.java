@@ -31,7 +31,7 @@ public class Main {
     private static boolean skipPublicDbLinks = false;
     private static boolean stopOnWarning = false;
     private static String customConfigLocation = null;
-    private static String defaultConfigLocation = "scheme2ddl.config.xml";
+    private static String defaultConfigLocation = "db2-scheme2ddl.config.xml";
     private static String dbUrl = null;
     private static String schemas;
     private static boolean isLaunchedByDBA;
@@ -249,7 +249,7 @@ public class Main {
         msg.append("java -jar scheme2ddl.jar [-url ] [-o] [-s]" + lSep);
         msg.append("util for export oracle schema from DB to DDL scripts (file per object)" + lSep);
         msg.append("internally call to dbms_metadata.get_ddl " + lSep);
-        msg.append("more config options in scheme2ddl.config.xml " + lSep);
+        msg.append("more config options in db2-scheme2ddl.config.xml " + lSep);
         msg.append("Options: " + lSep);
         msg.append("  -help, -h               print this message" + lSep);
         // msg.append("  -verbose, -v           be extra verbose" + lSep);

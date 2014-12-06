@@ -5,14 +5,19 @@ import com.googlecode.scheme2ddl.domain.Db2LookInfoComparator;
 import com.googlecode.scheme2ddl.domain.UserObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.CallableStatementCallback;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.stereotype.Component;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,14 +27,20 @@ import java.util.Map;
  * @author A_Reshetnikov
  * @since Date: 17.10.2012
  */
+@Component (value = "userObjectDao")
+@Scope(value = "step")
 public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDao {
 
     private static final Log log = LogFactory.getLog(UserObjectDaoDb2Impl.class);
-    private Map<String, Boolean> transformParams;
     @Value("#{jobParameters['schemaName']}")
     private String schemaName;
     @Value("#{jobParameters['launchedByDBA']}")
     private boolean isLaunchedByDBA = false;
+
+    @Autowired
+    public UserObjectDaoDb2Impl(DataSource dataSource) {
+        setDataSource(dataSource);
+    }
 
     public List<UserObject> findListForProccessing() {
 
@@ -266,48 +277,6 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
 
     }
 
-    private String executeDbmsMetadataGetDdl(final String query, final String type, final String name, final String schema) {
-
-
-        return (String) getJdbcTemplate().execute(new ConnectionCallback() {
-            public String doInConnection(Connection connection) throws SQLException, DataAccessException {
-                applyTransformParameters(connection);
-                PreparedStatement ps = connection.prepareStatement("call SYSPROC.DB2LK_GENERATE_DDL('-e -t MY.MAIN_TABLE', ?) ");
-                ps.setString(1, type);
-                ps.setString(2, name);
-                if (schema != null) {
-                    ps.setString(3, schema);
-                }
-                ResultSet rs = null;
-                try {
-                    rs = ps.executeQuery();
-                } catch (SQLException e) {
-//                    log.trace(String.format("Error during select dbms_metadata.get_ddl('%s', '%s') from dual\n" +
-//                            "Try to exclude type '%s' in advanced config excludes section\n", type, name, map2TypeForConfig(type)));
-//                    log.trace(String.format("Sample:\n\n" +
-//                            " <util:map id=\"excludes\">\n" +
-//                            "...\n" +
-//                            "         <entry key=\"%s\">\n" +
-//                            "            <set>\n" +
-//                            "                <value>%s</value>\n" +
-//                            "            </set>\n" +
-//                            "        </entry>\n" +
-//                            "...\n" +
-//                            "</util:map>", map2TypeForConfig(type), name));
-                    throw e;
-                }
-                try {
-                    if (rs.next()) {
-                        return rs.getString(1);
-                    }
-                } finally {
-                    rs.close();
-                }
-                return null;
-            }
-        });
-    }
-
     public String findDependentDLLByTypeName(final String type, final String name) {
 
 
@@ -383,36 +352,11 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
         else
             return "";
 
-//        return (String) getJdbcTemplate().execute(new ConnectionCallback() {
-//            final String query = "select dbms_metadata.get_dependent_ddl(?, ?, ?) from dual";
-//
-//            public Object doInConnection(Connection connection) throws SQLException, DataAccessException {
-//                applyTransformParameters(connection);
-//                PreparedStatement ps = connection.prepareStatement(query);
-//                ps.setString(1, type);
-//                ps.setString(2, name);
-//                ps.setString(3, isLaunchedByDBA ? schemaName : null);
-//                ResultSet rs;
-//                try {
-//                    rs = ps.executeQuery();
-//                } catch (SQLException e) {
-//                    log.trace(String.format("Error during select dbms_metadata.get_dependent_ddl(%s, %s) from dual", type, name));
-//                    return "";
-//                }
-//                try {
-//                    if (rs.next()) {
-//                        return rs.getString(1);
-//                    }
-//                } finally {
-//                    rs.close();
-//                }
-//                return null;
-//            }
-//        });
+
     }
 
     public String findDDLInPublicScheme(String type, String name) {
-        return executeDbmsMetadataGetDdl("select dbms_metadata.get_ddl(?, ?, ?) from dual", type, name, "PUBLIC");
+       throw new NotImplementedException();
     }
 
     public String findDbmsJobDDL(String name) {
@@ -433,25 +377,6 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
                     "END;";
 
         return (String) getJdbcTemplate().execute(sql, new CallableStatementCallbackImpl());
-    }
-
-    public void applyTransformParameters(Connection connection) throws SQLException {
-        for (String parameterName : transformParams.keySet()) {
-            connection.setAutoCommit(false);
-            // setBoolean doesn't convert java boolean to pl/sql boolean, so used such query building
-            String sql = String.format(
-                    "BEGIN " +
-                            " dbms_metadata.set_transform_param(DBMS_METADATA.SESSION_TRANSFORM,'%s',%s);" +
-                            " END;", parameterName, transformParams.get(parameterName));
-            PreparedStatement ps = connection.prepareCall(sql);
-            //  ps.setString(1, parameterName);
-            //  ps.setBoolean(2, transformParams.get(parameterName) );  //In general this doesn't work
-            ps.execute();
-        }
-    }
-
-    public void setTransformParams(Map<String, Boolean> transformParams) {
-        this.transformParams = transformParams;
     }
 
     public void setSchemaName(String schemaName) {
@@ -480,4 +405,5 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
             return userObject;
         }
     }
+
 }

@@ -11,7 +11,8 @@
     <context:annotation-config/>
     <aop:aspectj-autoproxy/>
 
-    <import resource="daoContext.xml"/>
+    <context:component-scan base-package="com.googlecode.scheme2ddl.dao"/>
+
 
     <job id="job1" xmlns="http://www.springframework.org/schema/batch">
         <step id="step1" parent="simpleStep">

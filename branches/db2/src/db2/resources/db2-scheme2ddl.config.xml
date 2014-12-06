@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		  http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+    <import resource="classpath:applicationContext.xml"/>
+
+
+    <bean id="dataSource" class="com.ibm.db2.jcc.DB2DataSource">
+        <!--<property name="URL" value="jdbc:db2://db2-dev02:50000/my"/>-->
+        <!-- You can choose a DBA user. For example: value="sys as sysdba" -->
+        <!--<property name="user" value="scott"/>-->
+        <!--<property name="password" value="tiger"/>-->
+        <!--<property name="connectionCachingEnabled" value="true"/>-->
+    </bean>
+
+    <util:list id="schemaList">
+        <!--<value>SCOTT</value>-->
+        <!--<value>HR</value>-->
+    </util:list>
+
+    <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader" scope="step">
+        <property name="processPublicDbLinks" value="true"/>
+        <property name="processDmbsJobs" value="true"/>
+        <!--  process each constraint in separate files (constraints already included to tables DDL scripts in default transformParams_for_dbms_metadata) -->
+        <property name="processConstraint" value="false"/>
+    </bean>
+
+    <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
+        <property name="outputPath" value="output"/>
+    </bean>
+
+
+    <bean id="taskExecutor" class="org.springframework.core.task.SimpleAsyncTaskExecutor">
+        <property name="concurrencyLimit" value="1"/>
+    </bean>
+
+
+
+
+    <!-- format option for DDL, actually perform only trim for resulting DDL -->
+    <bean id="ddlFormatter" class="com.googlecode.scheme2ddl.DDLFormatter">
+        <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT. -->
+        <property name="noFormat" value="true"/>
+        <property name="isMorePrettyFormat" value="false"/>
+    </bean>
+
+    <!-- rules for construct filenames  -->
+    <bean id="fileNameConstructor" class="com.googlecode.scheme2ddl.FileNameConstructor">
+        <!-- Construct your custom layout from keywords
+
+                schema - schema name in lower case
+                type - type name in lower case, for example 'table' or 'index'
+                types_plural - type name in plural form in lower case, for xample 'tables' or 'indexes'
+                object_name - object name in lower case
+                ext - extension in lower case
+                SCHEMA - schema name in UPPER case
+                TYPE - type name in UPPER case, for example 'table' or 'index'
+                TYPES_PLURAL - type name in plural form in UPPER case, for xample 'tables' or 'indexes'
+                OBJECT_NAME - object name in UPPER case
+                EXT - extension in UPPER case
+
+            Keywords escaping is not supported.
+            Word in Mixed Case is not keyword
+        -->
+        <property name="template" value="SCHEMA/types_plural/object_name.ext"/>
+        <property name="templateForSysDBA" value="SCHEMA/types_plural/object_name.ext"/>
+
+        <!-- File extension map rules.
+        Use predefined 'TOAD' or 'PL/SQL Developer' mapping or create custom mapping -->
+        <property name="extensionMap" ref="sql_by_default"/>
+    </bean>
+
+    <util:map id="sql_by_default">
+        <entry key="DEFAULT">
+            <value>sql</value>
+        </entry>
+    </util:map>
+
+
+     <util:map id="dependencies">
+
+    </util:map>
+
+    <!-- Key is the object type,
+         Value - is set of patterns for exlude
+         Currently only '*' wildcard supported -->
+    <util:map id="excludes">
+
+    </util:map>
+
+
+</beans>
