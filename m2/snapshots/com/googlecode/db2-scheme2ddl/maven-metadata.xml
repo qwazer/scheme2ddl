@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.googlecode</groupId>
+  <artifactId>db2-scheme2ddl</artifactId>
+  <versioning>
+    <versions>
+      <version>0.0.1-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20141207181055</lastUpdated>
+  </versioning>
+</metadata>
