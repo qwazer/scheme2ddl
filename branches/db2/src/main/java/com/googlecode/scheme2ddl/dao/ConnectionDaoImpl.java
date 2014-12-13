@@ -22,7 +22,7 @@ public class ConnectionDaoImpl extends JdbcDaoSupport implements ConnectionDao {
 
     public boolean isConnectionAvailable() {
         try {
-            getJdbcTemplate().queryForInt("select 1 from dual");
+            getJdbcTemplate().queryForInt("select 1 from SYSIBM.dual");
         } catch (DataAccessException e) {
             return false;
         }

@@ -17,6 +17,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,13 +72,14 @@ public class Main {
     }
 
     private static void testDBConnection(ConfigurableApplicationContext context) throws SQLException {
-//        ConnectionDao connectionDao = (ConnectionDao) context.getBean("connectionDao");
-//        OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
-//        if (connectionDao.isConnectionAvailable()) {
-//            System.out.println("OK success connection to " + dataSource.getURL());
-//        } else {
-//            System.out.println("FAIL connect to " + dataSource.getURL());
-//        }
+        ConnectionDao connectionDao = (ConnectionDao) context.getBean("connectionDao");
+        DB2DataSource dataSource = (DB2DataSource) context.getBean("dataSource");
+        String url = dataSource.getUser() + "@" + dataSource.getServerName() + ":" + dataSource.getPortNumber() + ":" + dataSource.getDatabaseName();
+        if (connectionDao.isConnectionAvailable()) {
+            System.out.println("OK success connection to " + url);
+        } else {
+            System.out.println("FAIL connect to " + url);
+        }
     }
 
     private static void modifyContext(ConfigurableApplicationContext context) {
@@ -106,13 +108,7 @@ public class Main {
             SimpleAsyncTaskExecutor taskExecutor = (SimpleAsyncTaskExecutor) context.getBean("taskExecutor");
             taskExecutor.setConcurrencyLimit(parallelCount);
         }
-//        String userName = ((OracleDataSource) context.getBean("dataSource")).getUser();
-//        isLaunchedByDBA = userName.toLowerCase().matches(".+as +sysdba *");
-//        if (!isLaunchedByDBA){
-//            ConnectionDao connectionDao = (ConnectionDao) context.getBean("connectionDao");
-//            isLaunchedByDBA = connectionDao.hasSelectCatalogRole(); //todo rename isLaunchedByDBA -> processForeignSchema
-//        }
-        //process schemas
+
         processSchemas(context);
 
         FileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);   //will create new one if not exist
@@ -129,7 +125,6 @@ public class Main {
         List<String> listFromContext = retrieveSchemaListFromContext(context);
         if (schemas == null) {
             if (listFromContext.size() == 0) {
-                //get default schema from username
                 schemaList = findSchemaListInDb(context);
             } else {
 
@@ -165,12 +160,6 @@ public class Main {
 
     }
 
-    private static void fillSchemaListFromUserName(ConfigurableApplicationContext context) {
-//        OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
-//        String schemaName = dataSource.getUser().split(" ")[0];
-//        schemaList = new ArrayList<String>();
-//        schemaList.add(schemaName);
-    }
 
     /**
      * @param context
