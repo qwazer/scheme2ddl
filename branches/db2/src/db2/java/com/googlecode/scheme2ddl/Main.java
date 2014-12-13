@@ -67,7 +67,7 @@ public class Main {
         if (justTestConnection) {
             testDBConnection(context);
         } else {
-            new UserObjectJobRunner().start(context, false);
+            new UserObjectJobRunner().start(context);
         }
     }
 
@@ -275,15 +275,7 @@ public class Main {
                 justPrintUsage = true;
             } else if (arg.equals("-url") || arg.equals("--url")) {
                 dbUrl = args[i + 1];
-                //check for as sysdba connection
-                if (args.length >= i + 3) {
-                    if ((args[i + 2].toLowerCase().equals("as")) &&
-                            (args[i + 3].toLowerCase().startsWith("sysdba"))) {
-                        //isLaunchedByDBA = true;
-                        dbUrl = args[i + 1] + " " + args[i + 2] + " " + args[i + 3];
-                        i = i + 2;
-                    }
-                }
+
                 i++;
             } else if (arg.equals("-o") || arg.equals("-output") || arg.equals("--output")) {
                 outputPath = args[i + 1];

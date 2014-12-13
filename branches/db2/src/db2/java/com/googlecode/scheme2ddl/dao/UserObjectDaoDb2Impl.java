@@ -34,8 +34,7 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
     private static final Log log = LogFactory.getLog(UserObjectDaoDb2Impl.class);
     @Value("#{jobParameters['schemaName']}")
     private String schemaName;
-    @Value("#{jobParameters['launchedByDBA']}")
-    private boolean isLaunchedByDBA = false;
+
 
     @Autowired
     public UserObjectDaoDb2Impl(DataSource dataSource) {
@@ -100,15 +99,7 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
 
     public List<UserObject> findConstaints() {
         String sql;
-        if (isLaunchedByDBA)
-            sql = " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
-                    " from all_constraints " +
-                    " where constraint_type != 'R' and owner = '" + schemaName + "'" +
-                    " UNION ALL " +
-                    " select constraint_name as object_name, 'REF_CONSTRAINT' as object_type" +
-                    " from all_constraints " +
-                    " where constraint_type = 'R' and owner = '" + schemaName + "'";
-        else
+
             sql = " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
                     " from user_constraints where  constraint_type != 'R'" +
                     " UNION ALL " +
@@ -360,16 +351,8 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
     }
 
     public String findDbmsJobDDL(String name) {
-        String sql;
-        if (isLaunchedByDBA)
-            // The 'dbms_job.user_export' function does not work with sys/dba users (can't find users jobs). :(
-            sql = "DECLARE\n" +
-                    " callstr VARCHAR2(4096);\n" +
-                    "BEGIN\n" +
-                    "  dbms_job.full_export(" + name + ", callstr);\n" +
-                    ":done := callstr; END;";
-        else
-            sql = "DECLARE\n" +
+
+        String    sql = "DECLARE\n" +
                     " callstr VARCHAR2(4096);\n" +
                     "BEGIN\n" +
                     "  dbms_job.user_export(" + name + ", callstr);\n" +
@@ -383,9 +366,6 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
         this.schemaName = schemaName;
     }
 
-    public void setLaunchedByDBA(boolean launchedByDBA) {
-        this.isLaunchedByDBA = launchedByDBA;
-    }
 
     private class CallableStatementCallbackImpl implements CallableStatementCallback {
         public Object doInCallableStatement(CallableStatement callableStatement) throws SQLException, DataAccessException {
