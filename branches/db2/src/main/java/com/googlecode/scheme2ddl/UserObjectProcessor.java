@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.googlecode.scheme2ddl.TypeNamesUtil.map2TypeForDBMS;
 
 /**
  * @author A_Reshetnikov
