@@ -1,12 +1,18 @@
 package com.googlecode.scheme2ddl;
 
+import com.googlecode.scheme2ddl.dao.ConnectionDao;
+import com.googlecode.scheme2ddl.dao.UserObjectDao;
+import com.googlecode.scheme2ddl.domain.UserObject;
 import com.ibm.db2.jcc.DB2DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -20,6 +26,7 @@ import java.util.List;
  * @author A_Reshetnikov
  * @since Date: 17.10.2012
  */
+
 public class Main {
 
     private static final Log log = LogFactory.getLog(Main.class);
@@ -34,8 +41,10 @@ public class Main {
     private static String defaultConfigLocation = "db2-scheme2ddl.config.xml";
     private static String dbUrl = null;
     private static String schemas;
-    private static boolean isLaunchedByDBA;
     private static List<String> schemaList;
+
+
+
 
     public static void main(String[] args) throws Exception {
         collectArgs(args);
@@ -57,7 +66,7 @@ public class Main {
         if (justTestConnection) {
             testDBConnection(context);
         } else {
-            new UserObjectJobRunner().start(context, isLaunchedByDBA);
+            new UserObjectJobRunner().start(context, false);
         }
     }
 
@@ -107,10 +116,7 @@ public class Main {
         processSchemas(context);
 
         FileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);   //will create new one if not exist
-        if (isLaunchedByDBA) {
-            fileNameConstructor.setTemplate(fileNameConstructor.getTemplateForSysDBA());
-            fileNameConstructor.afterPropertiesSet();
-        }
+
 
         if (stopOnWarning){
             UserObjectProcessor processor = (UserObjectProcessor) context.getBean("processor");
@@ -124,14 +130,9 @@ public class Main {
         if (schemas == null) {
             if (listFromContext.size() == 0) {
                 //get default schema from username
-                schemaList = extactSchemaListFromUserName(context);
+                schemaList = findSchemaListInDb(context);
             } else {
-                if (isLaunchedByDBA)
-                    schemaList = new ArrayList<String>(listFromContext);
-                else {
-                    log.warn("Ignore 'schemaList' from advanced config, becouse oracle user is not connected as sys dba");
-                    schemaList = extactSchemaListFromUserName(context);
-                }
+
             }
         } else {
             String[] array = schemas.split(",");
@@ -154,12 +155,14 @@ public class Main {
         }
     }
 
-    private static List<String> extactSchemaListFromUserName(ConfigurableApplicationContext context) {
-//        OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
-//        String schemaName = dataSource.getUser().split(" ")[0];
-        List<String> list = new ArrayList<String>();
-        list.add("MY");
+    private static List<String> findSchemaListInDb(ConfigurableApplicationContext context) {
+        ConnectionDao connectionDao = (ConnectionDao) context.getBean("connectionDao");
+        List<String> list = connectionDao.findAvailableSchemas();
+        List<String> excludedSchemas = (List<String>) context.getBean("excludedSchemas");
+        list.removeAll(excludedSchemas);
+        list.remove(null);
         return list;
+
     }
 
     private static void fillSchemaListFromUserName(ConfigurableApplicationContext context) {

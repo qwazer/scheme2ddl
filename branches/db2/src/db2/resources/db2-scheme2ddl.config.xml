@@ -38,8 +38,6 @@
     </bean>
 
 
-
-
     <!-- format option for DDL, actually perform only trim for resulting DDL -->
     <bean id="ddlFormatter" class="com.googlecode.scheme2ddl.DDLFormatter">
         <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT. -->
@@ -80,7 +78,7 @@
     </util:map>
 
 
-     <util:map id="dependencies">
+    <util:map id="dependencies">
 
     </util:map>
 
@@ -90,6 +88,21 @@
     <util:map id="excludes">
 
     </util:map>
+
+    <util:list id="excludedSchemas">
+        <value>NULLID</value>
+        <value>SQLJ</value>
+        <value>SYSCAT</value>
+        <value>SYSFUN</value>
+        <value>SYSIBM</value>
+        <value>SYSIBMADM</value>
+        <value>SYSIBMINTERNAL</value>
+        <value>SYSIBMTS</value>
+        <value>SYSPROC</value>
+        <value>SYSPUBLIC</value>
+        <value>SYSSTAT</value>
+        <value>SYSTOOLS</value>
+    </util:list>
 
 
 </beans>

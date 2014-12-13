@@ -1,5 +1,9 @@
 package com.googlecode.scheme2ddl.dao;
 
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
 /**
  * Check some properties of connection
  *
@@ -11,4 +15,6 @@ public interface ConnectionDao {
     boolean isConnectionAvailable();
 
     boolean hasSelectCatalogRole();
+
+    List<String> findAvailableSchemas();
 }

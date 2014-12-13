@@ -45,7 +45,7 @@ public class UserObjectDaoDb2Impl extends JdbcDaoSupport implements UserObjectDa
     public List<UserObject> findListForProccessing() {
 
 
-        long opToken = call_DB2LK_GENERATE_DDL("-e -xd -z " + schemaName);
+        long opToken = call_DB2LK_GENERATE_DDL("-e -z " + schemaName);
 
         final String sql;
            // sql = "select OBJECT_NAME, OBJECT_TYPE from SYSIBMADM.ALL_OBJECTS where OBJECT_SCHEMA = '"+schemaName+"' ";
