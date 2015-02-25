@@ -1,4 +1,8 @@
 #labels Featured
+==What's new in version 2.3.3==
+  # fix issue #23 again (regression)
+
+
 ==What's new in version 2.3.2==
   # fix issue #23 sql typo in exporting jobs
 
@@ -15,7 +19,7 @@
   # broke compatibility with old (2.1.X) custom config.
  If you got Exception `"$Proxy12 cannot be cast to com.googlecode.scheme2ddl.UserObjectProcessor"` add new `<bean id="fileNameConstructor">` and `<util:map id="sql_by_default">` to your custom config 
 
-==What's new in version 2.2.2==
+==What's new in version 2.2.3==
   # fix issue #12
 
 ==What's new in version 2.2.2==
