@@ -1,4 +1,8 @@
 #labels Featured
+==What's new in version 2.3.4==
+  # fix issue #26 
+  # add option for replace windows reserved file names, backward compatibility preserved
+
 ==What's new in version 2.3.3==
   # fix issue #23 again (regression)
 
