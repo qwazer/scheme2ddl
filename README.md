@@ -1,5 +1,5 @@
 
-**scheme2ddl** - command line util for export oracle schema to set of ddl scripts. Provide a lot of configurations via basic command line options or advanced XML configuartion.
+**scheme2ddl** is command line util for export oracle schema to set of ddl scripts. Provide a lot of configurations via basic command line options or advanced XML configuartion.
 
 **scheme2ddl** is part of 
 [oracle-ddl2svn](http://code.google.com/p/oracle-ddl2svn) project.
@@ -15,7 +15,6 @@ Java must be installed on your computer.
 For exporting oracle scheme you must provide
 
    - DB connection string
-   
    - output directory
    
 Usage example. Command
@@ -69,8 +68,6 @@ More command line options
 ###See it in action in cloud 
 You can see it in action as [Jenkins build](http://jenkins-ddl2svn.rhcloud.com/job/amazon-rds-oracle-schema2ddl/lastSuccessfulBuild). Look at console output and build artifacts.
 
- Jenkins hosting provided by Red Hat's OpenShift.
- 
- Oracle hosting provided by Amazon's RDS.
-
+> Jenkins hosting provided by Red Hat's OpenShift.
+> Oracle hosting provided by Amazon's RDS.
 
