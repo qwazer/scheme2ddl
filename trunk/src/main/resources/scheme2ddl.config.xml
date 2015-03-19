@@ -74,6 +74,7 @@
         -->
         <property name="template" value="types_plural/object_name.ext"/>
         <property name="templateForSysDBA" value="SCHEMA/types_plural/object_name.ext"/>
+        <property name="needToReplaceWindowsReservedFileNames" value="true"/>
 
         <!-- File extension map rules.
         Use predefined 'TOAD' or 'PL/SQL Developer' mapping or create custom mapping -->
@@ -118,6 +119,37 @@
         <entry key="DEFAULT">
             <value>sql</value>
         </entry>
+    </util:map>
+
+
+    <!--
+     Windows doesn't allow to save files with reserved file names
+     https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx
+     This is confugurable workaround for this limitation
+    -->
+    <util:map id="windowsReservedNamesReplacements" key-type="java.lang.String" value-type="java.lang.String">
+        <entry key="CON " value="CON_" />
+        <entry key="PRN"  value="PRN_" />
+        <entry key="AUX"  value="AUX_" />
+        <entry key="NUL"  value="NUL_" />
+        <entry key="COM1" value="COM1_"/>
+        <entry key="COM2" value="COM2_"/>
+        <entry key="COM3" value="COM3_"/>
+        <entry key="COM4" value="COM4_"/>
+        <entry key="COM5" value="COM5_"/>
+        <entry key="COM6" value="COM6_"/>
+        <entry key="COM7" value="COM7_"/>
+        <entry key="COM8" value="COM8_"/>
+        <entry key="COM9" value="COM9_"/>
+        <entry key="LPT1" value="LPT1_"/>
+        <entry key="LPT2" value="LPT2_"/>
+        <entry key="LPT3" value="LPT3_"/>
+        <entry key="LPT4" value="LPT4_"/>
+        <entry key="LPT5" value="LPT5_"/>
+        <entry key="LPT6" value="LPT6_"/>
+        <entry key="LPT7" value="LPT7_"/>
+        <entry key="LPT8" value="LPT8_"/>
+        <entry key="LPT9" value="LPT9_"/>
     </util:map>
 
 

@@ -4,8 +4,11 @@ import com.googlecode.scheme2ddl.domain.UserObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +35,12 @@ public class FileNameConstructor implements InitializingBean {
     private String templateForSysDBA = "SCHEMA/types_plural/object_name.ext";
     private String preparedTemplate;
     private Map<String, String> extensionMap;
+
+
+    private boolean needToReplaceWindowsReservedFileNames = false;
+
+    @Resource
+    private Map<String,String> windowsReservedNamesReplacements;
 
     /**
      * prepare template
@@ -89,8 +98,17 @@ public class FileNameConstructor implements InitializingBean {
         filename = filename.replace(nonOracleChar + kw_type_lower, typeName.toLowerCase());
         filename = filename.replace(nonOracleChar + kw_type_UPPER, typeName.toUpperCase());
 
-        filename = filename.replace(nonOracleChar + kw_objectname_lower, userObject.getName().toLowerCase());
-        filename = filename.replace(nonOracleChar + kw_objectname_UPPER, userObject.getName().toUpperCase());
+
+        String userObjectName = userObject.getName();
+
+        if (needToReplaceWindowsReservedFileNames){
+            if (windowsReservedNamesReplacements.get(userObjectName) != null){
+                userObjectName = windowsReservedNamesReplacements.get(userObjectName);
+            }
+        }
+
+        filename = filename.replace(nonOracleChar + kw_objectname_lower, userObjectName.toLowerCase());
+        filename = filename.replace(nonOracleChar + kw_objectname_UPPER, userObjectName.toUpperCase());
 
         String extension = extensionMap.get(typeName.toUpperCase());
         if (extension == null) {
@@ -126,9 +144,19 @@ public class FileNameConstructor implements InitializingBean {
             extensionMap = new HashMap<String, String>();
             extensionMap.put("DEFAULT", "sql");
         }
+
+
+        if (windowsReservedNamesReplacements == null){
+           needToReplaceWindowsReservedFileNames=false;
+
+        }
     }
 
     public void setExtensionMap(Map<String, String> extensionMap) {
         this.extensionMap = extensionMap;
+    }
+
+    public void setNeedToReplaceWindowsReservedFileNames(boolean needToReplaceWindowsReservedFileNames) {
+        this.needToReplaceWindowsReservedFileNames = needToReplaceWindowsReservedFileNames;
     }
 }
