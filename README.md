@@ -4,7 +4,6 @@
 **scheme2ddl** is part of 
 [oracle-ddl2svn](http://code.google.com/p/oracle-ddl2svn) project.
 
-Current released version is [2.3.4] (http://scheme2ddl.googlecode.com/svn/m2/releases/com/googlecode/scheme2ddl/2.3.4/scheme2ddl-2.3.4.jar)
 
 ###Benefits
 *scheme2ddl* give ability to filter undesirable information, separate DDL in different files, pretty format output.
