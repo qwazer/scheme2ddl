@@ -4,9 +4,11 @@
 **scheme2ddl** is part of 
 [oracle-ddl2svn](http://code.google.com/p/oracle-ddl2svn) project.
 
+Latest releases available at [bintray](https://bintray.com/qwazer/maven/scheme2ddl)
+
 
 ###Benefits
-*scheme2ddl* give ability to filter undesirable information, separate DDL in different files, pretty format output.
+**scheme2ddl** give ability to filter undesirable information, separate DDL in different files, pretty format output.
 
 ###How to start with minimal configuration
 Java must be installed on your computer.
