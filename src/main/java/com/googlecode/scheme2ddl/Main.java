@@ -39,8 +39,13 @@ public class Main {
     private static String schemas;
     private static boolean isLaunchedByDBA;
     private static List<String> schemaList;
+	private static String objectFilter = "%";
+	private static String typeFilter = "";
+	private static String typeFilterMode = "include";
 
     public static void main(String[] args) throws Exception {
+		typeFilterMode = "include"; //default is to include any type filter
+		
         collectArgs(args);
         if (justPrintUsage) {
             printUsage();
@@ -60,7 +65,10 @@ public class Main {
         if (justTestConnection) {
             testDBConnection(context);
         } else {
-            new UserObjectJobRunner().start(context, isLaunchedByDBA);
+			System.out.println("DDL object filter: " + objectFilter);
+			System.out.println("DDL type filter: " + typeFilter);
+			System.out.println("DDL type filter mode: " + typeFilterMode);
+            new UserObjectJobRunner().start(context, isLaunchedByDBA, objectFilter.toLowerCase(), typeFilter.toUpperCase(), typeFilterMode.toLowerCase());
         }
     }
 
@@ -232,19 +240,23 @@ public class Main {
         msg.append("internally call to dbms_metadata.get_ddl " + lSep);
         msg.append("more config options in scheme2ddl.config.xml " + lSep);
         msg.append("Options: " + lSep);
-        msg.append("  -help, -h               print this message" + lSep);
+        msg.append("  -help, -h                print this message" + lSep);
         // msg.append("  -verbose, -v           be extra verbose" + lSep);
-        msg.append("  -url,                   DB connection URL" + lSep);
-        msg.append("                          example: scott/tiger@localhost:1521:ORCL" + lSep);
+        msg.append("  -url,                    DB connection URL" + lSep);
+        msg.append("                           example: scott/tiger@localhost:1521:ORCL" + lSep);
 
-        msg.append("  -o, --output,           output dir" + lSep);
-        msg.append("  -p, --parallel,         number of parallel thread (default 4)" + lSep);
-        msg.append("  -s, --schemas,          a comma separated list of schemas for processing" + lSep);
-        msg.append("                          (works only if connected to oracle as sysdba)" + lSep);
-        msg.append("  -c, --config,           path to scheme2ddl config file (xml)" + lSep);
-        msg.append("  --stop-on-warning,      stop on getting DDL error (skip by default)" + lSep);
-        msg.append("  -tc,--test-connection,  test db connection available" + lSep);
-        msg.append("  -version,               print version info and exit" + lSep);
+        msg.append("  -o, --output,            output dir" + lSep);
+        msg.append("  -p, --parallel,          number of parallel thread (default 4)" + lSep);
+        msg.append("  -s, --schemas,           a comma separated list of schemas for processing" + lSep);
+        msg.append("                           (works only if connected to oracle as sysdba)" + lSep);
+        msg.append("  -c, --config,            path to scheme2ddl config file (xml)" + lSep);
+        msg.append("  -f, --filter,            filter for specific DDL objects" + lSep);
+        msg.append("                           every LIKE wildcard can be used" + lSep);
+		msg.append("  -tf, --type-filter,      filter for specific DDL object types" + lSep);
+		msg.append("  -tfm, --type-filtermode, mode for type filter: include(default) or exclude" + lSep);
+        msg.append("  --stop-on-warning,       stop on getting DDL error (skip by default)" + lSep);
+        msg.append("  -tc,--test-connection,   test db connection available" + lSep);
+        msg.append("  -version,                print version info and exit" + lSep);
         System.out.println(msg.toString());
     }
 
@@ -290,6 +302,19 @@ public class Main {
             } else if (arg.equals("-c") || arg.equals("--config")) {
                 customConfigLocation = args[i + 1];
                 i++;
+            } else if (arg.equals("-f") || arg.equals("--filter")) {
+            	objectFilter = args[i + 1];
+                i++;
+			} else if (arg.equals("-tf") || arg.equals("--type-filter")) {
+            	typeFilter = args[i + 1];
+                i++;
+			} else if (arg.equals("-tfm") || arg.equals("--type-filtermode")) {
+            	typeFilterMode = args[i + 1];
+                i++;
+				//default to include if anything except include or exclude is given as argument
+				if (!typeFilterMode.equals("include") && !typeFilterMode.equals("exclude")) {
+					typeFilterMode = "include";
+				}
             } else if (arg.equals("-version")) {
                 justPrintVersion = true;
             } else if (arg.startsWith("-")) {
