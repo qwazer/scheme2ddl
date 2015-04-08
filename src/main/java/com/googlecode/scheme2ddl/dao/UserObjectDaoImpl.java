@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.googlecode.scheme2ddl.TypeNamesUtil.map2TypeForConfig;
+//import static com.googlecode.scheme2ddl.TypeNamesUtil.map2TypeForConfig;
 
 /**
  * @author A_Reshetnikov
@@ -30,32 +30,63 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
     private String schemaName;
     @Value("#{jobParameters['launchedByDBA']}")
     private boolean isLaunchedByDBA = false;
+	@Value("#{jobParameters['objectFilter']}")
+    private String objectFilter;
+	@Value("#{jobParameters['typeFilter']}")
+    private String typeFilter;
+	@Value("#{jobParameters['typeFilterMode']}")
+    private String typeFilterMode = "include";
 
     public List<UserObject> findListForProccessing() {
         String sql;
-        if (isLaunchedByDBA)
-            sql = "select t.object_name, t.object_type " +
+        if (isLaunchedByDBA) {
+            sql = "select t.object_name, object_type " +
                     "  from dba_objects t " +
                     " where t.generated = 'N' " +
+					"	and lower(t.object_name) like '" + objectFilter + "' " +
                     "   and t.owner = '" + schemaName + "' " +
                     "   and not exists (select 1 " +
                     "          from user_nested_tables unt" +
-                    "         where t.object_name = unt.table_name)" +
-                    " UNION ALL " +
-                    " select rname as object_name, 'REFRESH_GROUP' as object_type " +
-                    " from dba_refresh a " +
-                    " where a.rowner = '" + schemaName + "' ";
-        else
-            sql = "select t.object_name, t.object_type " +
+                    "         where t.object_name = unt.table_name)";
+			if (!typeFilter.isEmpty()) { //type filter is filled
+				sql += " and upper(t.object_type) ";
+				
+				if (typeFilterMode.equals("exclude")) //exclude types
+					sql += " NOT ";
+				
+				sql += " IN (" + typeFilter + ") ";
+			}
+			if (isTypeAllowed("'REFRESH GROUP'")) {
+                sql += " UNION ALL " +
+					" select rname as object_name, 'REFRESH_GROUP' as object_type " +
+					" from dba_refresh a " +
+					" where a.rowner = '" + schemaName + "' " +
+					" and lower(a.rname) like '" + objectFilter + "' ";
+			}
+        } else {
+            sql = "select t.object_name, object_type " +
                     "  from user_objects t " +
                     " where t.generated = 'N' " +
+					"	and lower(t.object_name) like '" + objectFilter + "' " +
                     "   and not exists (select 1 " +
                     "          from user_nested_tables unt" +
-                    "         where t.object_name = unt.table_name)" +
-                    " UNION ALL " +
-                    " select rname as object_name, 'REFRESH GROUP' as object_type " +
-                    " from user_refresh ";
-        return getJdbcTemplate().query(sql, new UserObjectRowMapper());
+                    "         where t.object_name = unt.table_name)";
+			if (!typeFilter.isEmpty()) {
+				sql += " and upper(t.object_type) ";
+				
+				if (typeFilterMode.equals("exclude")) //exclude types
+					sql += " NOT ";
+					
+				sql += " IN (" + typeFilter + ") ";
+			}
+			if (isTypeAllowed("'REFRESH GROUP'")) {
+                sql += " UNION ALL " +
+                    " select rname as object_name, 'REFRESH_GROUP' as object_type " +
+                    " from user_refresh " +
+					" where lower(rname) like '" + objectFilter + "' ";
+			}
+        }
+		return getJdbcTemplate().query(sql, new UserObjectRowMapper());
     }
 
     public List<UserObject> findPublicDbLinks() {
@@ -64,7 +95,8 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
             list = getJdbcTemplate().query(
                     "select db_link as object_name, 'PUBLIC DATABASE LINK' as object_type " +
                             "from DBA_DB_LINKS " +
-                            "where owner='PUBLIC'",
+                            "where owner='PUBLIC'" +
+							"	and lower(db_link) like '" + objectFilter + "' ",
                     new UserObjectRowMapper());
         } catch (BadSqlGrammarException sqlGrammarException) {
             if (sqlGrammarException.getSQLException().getErrorCode() == 942) {
@@ -97,26 +129,44 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
         String tableName = isLaunchedByDBA ? "dba_jobs" : "user_jobs";
         String whereClause = isLaunchedByDBA ? "schema_user = '" + schemaName + "'" : "schema_user != 'SYSMAN'";
         String sql = "select job || '' as object_name, 'DBMS JOB' as object_type " +
-                "from  " + tableName + " where " + whereClause;
-        return getJdbcTemplate().query(sql, new UserObjectRowMapper());
+                "from  " + tableName + " where " + whereClause + "	and to_char(job) like '" + objectFilter + "' ";
+		// a little bit ugly, but this prevents an output from jobs if dbms job is not in typeFilter
+		if (!isTypeAllowed("'DBMS JOB'")) {
+			sql += " and 1 = 2 ";
+		}
+		return getJdbcTemplate().query(sql, new UserObjectRowMapper());
     }
 
     public List<UserObject> findConstaints() {
         String sql;
+		String prevent_constraint = new String("");
+		String prevent_refconstraint = new String("");
+		
+		if (!isTypeAllowed("'CONSTRAINT'")) {
+			prevent_constraint = " and 1 = 2 ";
+		}
+		if (!isTypeAllowed("'REF_CONSTRAINT'")) {
+			prevent_refconstraint = " and 1 = 2 ";
+		}
         if (isLaunchedByDBA)
             sql = " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
                     " from all_constraints " +
                     " where constraint_type != 'R' and owner = '" + schemaName + "'" +
+					" and lower(constraint_name) like '" + objectFilter + "' " + prevent_constraint +
                     " UNION ALL " +
                     " select constraint_name as object_name, 'REF_CONSTRAINT' as object_type" +
                     " from all_constraints " +
-                    " where constraint_type = 'R' and owner = '" + schemaName + "'";
+                    " where constraint_type = 'R' and owner = '" + schemaName + "'" +
+					" and lower(constraint_name) like '" + objectFilter + "' " + prevent_refconstraint;
         else
             sql = " select constraint_name as object_name, 'CONSTRAINT' as object_type" +
                     " from user_constraints where  constraint_type != 'R'" +
+					" and lower(constraint_name) like '" + objectFilter + "' " + prevent_constraint +
                     " UNION ALL " +
                     " select constraint_name as object_name, 'REF_CONSTRAINT' as object_type" +
-                    " from user_constraints where constraint_type = 'R'";
+                    " from user_constraints where constraint_type = 'R'" +
+					" and lower(constraint_name) like '" + objectFilter + "' " + prevent_refconstraint;
+					
         return getJdbcTemplate().query(sql, new UserObjectRowMapper());
     }
 
@@ -260,9 +310,20 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
         public UserObject mapRow(ResultSet rs, int rowNum) throws SQLException {
             UserObject userObject = new UserObject();
             userObject.setName(rs.getString("object_name"));
-            userObject.setType(rs.getString("object_type"));
+			userObject.setType(rs.getString("object_type"));
             userObject.setSchema(schemaName == null ? "" : schemaName);
             return userObject;
         }
     }
+	
+	private boolean isTypeAllowed (String typeName) {
+		if (typeFilter.isEmpty()) // empty type filter means all types are allowed
+			return true;
+		if (typeFilterMode.equals("include") && typeFilter.contains(typeName)) // given typeName is in the typeFilter
+			return true;
+		if (typeFilterMode.equals("exclude") && !typeFilter.contains(typeName)) // given typeName is not in the typeFilter
+			return true;
+		
+		return false;
+	}
 }

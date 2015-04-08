@@ -19,6 +19,8 @@ public class TypeNamesUtil {
             return "DB_LINK";
         if (type.equals("JOB"))
             return "PROCOBJ";
+		if (type.equals("SCHEDULE"))
+            return "PROCOBJ";
         return type.replace(" ", "_");
     }
 
