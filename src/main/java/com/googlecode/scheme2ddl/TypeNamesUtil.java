@@ -15,12 +15,15 @@ public class TypeNamesUtil {
      * @return type name for using in  DBMS_METADATA package
      */
     public static String map2TypeForDBMS(String type) {
+		FileNameConstructor fileNameConstructor;
         if (type.contains("DATABASE LINK"))
             return "DB_LINK";
         if (type.equals("JOB"))
             return "PROCOBJ";
 		if (type.equals("SCHEDULE"))
             return "PROCOBJ";
+		if (type.equals("PACKAGE"))
+            return "PACKAGE_SPEC";
         return type.replace(" ", "_");
     }
 
