@@ -105,10 +105,10 @@
         <entry key="VIEW">
             <value>vw</value>
         </entry>
-        <entry key="PACKAGE">   <!--todo is not the same as Package Specs of TOAD -->
+        <entry key="PACKAGE">
             <value>pks</value>
         </entry>
-        <entry key="PACKAGE BODY">
+        <entry key="PACKAGE_BODY">
             <value>pkb</value>
         </entry>
     </util:map>
@@ -187,7 +187,7 @@
                 <value>OBJECT_GRANT</value>
             </set>
         </entry>
-        <entry key="PACKAGE">
+        <entry key="PACKAGE BODY">
             <set>
                 <value>OBJECT_GRANT</value>
             </set>
@@ -227,7 +227,7 @@
         <entry key="LOB"><set><value>*</value></set></entry>
 
         <!--Excluded, because all them persist in PACKAGE, TYPE and TABLE -->
-        <entry key="PACKAGE BODY"><set><value>*</value></set></entry>
+        <!--<entry key="PACKAGE BODY"><set><value>*</value></set></entry>-->
         <entry key="TYPE BODY"><set><value>*</value></set></entry>
         <entry key="INDEX"><set><value>*</value></set></entry>
         <!--For removing system types http://www.sql.ru/forum/actualthread.aspx?bid=3&tid=542661&hl=-->
