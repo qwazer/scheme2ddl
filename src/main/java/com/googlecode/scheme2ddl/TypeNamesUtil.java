@@ -15,7 +15,6 @@ public class TypeNamesUtil {
      * @return type name for using in  DBMS_METADATA package
      */
     public static String map2TypeForDBMS(String type) {
-		FileNameConstructor fileNameConstructor;
         if (type.contains("DATABASE LINK"))
             return "DB_LINK";
         if (type.equals("JOB"))
