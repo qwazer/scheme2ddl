@@ -35,6 +35,7 @@ public class FileNameConstructor implements InitializingBean {
     private String templateForSysDBA = "SCHEMA/types_plural/object_name.ext";
     private String preparedTemplate;
     private Map<String, String> extensionMap;
+	private boolean combinePackage;
 
 
     private boolean needToReplaceWindowsReservedFileNames = false;
@@ -90,6 +91,11 @@ public class FileNameConstructor implements InitializingBean {
         filename = filename.replace(nonOracleChar + kw_schema_UPPER, userObject.getSchema().toUpperCase());
 
         String typeName = abbreviate(userObject.getType()).replace(" ", "_");
+		
+		String typeName_backup = typeName;
+		if (combinePackage && typeName.equals("PACKAGE_BODY")) {
+			typeName = "PACKAGE";
+		}
 
         //process kw_types_plural before kw_type
         filename = filename.replace(nonOracleChar + kw_types_plural_lower, pluralaze(typeName).toLowerCase());
@@ -98,6 +104,9 @@ public class FileNameConstructor implements InitializingBean {
         filename = filename.replace(nonOracleChar + kw_type_lower, typeName.toLowerCase());
         filename = filename.replace(nonOracleChar + kw_type_UPPER, typeName.toUpperCase());
 
+		if (combinePackage) {
+			typeName = typeName_backup;
+		}
 
         String userObjectName = userObject.getName();
 
@@ -154,6 +163,10 @@ public class FileNameConstructor implements InitializingBean {
 
     public void setExtensionMap(Map<String, String> extensionMap) {
         this.extensionMap = extensionMap;
+    }
+	
+	public void setCombinePackage(boolean combinePackage) {
+        this.combinePackage = combinePackage;
     }
 
     public void setNeedToReplaceWindowsReservedFileNames(boolean needToReplaceWindowsReservedFileNames) {
