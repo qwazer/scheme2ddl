@@ -26,5 +26,7 @@ public interface UserObjectDao {
     String findDDLInPublicScheme(String type, String name);
 
     String findDbmsJobDDL(String name);
+	
+	String findRefGroupDDL(String type, String name);
 
 }

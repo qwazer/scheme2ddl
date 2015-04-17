@@ -71,6 +71,9 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
             if (userObject.getType().equals("PUBLIC DATABASE LINK")) {
                 return userObjectDao.findDDLInPublicScheme(map2TypeForDBMS(userObject.getType()), userObject.getName());
             }
+			if (userObject.getType().equals("REFRESH_GROUP")) {
+                return userObjectDao.findRefGroupDDL(userObject.getType(), userObject.getName());
+            }
             String res = userObjectDao.findPrimaryDDL(map2TypeForDBMS(userObject.getType()), userObject.getName());
             Set<String> dependedTypes = dependencies.get(userObject.getType());
             if (dependedTypes != null) {

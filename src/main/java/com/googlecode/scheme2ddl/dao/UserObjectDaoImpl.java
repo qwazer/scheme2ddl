@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-//import static com.googlecode.scheme2ddl.TypeNamesUtil.map2TypeForConfig;
+import static com.googlecode.scheme2ddl.TypeNamesUtil.map2TypeForDBMS;
 
 /**
  * @author A_Reshetnikov
@@ -270,6 +270,69 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
 
         return (String) getJdbcTemplate().execute(sql, new CallableStatementCallbackImpl());
     }
+	
+	public String findRefGroupDDL(String type, final String name) {
+		if (isLaunchedByDBA)
+			return findPrimaryDDL(map2TypeForDBMS(type), name);
+		else
+			return (String) getJdbcTemplate().execute(new ConnectionCallback() {
+				final String query = 
+				"SELECT 'begin'"
+						 + "|| CHR (13) || CHR (10)"
+						 + "|| '-- dbms_refresh.destroy(name      => '''"
+						 + "|| rname"
+						 + "|| ''');'"
+						 + "|| CHR (13) || CHR (10)"
+						 + "|| '   dbms_refresh.make   (name      => '''"
+						 + "|| rname"
+						 + "|| ''', '"
+						 + "|| CHR (13) || CHR (10)"
+						 + "|| '                        list      => '''"
+						 + "|| listagg(name, ',') within group (order by name)"
+						 + "|| ''','"
+						 + "|| CHR (13) || CHR (10)"
+						 + "|| '                        next_date => '"
+						 + "|| CASE WHEN MAX(next_date) IS NULL THEN 'NULL' ELSE 'to_date(''' || TO_CHAR (MAX (next_date), 'DD.MM.YYYY HH24:MI:SS') || ''', ''DD.MM.YYYY HH24:MI:SS'')' END"
+						 + "|| ', '"
+						 + "|| CHR (13) || CHR (10)"
+						 + "|| '                        interval  => '"
+						 + "|| CASE WHEN MAX(interval) IS NULL THEN 'NULL' ELSE '''' || MAX (REPLACE(interval, '''', '''''')) || '''' END "
+						 + "|| ');'"
+						 + "|| CHR (13) || CHR (10)"
+						 + "|| '   commit;'"
+						 + "|| CHR (13) || CHR (10)"
+						 + "|| 'end;'"
+						 + "|| CHR (13) || CHR (10)"
+						 + "|| '/'"
+						 + "|| CHR (13) || CHR (10)"
+				+ " FROM user_refresh_children "
+				+ " WHERE rname = UPPER ('"+name+"')"
+				+ " GROUP BY rname";
+				
+				public Object doInConnection(Connection connection) throws SQLException, DataAccessException {
+					System.out.println(query);
+					applyTransformParameters(connection);
+					PreparedStatement ps = connection.prepareStatement(query);
+						
+					ResultSet rs;
+					
+					try {
+						rs = ps.executeQuery();
+					} catch (SQLException e) {
+						log.trace(String.format("Error during select ddl for refresh group (%s)", name));
+						return "";
+					}
+					try {
+						if (rs.next()) {
+							return rs.getString(1);
+						}
+					} finally {
+						rs.close();
+					}
+					return null;
+				}
+			});			
+	}
 
     public void applyTransformParameters(Connection connection) throws SQLException {
         for (String parameterName : transformParams.keySet()) {
