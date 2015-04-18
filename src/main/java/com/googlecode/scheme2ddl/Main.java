@@ -1,7 +1,6 @@
 package com.googlecode.scheme2ddl;
 
 import com.googlecode.scheme2ddl.dao.ConnectionDao;
-import com.googlecode.scheme2ddl.dao.UserObjectDao;
 import oracle.jdbc.pool.OracleDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +32,7 @@ public class Main {
     private static boolean justTestConnection = false;
     private static boolean skipPublicDbLinks = false;
     private static boolean stopOnWarning = false;
-    private static boolean filterSequenceValues = false;
+    private static boolean replaceSequenceValues = false;
     private static String customConfigLocation = null;
     private static String defaultConfigLocation = "scheme2ddl.config.xml";
     private static String dbUrl = null;
@@ -121,9 +120,9 @@ public class Main {
             UserObjectProcessor processor = (UserObjectProcessor) context.getBean("processor");
             processor.setStopOnWarning(stopOnWarning);
         }
-        if (filterSequenceValues){
+        if (replaceSequenceValues){
             UserObjectProcessor processor = (UserObjectProcessor) context.getBean("processor");
-            processor.setFilterSequenceValues(filterSequenceValues);
+            processor.setReplaceSequenceValues(replaceSequenceValues);
         }
 
     }
@@ -245,23 +244,25 @@ public class Main {
         msg.append("internally call to dbms_metadata.get_ddl " + lSep);
         msg.append("more config options in scheme2ddl.config.xml " + lSep);
         msg.append("Options: " + lSep);
-        msg.append("  -help, -h                print this message" + lSep);
-        // msg.append("  -verbose, -v           be extra verbose" + lSep);
-        msg.append("  -url,                    DB connection URL" + lSep);
-        msg.append("                           example: scott/tiger@localhost:1521:ORCL" + lSep);
+        msg.append("  -help, -h                  print this message" + lSep);
+        // msg.append("  -verbose, -v             be extra verbose" + lSep);
+        msg.append("  -url,                      DB connection URL" + lSep);
+        msg.append("                             example: scott/tiger@localhost:1521:ORCL" + lSep);
 
-        msg.append("  -o, --output,            output dir" + lSep);
-        msg.append("  -p, --parallel,          number of parallel thread (default 4)" + lSep);
-        msg.append("  -s, --schemas,           a comma separated list of schemas for processing" + lSep);
-        msg.append("                           (works only if connected to oracle as sysdba)" + lSep);
-        msg.append("  -c, --config,            path to scheme2ddl config file (xml)" + lSep);
-        msg.append("  -f, --filter,            filter for specific DDL objects" + lSep);
-        msg.append("                           every LIKE wildcard can be used" + lSep);
-		msg.append("  -tf, --type-filter,      filter for specific DDL object types" + lSep);
-		msg.append("  -tfm, --type-filtermode, mode for type filter: include(default) or exclude" + lSep);
-        msg.append("  --stop-on-warning,       stop on getting DDL error (skip by default)" + lSep);
-        msg.append("  -tc,--test-connection,   test db connection available" + lSep);
-        msg.append("  -version,                print version info and exit" + lSep);
+        msg.append("  -o, --output,              output dir" + lSep);
+        msg.append("  -p, --parallel,            number of parallel thread (default 4)" + lSep);
+        msg.append("  -s, --schemas,             a comma separated list of schemas for processing" + lSep);
+        msg.append("                             (works only if connected to oracle as sysdba)" + lSep);
+        msg.append("  -c, --config,              path to scheme2ddl config file (xml)" + lSep);
+        msg.append("  -f, --filter,              filter for specific DDL objects" + lSep);
+        msg.append("                             every LIKE wildcard can be used" + lSep);
+		msg.append("  -tf, --type-filter,        filter for specific DDL object types" + lSep);
+		msg.append("  -tfm, --type-filtermode,   mode for type filter: include(default) or exclude" + lSep);
+        msg.append("  --stop-on-warning,         stop on getting DDL error (skip by default)" + lSep);
+        msg.append("  -rsv,                      replace actual filter values with 1 " +
+                "     --replace-sequence-values, " + lSep);
+        msg.append("  -tc,--test-connection,     test db connection available" + lSep);
+        msg.append("  -version,                  print version info and exit" + lSep);
         System.out.println(msg.toString());
     }
 
@@ -305,7 +306,7 @@ public class Main {
             } else if (arg.equals("--stop-on-warning")) {
                 stopOnWarning = true;
             }   else if ((arg.equals("-fsv") || arg.equals("--filter-sequence-values"))) {
-                filterSequenceValues = true;
+                replaceSequenceValues = true;
             } else if (arg.equals("-c") || arg.equals("--config")) {
                 customConfigLocation = args[i + 1];
                 i++;

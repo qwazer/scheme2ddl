@@ -26,7 +26,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     private Map<String, Set<String>> excludes;
     private Map<String, Set<String>> dependencies;
     private boolean stopOnWarning;
-    private boolean filterSequenceValues;
+    private boolean replaceSequenceValues;
 
     public UserObject process(UserObject userObject) throws Exception {
 
@@ -76,7 +76,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
                 return userObjectDao.findRefGroupDDL(userObject.getType(), userObject.getName());
             }
             String res = userObjectDao.findPrimaryDDL(map2TypeForDBMS(userObject.getType()), userObject.getName());
-            if (userObject.getType().equals("SEQUENCE") && filterSequenceValues) {
+            if (userObject.getType().equals("SEQUENCE") && replaceSequenceValues) {
                 res = ddlFormatter.replaceActualSequenceValueWithOne(res);
             }
             Set<String> dependedTypes = dependencies.get(userObject.getType());
@@ -116,8 +116,8 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
         this.fileNameConstructor = fileNameConstructor;
     }
 
-    public void setFilterSequenceValues(boolean filterSequenceValues) {
-        this.filterSequenceValues = filterSequenceValues;
+    public void setReplaceSequenceValues(boolean replaceSequenceValues) {
+        this.replaceSequenceValues = replaceSequenceValues;
     }
 
     public void setStopOnWarning(boolean stopOnWarning) {
