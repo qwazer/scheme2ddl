@@ -33,6 +33,7 @@ public class Main {
     private static boolean justTestConnection = false;
     private static boolean skipPublicDbLinks = false;
     private static boolean stopOnWarning = false;
+    private static boolean filterSequenceValues = false;
     private static String customConfigLocation = null;
     private static String defaultConfigLocation = "scheme2ddl.config.xml";
     private static String dbUrl = null;
@@ -119,6 +120,10 @@ public class Main {
         if (stopOnWarning){
             UserObjectProcessor processor = (UserObjectProcessor) context.getBean("processor");
             processor.setStopOnWarning(stopOnWarning);
+        }
+        if (filterSequenceValues){
+            UserObjectProcessor processor = (UserObjectProcessor) context.getBean("processor");
+            processor.setFilterSequenceValues(filterSequenceValues);
         }
 
     }
@@ -297,8 +302,10 @@ public class Main {
                 i++;
             } else if (arg.equals("-tc") || arg.equals("--test-connection")) {
                 justTestConnection = true;
-            }else if (arg.equals("--stop-on-warning")) {
+            } else if (arg.equals("--stop-on-warning")) {
                 stopOnWarning = true;
+            }   else if ((arg.equals("-fsv") || arg.equals("--filter-sequence-values"))) {
+                filterSequenceValues = true;
             } else if (arg.equals("-c") || arg.equals("--config")) {
                 customConfigLocation = args[i + 1];
                 i++;

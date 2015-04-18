@@ -9,7 +9,7 @@
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
 
     <context:annotation-config/>
-    <aop:aspectj-autoproxy/>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
 
     <job id="job1" xmlns="http://www.springframework.org/schema/batch">
         <step id="step1" parent="simpleStep">
@@ -51,6 +51,7 @@
         <property name="excludes" ref="excludes"/>
         <property name="dependencies" ref="dependencies"/>
         <property name="stopOnWarning" value="false"/>
+        <property name="filterSequenceValues" value="false"/>
     </bean>
 
 

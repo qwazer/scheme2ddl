@@ -1,5 +1,8 @@
 package com.googlecode.scheme2ddl;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * @author A_Reshetnikov
  * @since Date: 18.10.2012
@@ -40,5 +43,22 @@ public class DDLFormatter {
 
     public void setIsMorePrettyFormat(boolean isMorePrettyFormat) {
         this.isMorePrettyFormat = isMorePrettyFormat;
+    }
+
+
+    public String replaceActualSequenceValueWithOne(String res) {
+
+        String output;
+        Pattern p = Pattern.compile("CREATE SEQUENCE (.*) START WITH (\\d+) (.*)");
+        Matcher m = p.matcher(res);
+        if (m.find()) {
+             output = m.replaceFirst("CREATE SEQUENCE " + m.group(1) + " START WITH 1 " + m.group(3) );
+            if (!"1".equals(m.group(2)))
+             output = output + newline + "/* -- actual sequence value was replaced by scheme2ddl to 1 */";
+        }
+        else {
+            output = res;
+        }
+        return output;
     }
 }

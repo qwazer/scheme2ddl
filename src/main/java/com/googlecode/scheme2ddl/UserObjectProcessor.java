@@ -26,6 +26,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     private Map<String, Set<String>> excludes;
     private Map<String, Set<String>> dependencies;
     private boolean stopOnWarning;
+    private boolean filterSequenceValues;
 
     public UserObject process(UserObject userObject) throws Exception {
 
@@ -75,6 +76,9 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
                 return userObjectDao.findRefGroupDDL(userObject.getType(), userObject.getName());
             }
             String res = userObjectDao.findPrimaryDDL(map2TypeForDBMS(userObject.getType()), userObject.getName());
+            if (userObject.getType().equals("SEQUENCE") && filterSequenceValues) {
+                res = ddlFormatter.replaceActualSequenceValueWithOne(res);
+            }
             Set<String> dependedTypes = dependencies.get(userObject.getType());
             if (dependedTypes != null) {
                 for (String dependedType : dependedTypes) {
@@ -110,6 +114,10 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
 
     public void setFileNameConstructor(FileNameConstructor fileNameConstructor) {
         this.fileNameConstructor = fileNameConstructor;
+    }
+
+    public void setFilterSequenceValues(boolean filterSequenceValues) {
+        this.filterSequenceValues = filterSequenceValues;
     }
 
     public void setStopOnWarning(boolean stopOnWarning) {
