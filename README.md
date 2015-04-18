@@ -39,21 +39,23 @@ More command line options
     java -jar scheme2ddl.jar -help
     ...
         Options: 
-          -help, -h                print this message
-          -url,                    DB connection URL
-                                   example: scott/tiger@localhost:1521:ORCL
-          -o, --output,            output dir
-          -p, --parallel,          number of parallel thread (default 4)
-          -s, --schemas,           a comma separated list of schemas for processing
-                                   (works only if connected to oracle as sysdba)
-          -c, --config,            path to scheme2ddl config file (xml)
-          -f, --filter,            filter for specific DDL objects
-                                   every LIKE wildcard can be used
-          -tf, --type-filter,      filter for specific DDL object types
-          -tfm, --type-filtermode, mode for type filter: include(default) or exclude
-          --stop-on-warning,       stop on getting DDL error (skip by default)
-          -tc,--test-connection,   test db connection available
-          -version,                print version info and exit
+          -help, -h                  print this message
+          -url,                      DB connection URL
+                                     example: scott/tiger@localhost:1521:ORCL
+          -o, --output,              output dir
+          -p, --parallel,            number of parallel thread (default 4)
+          -s, --schemas,             a comma separated list of schemas for processing
+                                     (works only if connected to oracle as sysdba)
+          -c, --config,              path to scheme2ddl config file (xml)
+          -f, --filter,              filter for specific DDL objects
+                                     every LIKE wildcard can be used
+          -tf, --type-filter,        filter for specific DDL object types
+          -tfm, --type-filtermode,   mode for type filter: include(default) or exclude
+          --stop-on-warning,         stop on getting DDL error (skip by default)
+          -rsv,                      replace actual filter values with 1 
+          --replace-sequence-values, 
+          -tc,--test-connection,     test db connection available
+          -version,                  print version info and exit
 
 
 

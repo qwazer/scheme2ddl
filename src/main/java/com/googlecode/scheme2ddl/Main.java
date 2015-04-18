@@ -259,8 +259,8 @@ public class Main {
 		msg.append("  -tf, --type-filter,        filter for specific DDL object types" + lSep);
 		msg.append("  -tfm, --type-filtermode,   mode for type filter: include(default) or exclude" + lSep);
         msg.append("  --stop-on-warning,         stop on getting DDL error (skip by default)" + lSep);
-        msg.append("  -rsv,                      replace actual filter values with 1 " +
-                "     --replace-sequence-values, " + lSep);
+        msg.append("  -rsv,                      replace actual filter values with 1 " + lSep);
+        msg.append("  --replace-sequence-values, " + lSep);
         msg.append("  -tc,--test-connection,     test db connection available" + lSep);
         msg.append("  -version,                  print version info and exit" + lSep);
         System.out.println(msg.toString());
