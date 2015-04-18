@@ -52,7 +52,7 @@ More command line options
           -tf, --type-filter,        filter for specific DDL object types
           -tfm, --type-filtermode,   mode for type filter: include(default) or exclude
           --stop-on-warning,         stop on getting DDL error (skip by default)
-          -rsv,                      replace actual filter values with 1 
+          -rsv,                      replace actual sequence values with 1 
           --replace-sequence-values, 
           -tc,--test-connection,     test db connection available
           -version,                  print version info and exit
