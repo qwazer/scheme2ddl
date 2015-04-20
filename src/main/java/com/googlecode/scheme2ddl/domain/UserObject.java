@@ -63,4 +63,9 @@ public class UserObject {
                 ", ddl='" + ddl + '\'' +
                 '}';
     }
+    
+    public String getFullName()
+	{
+		return schema + "." + name;
+	}
 }

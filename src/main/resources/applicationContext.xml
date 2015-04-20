@@ -52,6 +52,7 @@
         <property name="dependencies" ref="dependencies"/>
         <property name="stopOnWarning" value="false"/>
         <property name="replaceSequenceValues" value="false"/>
+        <property name="includes" ref="includes"/>
     </bean>
 
 
