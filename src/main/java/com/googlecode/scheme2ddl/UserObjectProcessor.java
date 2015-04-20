@@ -67,13 +67,13 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     private String map2Ddl(UserObject userObject) throws CannotGetDDLException, NonSkippableException {
         try {
             if (userObject.getType().equals("DBMS JOB")) {
-                return userObjectDao.findDbmsJobDDL(userObject.getName());
+                return ddlFormatter.formatDDL(userObjectDao.findDbmsJobDDL(userObject.getName()));
             }
             if (userObject.getType().equals("PUBLIC DATABASE LINK")) {
-                return userObjectDao.findDDLInPublicScheme(map2TypeForDBMS(userObject.getType()), userObject.getName());
+                return ddlFormatter.formatDDL(userObjectDao.findDDLInPublicScheme(map2TypeForDBMS(userObject.getType()), userObject.getName()));
             }
 			if (userObject.getType().equals("REFRESH_GROUP")) {
-                return userObjectDao.findRefGroupDDL(userObject.getType(), userObject.getName());
+                return ddlFormatter.formatDDL(userObjectDao.findRefGroupDDL(userObject.getType(), userObject.getName()));
             }
             String res = userObjectDao.findPrimaryDDL(map2TypeForDBMS(userObject.getType()), userObject.getName());
             if (userObject.getType().equals("SEQUENCE") && replaceSequenceValues) {

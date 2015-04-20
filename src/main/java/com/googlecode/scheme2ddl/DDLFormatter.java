@@ -20,6 +20,10 @@ public class DDLFormatter {
             return ddl;
 
         ddl = ddl.trim() + "\n";
+		
+		// replace unix line endings with windows
+		ddl = ddl.replaceAll("\r\n", "\n");
+        ddl = ddl.replaceAll("\n", "\r\n");
 
         if (!isMorePrettyFormat)
             return ddl;
