@@ -24,13 +24,14 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     private DDLFormatter ddlFormatter;
     private FileNameConstructor fileNameConstructor;
     private Map<String, Set<String>> excludes;
+    private Map<String, Set<String>> includes;
     private Map<String, Set<String>> dependencies;
     private boolean stopOnWarning;
     private boolean replaceSequenceValues;
 
     public UserObject process(UserObject userObject) throws Exception {
 
-        if (needToExclude(userObject)) {
+        if (needToExclude(userObject)  && !needToInclude(userObject)) {
             log.debug(String.format("Skipping processing of user object %s ", userObject));
             return null;
         }
@@ -43,7 +44,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
         if (excludes == null || excludes.size() == 0) return false;
         if (excludes.get("*") != null) {
             for (String pattern : excludes.get("*")) {
-                if (matchesByPattern(userObject.getName(), pattern))
+                if (matchesByPattern(userObject.getFullName(), pattern))
                     return true;
             }
         }
@@ -51,15 +52,44 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
             if (typeName.equalsIgnoreCase(userObject.getType())) {
                 if (excludes.get(typeName) == null) return true;
                 for (String pattern : excludes.get(typeName)) {
-                    if (matchesByPattern(userObject.getName(), pattern))
+                    if (matchesByPattern(userObject.getFullName(), pattern))
                         return true;
                 }
             }
         }
         return false;
     }
+    
+    private boolean needToInclude(UserObject userObject)
+	{
+		if (includes == null || includes.size() == 0)
+			return false;
+		if (includes.get("*") != null)
+		{
+			for (String pattern : includes.get("*"))
+			{
+				if (matchesByPattern(userObject.getFullName(), pattern))
+					return true;
+			}
+		}
+		for (String typeName : includes.keySet())
+		{
+			if (typeName.equalsIgnoreCase(userObject.getType()))
+			{
+				if (includes.get(typeName) == null)
+					return true;
+				for (String pattern : includes.get(typeName))
+				{
+					if (matchesByPattern(userObject.getFullName(), pattern))
+						return true;
+				}
+			}
+		}
+		return false;
+	}
 
     private boolean matchesByPattern(String s, String pattern) {
+    	pattern = pattern.replaceAll("\\.", "\\\\.");
         pattern = pattern.replace("*", "(.*)").toLowerCase();
         return s.toLowerCase().matches(pattern);
     }
@@ -98,6 +128,10 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
 
     public void setExcludes(Map excludes) {
         this.excludes = excludes;
+    }
+    
+    public void setIncludes(Map includes) {
+        this.includes = includes;
     }
 
     public void setDependencies(Map dependencies) {
