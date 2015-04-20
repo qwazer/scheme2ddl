@@ -305,7 +305,7 @@ public class Main {
                 justTestConnection = true;
             } else if (arg.equals("--stop-on-warning")) {
                 stopOnWarning = true;
-            }   else if ((arg.equals("-fsv") || arg.equals("--filter-sequence-values"))) {
+            }   else if ((arg.equals("-rsv") || arg.equals("--replace-sequence-values"))) {
                 replaceSequenceValues = true;
             } else if (arg.equals("-c") || arg.equals("--config")) {
                 customConfigLocation = args[i + 1];
