@@ -312,6 +312,12 @@ public class Main {
                 i++;
             } else if (arg.equals("-f") || arg.equals("--filter")) {
             	objectFilter = args[i + 1];
+				//remove single quotes if given
+				if (objectFilter.length() > 0 &&
+					objectFilter.charAt(objectFilter.length()-1)=='\'' &&
+					objectFilter.charAt(0)=='\'') {
+					objectFilter = objectFilter.substring(1, objectFilter.length()-1);
+				}
                 i++;
 			} else if (arg.equals("-tf") || arg.equals("--type-filter")) {
             	typeFilter = args[i + 1];
