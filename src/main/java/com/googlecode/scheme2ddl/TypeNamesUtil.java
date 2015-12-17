@@ -21,6 +21,8 @@ public class TypeNamesUtil {
             return "PROCOBJ";
 		if (type.equals("SCHEDULE"))
             return "PROCOBJ";
+		if (type.equals("PROGRAM"))
+            return "PROCOBJ";
 		if (type.equals("PACKAGE"))
             return "PACKAGE_SPEC";
         return type.replace(" ", "_");
