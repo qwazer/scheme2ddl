@@ -3,7 +3,7 @@
 **scheme2ddl** is command line util for export oracle schema to set of ddl scripts. Provide a lot of configurations via basic command line options or advanced XML configuartion.
 
 **scheme2ddl** is part of 
-[oracle-ddl2svn](http://code.google.com/p/oracle-ddl2svn) project.
+[oracle-ddl2svn](https://github.com/qwazer/oracle-ddl2svn) project.
 
 
 
