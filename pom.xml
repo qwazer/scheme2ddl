@@ -21,7 +21,7 @@
         <repository>
             <id>otn-maven-repo</id>
             <name>Maven repo with artifacts from Oracle Technology Network for private usage</name>
-            <url>http://otn-maven-repo.googlecode.com/svn/m2</url>
+            <url>https://svn.riouxsvn.com/otnmavenrepo</url>
         </repository>
     </repositories>
 
