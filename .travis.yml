@@ -11,3 +11,5 @@ env:
 before_install:
     - .travis/oracle/download.sh
     - .travis/oracle/install.sh
+
+script: "mvn verify -Dspring.profiles.active=travis-ci"

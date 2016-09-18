@@ -4,17 +4,24 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-
-import static org.junit.Assert.*;
 
 /**
  * @author A_Reshetnikov
  * @since Date: 17.09.2016
  */
-public class MainTest {
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = ConfigurationIT.class)
+public class MainIT {
+
+    @Value("${url}")
+    private String url;
 
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
@@ -33,12 +40,12 @@ public class MainTest {
 
     @Test
     public void testMainJustTestConnectionOption() throws Exception {
-
-        String[] args = {"-url", "travis/travis@localhost:1521/XE", "--test-connection"};
+        String[] args = {"-url", url, "--test-connection"};
         Main.main(args);
         Assert.assertEquals(
-                "OK success connection to jdbc:oracle:thin:travis/travis@localhost:1521/XE\n",
+                "OK success connection to jdbc:oracle:thin:"+url +"\n",
                 outContent.toString());
     }
+
 
 }
