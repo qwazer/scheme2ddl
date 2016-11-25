@@ -31,6 +31,7 @@
 
     <bean id="writer" class="com.googlecode.scheme2ddl.UserObjectWriter">
         <property name="outputPath" value="output"/>
+        <!-- <property name="fileEncoding" value="UTF-8"/> -->
     </bean>
 
 

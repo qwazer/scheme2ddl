@@ -19,6 +19,7 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
 
     private static final Log log = LogFactory.getLog(UserObjectWriter.class);
     private String outputPath;
+    private String fileEncoding;
 
 
     public void write(List<? extends UserObject> data) throws Exception {
@@ -31,7 +32,10 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
         String absoluteFileName = outputPath + "/" +  userObject.getFileName();
         absoluteFileName = FilenameUtils.separatorsToSystem(absoluteFileName);
         File file = new File(absoluteFileName);
-        FileUtils.writeStringToFile(file, userObject.getDdl());
+        if(fileEncoding==null)
+        	FileUtils.writeStringToFile(file, userObject.getDdl());
+        else
+        	FileUtils.writeStringToFile(file, userObject.getDdl(), fileEncoding);
         log.info(String.format("Saved %s %s.%s to file %s",
                 userObject.getType().toLowerCase(),
                 userObject.getSchema().toLowerCase(),
@@ -43,6 +47,10 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
 
     public void setOutputPath(String outputPath) {
         this.outputPath = outputPath;
+    }
+    
+    public void setFileEncoding(String fileEncoding) {
+        this.fileEncoding = fileEncoding;
     }
 
     @Deprecated

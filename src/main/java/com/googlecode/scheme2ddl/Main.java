@@ -26,6 +26,7 @@ public class Main {
 
     private static final Log log = LogFactory.getLog(Main.class);
     public static String outputPath = null;
+    public static String outputEncoding = null;
     public static int parallelCount = 4;
     private static boolean justPrintUsage = false;
     private static boolean justPrintVersion = false;
@@ -96,6 +97,10 @@ public class Main {
         if (outputPath != null) {
             UserObjectWriter writer = (UserObjectWriter) context.getBean("writer");
             writer.setOutputPath(outputPath);
+        }
+        if (outputEncoding != null) {
+            UserObjectWriter writer = (UserObjectWriter) context.getBean("writer");
+            writer.setFileEncoding(outputEncoding);
         }
         if (parallelCount > 0) {
             SimpleAsyncTaskExecutor taskExecutor = (SimpleAsyncTaskExecutor) context.getBean("taskExecutor");
@@ -250,6 +255,8 @@ public class Main {
         msg.append("                             example: scott/tiger@localhost:1521:ORCL" + lSep);
 
         msg.append("  -o, --output,              output dir" + lSep);
+        msg.append("  -oe, --out-encoding,       out file encoding" + lSep);
+        msg.append("                             example: UTF-8" + lSep);
         msg.append("  -p, --parallel,            number of parallel thread (default 4)" + lSep);
         msg.append("  -s, --schemas,             a comma separated list of schemas for processing" + lSep);
         msg.append("                             (works only if connected to oracle as sysdba)" + lSep);
@@ -294,6 +301,9 @@ public class Main {
                 i++;
             } else if (arg.equals("-o") || arg.equals("-output") || arg.equals("--output")) {
                 outputPath = args[i + 1];
+                i++;
+            } else if (arg.equals("-oe") || arg.equals("-out-encoding") || arg.equals("--out-encoding")) {
+                outputEncoding = args[i + 1];
                 i++;
             } else if (arg.equals("-s") || arg.equals("-schemas") || arg.equals("--schemas")) {
                 schemas = args[i + 1];
