@@ -21,6 +21,22 @@
         <!--<value>SCOTT</value>-->
         <!--<value>HR</value>-->
     </util:list>
+    
+    <util:map id="ddlTimeFilterMap">
+    	
+    	<!-- format for ddlTimeAfter and ddlTimeBefore : YYYY-MM-DD HH:MM:SS -->
+    	<!-- entry key="ddlTimeAfter" value="2016-11-27 00:00:00"/> 
+    	<entry key="ddlTimeBefore" value="2016-11-28 06:00:00"/ -->
+    	    	
+    	<!-- unit can be one of (minute, hour, day) -->
+    	<!-- export ddl of objects that modified in last 2 days  -->
+    	<!-- entry key="ddlTimeIn">
+    		<util:map>
+    			<entry key="n" value="2"/>
+    			<entry key="unit" value="day"/> 
+    		</util:map>
+    	</entry -->
+    </util:map>
 
     <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader" scope="step">
         <property name="processPublicDbLinks" value="true"/>

@@ -17,6 +17,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author A_Reshetnikov
@@ -43,6 +50,11 @@ public class Main {
 	private static String objectFilter = "%";
 	private static String typeFilter = "";
 	private static String typeFilterMode = "include";
+	private static String ddlTimeAfter = null ;
+	private static String ddlTimeBefore = null ;
+	private static String ddlTimeIn = null ;
+    private static DateFormat dfDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static DateFormat dfDate = new SimpleDateFormat("yyyy-MM-dd");
 
     public static void main(String[] args) throws Exception {
 		typeFilterMode = "include"; //default is to include any type filter
@@ -69,7 +81,13 @@ public class Main {
 			System.out.println("DDL object filter: " + objectFilter);
 			System.out.println("DDL type filter: " + typeFilter);
 			System.out.println("DDL type filter mode: " + typeFilterMode);
-            new UserObjectJobRunner().start(context, isLaunchedByDBA, objectFilter.toLowerCase(), typeFilter.toUpperCase(), typeFilterMode.toLowerCase());
+			if (ddlTimeAfter != null)
+				System.out.println("Last DDL time after: " + ddlTimeAfter);
+			if (ddlTimeBefore != null)
+				System.out.println("Last DDL time before: " + ddlTimeBefore);
+			if (ddlTimeIn != null)
+				System.out.println("DDL time in last : " + ddlTimeIn);
+            new UserObjectJobRunner().start(context, isLaunchedByDBA, objectFilter.toLowerCase(), typeFilter.toUpperCase(), typeFilterMode.toLowerCase(), ddlTimeAfter, ddlTimeBefore, ddlTimeIn);
         }
     }
 
@@ -111,6 +129,32 @@ public class Main {
         if (!isLaunchedByDBA){
             ConnectionDao connectionDao = (ConnectionDao) context.getBean("connectionDao");
             isLaunchedByDBA = connectionDao.hasSelectCatalogRole(); //todo rename isLaunchedByDBA -> processForeignSchema
+        }
+        
+        Map<String,Object> ddlTimeFilterMap = (Map<String,Object>)context.getBean("ddlTimeFilterMap");
+        if (ddlTimeAfter == null && ddlTimeFilterMap != null && ddlTimeFilterMap instanceof Map && ddlTimeFilterMap.containsKey("ddlTimeAfter")){
+        	String da = (String)ddlTimeFilterMap.get("ddlTimeAfter");
+        	if (da != null)
+        		ddlTimeAfter = da;
+        }
+        if (ddlTimeBefore == null && ddlTimeFilterMap != null && ddlTimeFilterMap instanceof Map && ddlTimeFilterMap.containsKey("ddlTimeBefore")){
+        	String df = (String)ddlTimeFilterMap.get("ddlTimeBefore");
+        	if (df != null)
+        		ddlTimeBefore = df;
+        }
+        if (ddlTimeIn == null && ddlTimeFilterMap != null && ddlTimeFilterMap instanceof Map && ddlTimeFilterMap.containsKey("ddlTimeIn")){
+        	Map<String,String> dim = (Map<String,String>) ddlTimeFilterMap.get("ddlTimeIn");
+        	if (dim != null && dim instanceof Map && dim.containsKey("n") && dim.containsKey("unit")){
+        		String unit = dim.get("unit");
+        		String n = dim.get("n");
+
+            	if ("day".equals(unit))
+            		ddlTimeIn = n + " /*day*/";
+            	if ("hour".equals(unit))
+            		ddlTimeIn = n + " /*hour*/ /24";
+            	if ("minute".equals(unit))
+            		ddlTimeIn = n + " /*minute*/ /(24*60)";
+        	}
         }
         //process schemas
         processSchemas(context);
@@ -265,6 +309,14 @@ public class Main {
         msg.append("                             every LIKE wildcard can be used" + lSep);
 		msg.append("  -tf, --type-filter,        filter for specific DDL object types" + lSep);
 		msg.append("  -tfm, --type-filtermode,   mode for type filter: include(default) or exclude" + lSep);
+		msg.append("  -dta, --ddl-time-after,    export objects with last DDL time after the time specified" + lSep);
+        msg.append("                             example: 2016-11-27 : exports objects that modified after 27 Nov 2016" + lSep);
+        msg.append("                             example: \"2016-11-27 01:00:00\" : exports objects that modified after 27 Nov 2016, 1am" + lSep);
+		msg.append("  -dtb, --ddl-time-before,   export objects with last DDL time before the time specified" + lSep);
+        msg.append("                             example: \"2016-11-27 01:00:00\"" + lSep);		
+		msg.append("  -dti, --ddl-time-in,       export objects with last DDL time in last n[minute|hour|day]" + lSep);
+        msg.append("                             example: \"6 hour\" : exports objects that modified in last 6 hours" + lSep);		
+        msg.append("                             example: 2d : exports objects that modified in last 2 days" + lSep);		
         msg.append("  --stop-on-warning,         stop on getting DDL error (skip by default)" + lSep);
         msg.append("  -rsv,                      replace actual sequence values with 1 " + lSep);
         msg.append("  --replace-sequence-values, " + lSep);
@@ -313,6 +365,59 @@ public class Main {
                 i++;
             } else if (arg.equals("-tc") || arg.equals("--test-connection")) {
                 justTestConnection = true;
+            } else if (arg.equals("-dta") || arg.equals("--ddl-time-after") || arg.equals("-ddl-time-after")) {
+                ddlTimeAfter = args[i + 1];
+                i++;
+                Date d = null;
+                try{
+                	d = dfDateTime.parse(ddlTimeAfter);
+                	ddlTimeAfter = dfDateTime.format(d);
+                }catch(ParseException pe){
+                	try{
+                		d = dfDate.parse(ddlTimeAfter);
+                		ddlTimeAfter = dfDateTime.format(d);
+                	}catch(ParseException pe2){
+                    	System.err.println("Invalid parameter format for " + arg);
+                        printUsage();
+                        throw new Exception("");                		
+                	}
+                }
+            } else if (arg.equals("-dtb") || arg.equals("--ddl-time-before") || arg.equals("-ddl-time-before")) {
+                ddlTimeBefore = args[i + 1];
+                i++;
+                Date d = null;
+                try{
+                	d = dfDateTime.parse(ddlTimeBefore);
+                	ddlTimeBefore = dfDateTime.format(d);
+                }catch(ParseException pe){
+                	try{
+                		d = dfDate.parse(ddlTimeBefore);
+                		ddlTimeBefore = dfDateTime.format(d);
+                	}catch(ParseException pe2){
+                    	System.err.println("Invalid parameter format for " + arg);
+                        printUsage();
+                        throw new Exception("");                		
+                	}
+                }
+            } else if (arg.equals("-dti") || arg.equals("--ddl-time-in") || arg.equals("-ddl-time-in")) {
+                String param = args[i + 1];
+                i++;
+                Pattern pattern = Pattern.compile("^(\\d+)\\s?(minute|min|m|hour|h|day|d)?");
+                Matcher m = pattern.matcher(param);
+                if (m.find()){
+                	String unit = m.group(2);
+                	String n = m.group(1);
+                	if ("day".equals(unit) || "d".equals(unit) || unit == null)
+                		ddlTimeIn = n + " /*day*/ ";
+                	if ("hour".equals(unit) || "h".equals(unit))
+                		ddlTimeIn = n + " /*hour*/ /24";
+                	if ("minute".equals(unit) || "min".equals(unit) || "m".equals(unit))
+                		ddlTimeIn = n + " /*minute*/ /(24*60)";
+                }else{
+                	System.err.println("Invalid parameter format for " + arg);
+                    printUsage();
+                    throw new Exception("");
+                }
             } else if (arg.equals("--stop-on-warning")) {
                 stopOnWarning = true;
             }   else if ((arg.equals("-rsv") || arg.equals("--replace-sequence-values"))) {
