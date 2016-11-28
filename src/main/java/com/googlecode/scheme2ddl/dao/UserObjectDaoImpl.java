@@ -36,6 +36,12 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
     private String typeFilter;
 	@Value("#{jobParameters['typeFilterMode']}")
     private String typeFilterMode = "include";
+	@Value("#{jobParameters['ddlTimeAfter']}")
+    private String ddlTimeAfter = null;
+	@Value("#{jobParameters['ddlTimeBefore']}")
+    private String ddlTimeBefore = null;
+	@Value("#{jobParameters['ddlTimeIn']}")
+    private String ddlTimeIn = null;
 
     public List<UserObject> findListForProccessing() {
         String sql;
@@ -56,6 +62,12 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
 				
 				sql += " IN (" + typeFilter + ") ";
 			}
+			if (ddlTimeAfter != null)
+				sql += " and t.last_ddl_time >= TO_DATE('" + ddlTimeAfter + "', 'YYYY-MM-DD HH24:MI:SS') ";
+			if (ddlTimeBefore != null)
+				sql += " and t.last_ddl_time <= TO_DATE('" + ddlTimeBefore + "', 'YYYY-MM-DD HH24:MI:SS') ";
+			if (ddlTimeIn != null)
+				sql += " and t.last_ddl_time >= SYSDATE-" + ddlTimeIn + " ";
 			if (isTypeAllowed("'REFRESH GROUP'")) {
                 sql += " UNION ALL " +
 					" select rname as object_name, 'REFRESH_GROUP' as object_type " +
@@ -79,6 +91,12 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
 					
 				sql += " IN (" + typeFilter + ") ";
 			}
+			if (ddlTimeAfter != null)
+				sql += " and t.last_ddl_time >= TO_DATE('" + ddlTimeAfter + "', 'YYYY-MM-DD HH24:MI:SS') ";
+			if (ddlTimeBefore != null)
+				sql += " and t.last_ddl_time <= TO_DATE('" + ddlTimeBefore + "', 'YYYY-MM-DD HH24:MI:SS') ";
+			if (ddlTimeIn != null)
+				sql += " and t.last_ddl_time >= SYSDATE-" + ddlTimeIn + " ";
 			if (isTypeAllowed("'REFRESH GROUP'")) {
                 sql += " UNION ALL " +
                     " select rname as object_name, 'REFRESH_GROUP' as object_type " +

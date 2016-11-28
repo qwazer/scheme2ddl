@@ -20,7 +20,7 @@ public class UserObjectJobRunner {
     protected static final Log logger = LogFactory.getLog(UserObjectJobRunner.class);
     private JobLauncher launcher;
 
-    int start(ConfigurableApplicationContext context, boolean launchedByDBA, String objectFilter, String typeFilter, String typeFilterMode) throws Exception {
+    int start(ConfigurableApplicationContext context, boolean launchedByDBA, String objectFilter, String typeFilter, String typeFilterMode, String ddlTimeAfter, String ddlTimeBefore, String ddlTimeIn) throws Exception {
         try {
             context.getAutowireCapableBeanFactory().autowireBeanProperties(this,
                     AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
@@ -40,6 +40,9 @@ public class UserObjectJobRunner {
 				parametersBuilder.addString("objectFilter", objectFilter);
 				parametersBuilder.addString("typeFilter", typeFilter);
 				parametersBuilder.addString("typeFilterMode", typeFilterMode);
+				parametersBuilder.addString("ddlTimeAfter", ddlTimeAfter);
+				parametersBuilder.addString("ddlTimeBefore", ddlTimeBefore);
+				parametersBuilder.addString("ddlTimeIn", ddlTimeIn);
                 JobParameters jobParameters = parametersBuilder.toJobParameters();
                 logger.trace(String.format("Start spring batch job with parameters %s", jobParameters));
                 JobExecution jobExecution = launcher.run(job, jobParameters);

@@ -43,6 +43,8 @@ More command line options
           -url,                      DB connection URL
                                      example: scott/tiger@localhost:1521:ORCL
           -o, --output,              output dir
+          -oe, --out-encoding,       out file encoding
+                                     example: UTF-8
           -p, --parallel,            number of parallel thread (default 4)
           -s, --schemas,             a comma separated list of schemas for processing
                                      (works only if connected to oracle as sysdba)
@@ -51,6 +53,14 @@ More command line options
                                      every LIKE wildcard can be used
           -tf, --type-filter,        filter for specific DDL object types
           -tfm, --type-filtermode,   mode for type filter: include(default) or exclude
+          -dta, --ddl-time-after,    export objects with last DDL time after the time specified
+                                     example: 2016-11-27 : exports objects that modified after 27 Nov 2016
+                                     example: "2016-11-27 01:00:00" : exports objects that modified after 27 Nov 2016, 1am
+          -dtb, --ddl-time-before,   export objects with last DDL time before the time specified
+                                     example: "2016-11-27 01:00:00"
+          -dti, --ddl-time-in,       export objects with last DDL time in last n[minute|hour|day]
+                                     example: "6 hour" : exports objects that modified in last 6 hours
+                                     example: 2d : exports objects that modified in last 2 days          
           --stop-on-warning,         stop on getting DDL error (skip by default)
           -rsv,                      replace actual sequence values with 1 
           --replace-sequence-values, 
