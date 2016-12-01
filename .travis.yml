@@ -1,6 +1,10 @@
 language: java
 sudo: required
 
+jdk:
+  - oraclejdk8
+  - openjdk6
+
 env:
   global:
     - ORACLE_COOKIE=sqldev
