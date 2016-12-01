@@ -1,8 +1,11 @@
 package com.googlecode.scheme2ddl;
 
-import org.junit.Test;
 
-import static org.junit.Assert.*;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.AssertJUnit.assertEquals;
+
 
 /**
  * @author ar
