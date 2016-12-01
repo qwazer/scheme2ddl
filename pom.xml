@@ -10,10 +10,10 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.4.0.RELEASE</version>
+        <version>1.4.2.RELEASE</version>
     </parent>
 
-    <url>http://scheme2ddl.googlecode.com</url>
+    <url>https://github.com/qwazer/scheme2ddl</url>
 
     <scm>
         <connection>scm:git:git@github.com:qwazer/scheme2ddl.git</connection>
@@ -116,6 +116,14 @@
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc5</artifactId>
             <version>11.2.0.3.0</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
