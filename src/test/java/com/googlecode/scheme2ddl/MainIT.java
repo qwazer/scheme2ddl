@@ -67,4 +67,12 @@ public class MainIT extends AbstractTestNGSpringContextTests {
         Main.main(args);
         assertThat(outContent.toString(), containsString("scheme2ddl version "));
     }
+
+    @Test(expectedExceptions = Exception.class, expectedExceptionsMessageRegExp = "Job (.*) unsuccessful")
+    public void testStopOnWarning() throws Exception {
+        String[] args = {"-url", url, "--stop-on-warning"};
+        Main.main(args);
+        //todo will need to fix after properly catching exception
+
+    }
 }
