@@ -1,19 +1,18 @@
 language: java
 sudo: required
 
+services:
+  - docker
+
 jdk:
   - oraclejdk8
   - openjdk6
 
-env:
-  global:
-    - ORACLE_COOKIE=sqldev
-    - ORACLE_FILE=oracle11g/xe/oracle-xe-11.2.0-1.0.x86_64.rpm.zip
-    - ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe
-    - ORACLE_SID=XE
 
 before_install:
-    - .travis/oracle/download.sh
-    - .travis/oracle/install.sh
+  - docker pull wnameless/oracle-xe-11g
+  - docker run -d -p 49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g
+  - echo "Wait to allow Oracle to be initialized"
+  - sleep 30
 
-script: "mvn verify -Dspring.profiles.active=travis-ci"
+script: "mvn verify"
