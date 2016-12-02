@@ -10,7 +10,7 @@ jdk:
 
 
 before_install:
-  - docker pull wnameless/oracle-xe-11g
+  - docker build -t wnameless/oracle-xe-11g .
   - docker run --name oracle -d -p 127.0.0.1:49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g
   - docker inspect oracle
   - docker ps -a
