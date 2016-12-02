@@ -17,7 +17,7 @@ before_install:
 #  - docker pull wnameless/oracle-xe-11g:14.04.4
 #  - DOCKER_ORACLE=$(docker run -d -p 49161:1521 wnameless/oracle-xe-11g:14.04.4)
   - echo "Wait to allow Oracle to be initialized"
-  - sleep 600
+  - sleep 500
 #  - docker exec -i $DOCKER_ORACLE bash -c '/u01/app/oracle/product/11.2.0/xe/bin/lsnrctl stop'
 #  - docker exec -i $DOCKER_ORACLE bash -c '/u01/app/oracle/product/11.2.0/xe/bin/lsnrctl start'
 
