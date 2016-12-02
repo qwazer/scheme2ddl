@@ -11,8 +11,10 @@ jdk:
 
 before_install:
   - docker pull wnameless/oracle-xe-11g
-  - docker run -d -p 49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g
+  - DOCKER_ORACLE=$(docker run -d -p 49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g)
   - echo "Wait to allow Oracle to be initialized"
-  - sleep 160
+  - sleep 180
+  - docker exec -i $DOCKER_ORACLE bash -c 'echo "ALTER USER HR ACCOUNT UNLOCK IDENTIFIED BY pass;" | /u01/app/oracle/product/11.2.0/xe/bin/sqlplus system/oracle@localhost:1521'
+
 
 script: "mvn verify"
