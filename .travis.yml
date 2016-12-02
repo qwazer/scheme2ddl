@@ -13,6 +13,6 @@ before_install:
   - docker pull wnameless/oracle-xe-11g
   - docker run -d -p 49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g
   - echo "Wait to allow Oracle to be initialized"
-  - sleep 60
+  - sleep 120
 
 script: "mvn verify"
