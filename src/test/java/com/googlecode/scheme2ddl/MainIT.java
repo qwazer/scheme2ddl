@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
@@ -156,6 +157,32 @@ public class MainIT extends AbstractTestNGSpringContextTests {
                 "/\n" +
                 "ALTER TRIGGER \"HR\".\"SECURE_EMPLOYEES\" DISABLE;");
 
+
+    }
+
+    @Test
+    public void testFilterAndReplaceSeqValue() throws Exception {
+        File tempOutput = FileUtils.getFile(FileUtils.getTempDirectoryPath(),
+                "scheme2ddl-test-" + UUID.randomUUID().toString().substring(0,8));
+        String outputPath = tempOutput.getAbsolutePath();
+
+        String[] args = {"-url", url, "-f", "LOCATIONS_SEQ", "-o", outputPath};
+        Main.main(args);
+
+        String out = outContent.toString();
+        assertThat(out, containsString("Found 1 items for processing in schema HR"));
+
+        assertEqualsFileContent(outputPath + "/sequences/locations_seq.sql", "CREATE SEQUENCE  \"HR\".\"LOCATIONS_SEQ\"" +
+                "  MINVALUE 1 MAXVALUE 9900 INCREMENT BY 100 START WITH 3300 NOCACHE  NOORDER  NOCYCLE ;");
+
+
+        String[] args2 = {"-url", url, "--filter", "LOCATIONS_SEQ", "--output", outputPath, "--replace-sequence-values"};
+        Main.main(args2);
+        out = outContent.toString();
+        assertThat(out, containsString("Found 1 items for processing in schema HR"));
+
+        assertEqualsFileContent(outputPath + "/sequences/locations_seq.sql", "CREATE SEQUENCE  \"HR\".\"LOCATIONS_SEQ\"  MINVALUE 1 MAXVALUE 9900 INCREMENT BY 100 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;\n" +
+                "/* -- actual sequence value was replaced by scheme2ddl to 1 */");
 
     }
 
