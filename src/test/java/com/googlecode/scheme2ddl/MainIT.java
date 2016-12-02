@@ -49,7 +49,7 @@ public class MainIT extends AbstractTestNGSpringContextTests {
             dbaJdbcTemplate.execute("ALTER USER HR ACCOUNT UNLOCK IDENTIFIED BY pass");
         }
         catch (CannotGetJdbcConnectionException e){
-            e.printStackTrace();
+            logger.warn("Ignore all test due", e);
             throw new SkipException("Ignore all test due " +  e.getMessage());
         }
 
@@ -146,6 +146,15 @@ public class MainIT extends AbstractTestNGSpringContextTests {
                 "  ALTER TABLE \"HR\".\"REGIONS\" ADD CONSTRAINT \"REG_ID_PK\" PRIMARY KEY (\"REGION_ID\") ENABLE;\n" +
                 "  CREATE UNIQUE INDEX \"HR\".\"REG_ID_PK\" ON \"HR\".\"REGIONS\" (\"REGION_ID\") \n" +
                 "  ;");
+
+        assertEqualsFileContent(pwd + "/triggers/secure_employees.sql",
+                "CREATE OR REPLACE TRIGGER \"HR\".\"SECURE_EMPLOYEES\" \n" +
+                "  BEFORE INSERT OR UPDATE OR DELETE ON employees\n" +
+                "BEGIN\n" +
+                "  secure_dml;\n" +
+                "END secure_employees;\n" +
+                "/\n" +
+                "ALTER TRIGGER \"HR\".\"SECURE_EMPLOYEES\" DISABLE;");
 
 
     }
