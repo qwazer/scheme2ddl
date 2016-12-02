@@ -1,11 +1,11 @@
 language: java
-sudo: required
+#sudo: required
 
 services:
   - docker
 
 jdk:
-  - oraclejdk8
+# - oraclejdk8
   - openjdk6
 
 
@@ -13,6 +13,6 @@ before_install:
   - docker pull wnameless/oracle-xe-11g
   - docker run -d -p 49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g
   - echo "Wait to allow Oracle to be initialized"
-  - sleep 120
+  - sleep 160
 
 script: "mvn verify"
