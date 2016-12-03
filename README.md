@@ -57,6 +57,10 @@ More command line options
           -tc,--test-connection,     test db connection available
           -version,                  print version info and exit
 
+On Unix platform you can run `scheme2ddl.jar` as executable file:
+    
+    chmod +x scheme2ddl.jar
+    ./scheme2ddl.jar 
 
 
 ###How it is work inside? 

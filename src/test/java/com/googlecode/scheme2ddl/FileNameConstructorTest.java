@@ -1,10 +1,11 @@
 package com.googlecode.scheme2ddl;
 
 import com.googlecode.scheme2ddl.domain.UserObject;
-import org.junit.Before;
-import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +14,8 @@ import java.util.Map;
 
 import static com.googlecode.scheme2ddl.FileNameConstructor.abbreviate;
 import static com.googlecode.scheme2ddl.FileNameConstructor.pluralaze;
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
+
 
 /**
  * @author A_Reshetnikov
@@ -24,7 +26,7 @@ public class FileNameConstructorTest {
     private FileNameConstructor fileNameConstructor;
     private List<UserObject> list;
 
-    @Before
+    @BeforeMethod
     public void setUp() throws Exception {
         this.fileNameConstructor = new FileNameConstructor();
         fileNameConstructor.afterPropertiesSet();
@@ -146,7 +148,7 @@ public class FileNameConstructorTest {
         assertEquals(fileName, fileNameConstructor.map2FileName(userObject));
     }
 
-    @Test(expected=IllegalStateException.class)
+    @Test(expectedExceptions=IllegalStateException.class)
     public void testExtensionRulesWrongConfig() {
         Map<String, String> extensionMap = new HashMap<String, String>();
         extensionMap.put("VIEW", "vw");

@@ -65,9 +65,10 @@ public class Main {
         if (justTestConnection) {
             testDBConnection(context);
         } else {
-			System.out.println("DDL object filter: " + objectFilter);
-			System.out.println("DDL type filter: " + typeFilter);
-			System.out.println("DDL type filter mode: " + typeFilterMode);
+            // todo remove this System.out.println and move this params to bean params, not job params
+//			System.out.println("DDL object filter: " + objectFilter);
+//			System.out.println("DDL type filter: " + typeFilter);
+//			System.out.println("DDL type filter mode: " + typeFilterMode);
             new UserObjectJobRunner().start(context, isLaunchedByDBA, objectFilter.toLowerCase(), typeFilter.toUpperCase(), typeFilterMode.toLowerCase());
         }
     }
