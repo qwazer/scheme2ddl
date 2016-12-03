@@ -28,4 +28,4 @@ before_install:
   - travis_wait sleep 10
   - docker top oracle
 
-script: "mvn verify"
+script: "mvn test verify"
