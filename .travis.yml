@@ -12,10 +12,8 @@ jdk:
 before_install:
   - docker pull wnameless/oracle-xe-11g
   - docker run --name oracle -d -p 127.0.0.1:49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g
-  - docker inspect oracle
-  - docker ps -a
-#  - docker pull wnameless/oracle-xe-11g:14.04.4
-#  - DOCKER_ORACLE=$(docker run -d -p 49161:1521 wnameless/oracle-xe-11g:14.04.4)
+ # - docker inspect oracle
+ # - docker ps -a
   - echo "Wait to allow Oracle to be initialized"
   - travis_wait sleep 10
   - docker top oracle
@@ -23,14 +21,11 @@ before_install:
   - docker top oracle
   - travis_wait sleep 10
   - docker top oracle
-  - travis_wait sleep 20
+  - travis_wait sleep 10
   - docker top oracle
-  - travis_wait sleep 60
+  - travis_wait sleep 10
   - docker top oracle
-  - travis_wait sleep 60
+  - travis_wait sleep 10
   - docker top oracle
-#  - docker exec -i $DOCKER_ORACLE bash -c '/u01/app/oracle/product/11.2.0/xe/bin/lsnrctl stop'
-#  - docker exec -i $DOCKER_ORACLE bash -c '/u01/app/oracle/product/11.2.0/xe/bin/lsnrctl start'
-
 
 script: "mvn verify"
