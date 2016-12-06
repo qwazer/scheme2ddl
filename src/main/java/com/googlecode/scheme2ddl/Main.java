@@ -34,7 +34,7 @@ public class Main {
     private static boolean stopOnWarning = false;
     private static boolean replaceSequenceValues = false;
     private static String customConfigLocation = null;
-    private static String defaultConfigLocation = "scheme2ddl.config.xml";
+    private static final String defaultConfigLocation = "scheme2ddl.config.xml";
     private static String dbUrl = null;
     private static String schemas;
     private static boolean isLaunchedByDBA;
@@ -79,7 +79,7 @@ public class Main {
         if (connectionDao.isConnectionAvailable()) {
             System.out.println("OK success connection to " + dataSource.getURL());
         } else {
-            System.out.println("FAIL connect to " + dataSource.getURL());
+            System.out.println("FAIL connect to " + dataSource.getURL());   //todo unreacheble statement
         }
     }
 
@@ -337,7 +337,7 @@ public class Main {
                 String msg = "Unknown argument: " + arg;
                 System.err.println(msg);
                 printUsage();
-                throw new Exception("");
+                throw new Exception(msg);
             }
         }
     }
