@@ -32,4 +32,4 @@ script:
   - mvn test verify
 
 after_success:
-  - mvn coveralls:report -DrepoToken=$COVERALLS_REPO_TOKEN
+  - mvn coveralls:report -Dcoveralls.repoToken=$COVERALLS_REPO_TOKEN
