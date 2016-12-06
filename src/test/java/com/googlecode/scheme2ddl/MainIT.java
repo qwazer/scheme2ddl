@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.*;
@@ -33,6 +34,9 @@ public class MainIT extends AbstractTestNGSpringContextTests {
     @Value("${hrUrl}")
     private String url;
 
+    @Value("${dbaUrl}")
+    private String dbaUrl;
+
 
     @Autowired
     private JdbcTemplate dbaJdbcTemplate;
@@ -42,6 +46,9 @@ public class MainIT extends AbstractTestNGSpringContextTests {
 
     private final PrintStream outOriginal = System.out;
     private final PrintStream errorOriginal = System.err;
+
+
+    private File tempOutput;
 
 
     @BeforeClass
@@ -57,17 +64,37 @@ public class MainIT extends AbstractTestNGSpringContextTests {
     }
 
     @BeforeMethod
+    public void resetDefaultsForStaticFields() throws Exception {
+        ReflectionTestUtils.setField(Main.class, "justPrintUsage", false);
+        ReflectionTestUtils.setField(Main.class, "justPrintVersion", false);
+        ReflectionTestUtils.setField(Main.class, "justTestConnection", false);
+        ReflectionTestUtils.setField(Main.class, "dbUrl", null);
+    }
+
+    @BeforeMethod
     public void setUpStreams() {
         System.setOut(new PrintStream(outContent));
         System.setErr(new PrintStream(errContent));
     }
 
     @AfterMethod
-    public void cleanUpStreams() {
+    public void cleanUpStreams() throws IOException {
         System.setOut(outOriginal);
         System.setErr(errorOriginal);
         outContent.reset();
         errContent.reset();
+    }
+
+    @BeforeMethod
+    public void setUpTempOutputDir(){
+        tempOutput = FileUtils.getFile(FileUtils.getTempDirectoryPath(),
+                "scheme2ddl-test-tmp-output",
+                UUID.randomUUID().toString().substring(0,8));
+    }
+
+    @AfterMethod
+    public void cleanUpTempOutput() throws IOException {
+        FileUtils.deleteDirectory(tempOutput);
     }
 
 
@@ -162,6 +189,52 @@ public class MainIT extends AbstractTestNGSpringContextTests {
 
     }
 
+
+    @Test(expectedExceptions = RuntimeException.class,
+            expectedExceptionsMessageRegExp = "Cannot process schema \'PUBLIC\' with oracle user \'hr\', " +
+                    "if it\'s not connected as sysdba")
+    public void testProcessForeignSchemaNegative() throws Exception {
+        String[] args = {"-url", url, "-s", "PUBLIC"};
+        Main.main(args);
+    }
+
+    @Test
+    public void testProcessForeignSchema() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+
+        String[] args = {"-url", dbaUrl, "-s", "HR,OUTLN", "-o", outputPath};
+
+        Main.main(args);
+        String out = outContent.toString();
+
+        assertThat(out, containsString("Will try to process schema list [HR, OUTLN]"));
+        assertThat(out, containsString("Found 34 items for processing in schema HR"));
+        assertThat(out, containsString("Found 8 items for processing in schema OUTLN"));
+
+        assertEqualsFileContent(outputPath + "/OUTLN/procedures/ora$grant_sys_select.sql",
+                "CREATE OR REPLACE PROCEDURE \"OUTLN\".\"ORA$GRANT_SYS_SELECT\" as\n" +
+                "begin\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$ TO SELECT_CATALOG_ROLE';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$HINTS TO SELECT_CATALOG_ROLE';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$NODES TO SELECT_CATALOG_ROLE';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$ TO SYS WITH GRANT OPTION';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$HINTS TO SYS WITH GRANT OPTION';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$NODES TO SYS WITH GRANT OPTION';\n" +
+                "end;\n" +
+                "/");
+
+
+        assertEqualsFileContent(outputPath +"/HR/tables/regions.sql",
+                "CREATE TABLE \"HR\".\"REGIONS\" \n" +
+                "   (\t\"REGION_ID\" NUMBER CONSTRAINT \"REGION_ID_NN\" NOT NULL ENABLE, \n" +
+                "\t\"REGION_NAME\" VARCHAR2(25)\n" +
+                "   ) ;\n" +
+                "  ALTER TABLE \"HR\".\"REGIONS\" ADD CONSTRAINT \"REG_ID_PK\" PRIMARY KEY (\"REGION_ID\") ENABLE;\n" +
+                "  CREATE UNIQUE INDEX \"HR\".\"REG_ID_PK\" ON \"HR\".\"REGIONS\" (\"REGION_ID\") \n" +
+                "  ;");
+
+    }
+
     @Test
     public void testFilterAndReplaceSeqValue() throws Exception {
         File tempOutput = FileUtils.getFile(FileUtils.getTempDirectoryPath(),
@@ -191,7 +264,7 @@ public class MainIT extends AbstractTestNGSpringContextTests {
 
     private static void assertEqualsFileContent(String path, String content) throws IOException {
         File file = new File(path);
-        assertTrue(file.exists());
+        assertTrue(file.exists(), "file doesn't exists " + file );
         String fileContent = FileUtils.readFileToString(file, "UTF-8");
         assertEquals(fileContent.trim().replace("\r", ""), content.replace("\r", ""));
 
