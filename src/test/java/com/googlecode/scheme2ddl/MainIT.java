@@ -72,6 +72,10 @@ public class MainIT extends AbstractTestNGSpringContextTests {
         ReflectionTestUtils.setField(Main.class, "objectFilter", "%");
         ReflectionTestUtils.setField(Main.class, "typeFilter", "");
         ReflectionTestUtils.setField(Main.class, "typeFilterMode", "include");
+        ReflectionTestUtils.setField(Main.class, "isLaunchedByDBA", false);
+        ReflectionTestUtils.setField(Main.class, "schemas", null);
+        ReflectionTestUtils.setField(Main.class, "schemaList", null);
+        ReflectionTestUtils.setField(Main.class, "replaceSequenceValues", false);
     }
 
     @BeforeMethod
@@ -139,28 +143,32 @@ public class MainIT extends AbstractTestNGSpringContextTests {
     public void testExportHRSchemaDefault() throws Exception {
         String[] args = {"-url", url};
         Main.main(args);
-        String out = outContent.toString();
-        String pwd = FileUtils.getFile(new File("output")).getAbsolutePath();
+        assertHRSchemaDefault(
+                FileUtils.getFile(new File("output")).getAbsolutePath(),
+                outContent.toString());
+    }
+
+    private static void assertHRSchemaDefault(String dirPath, String out) throws IOException {
         assertThat(out, containsString("Will try to process schema  [HR]"));
         assertThat(out, containsString("Start getting of user object list in schema HR for processing"));
         assertThat(out, containsString("WARNING: processing of 'PUBLIC DATABASE LINK' will be skipped because HR no access to view it"));
         assertThat(out, containsString("Found 34 items for processing in schema HR"));
-        assertThat(out, containsString(String.format("Saved sequence hr.locations_seq to file %s/sequences/locations_seq.sql", pwd)));
-        assertThat(out, containsString(String.format("Saved sequence hr.employees_seq to file %s/sequences/employees_seq.sql", pwd)));
-        assertThat(out, containsString(String.format("Saved trigger hr.update_job_history to file %s/triggers/update_job_history.sql", pwd)));
-        assertThat(out, containsString(String.format("Saved procedure hr.add_job_history to file %s/procedures/add_job_history.sql", pwd)));
-        assertThat(out, containsString(String.format("Saved table hr.locations to file %s/tables/locations.sql", pwd)));
-        assertThat(out, containsString(String.format("Saved procedure hr.secure_dml to file %s/procedures/secure_dml.sql", pwd)));
-        assertThat(out, containsString(String.format("Saved view hr.emp_details_view to file %s/views/emp_details_view.sql", pwd)));
+        assertThat(out, containsString(String.format("Saved sequence hr.locations_seq to file %s/sequences/locations_seq.sql", dirPath)));
+        assertThat(out, containsString(String.format("Saved sequence hr.employees_seq to file %s/sequences/employees_seq.sql", dirPath)));
+        assertThat(out, containsString(String.format("Saved trigger hr.update_job_history to file %s/triggers/update_job_history.sql", dirPath)));
+        assertThat(out, containsString(String.format("Saved procedure hr.add_job_history to file %s/procedures/add_job_history.sql", dirPath)));
+        assertThat(out, containsString(String.format("Saved table hr.locations to file %s/tables/locations.sql", dirPath)));
+        assertThat(out, containsString(String.format("Saved procedure hr.secure_dml to file %s/procedures/secure_dml.sql", dirPath)));
+        assertThat(out, containsString(String.format("Saved view hr.emp_details_view to file %s/views/emp_details_view.sql", dirPath)));
 
 
-       assertThat(out, containsString(
-               "-------------------------------------------------------\n" +
-               "   R E P O R T     S K I P P E D     O B J E C T S     \n" +
-               "-------------------------------------------------------\n" +
-               "| skip rule |  object type              |    count    |\n" +
-               "-------------------------------------------------------\n" +
-               "|  config   |  INDEX                    |      19     |"));
+        assertThat(out, containsString(
+                "-------------------------------------------------------\n" +
+                "   R E P O R T     S K I P P E D     O B J E C T S     \n" +
+                "-------------------------------------------------------\n" +
+                "| skip rule |  object type              |    count    |\n" +
+                "-------------------------------------------------------\n" +
+                "|  config   |  INDEX                    |      19     |"));
 
 
         assertThat(out, containsString("Written 15 ddls with user objects from total 34 in schema HR"));
@@ -168,11 +176,11 @@ public class MainIT extends AbstractTestNGSpringContextTests {
         assertThat(out, containsString("scheme2ddl of schema HR completed"));
 
 
-        assertEqualsFileContent(pwd + "/sequences/locations_seq.sql", "CREATE SEQUENCE  \"HR\".\"LOCATIONS_SEQ\"" +
+        assertEqualsFileContent(dirPath + "/sequences/locations_seq.sql", "CREATE SEQUENCE  \"HR\".\"LOCATIONS_SEQ\"" +
                 "  MINVALUE 1 MAXVALUE 9900 INCREMENT BY 100 START WITH 3300 NOCACHE  NOORDER  NOCYCLE ;");
 
 
-        assertEqualsFileContent(pwd + "/tables/regions.sql", "CREATE TABLE \"HR\".\"REGIONS\" \n" +
+        assertEqualsFileContent(dirPath + "/tables/regions.sql", "CREATE TABLE \"HR\".\"REGIONS\" \n" +
                 "   (\t\"REGION_ID\" NUMBER CONSTRAINT \"REGION_ID_NN\" NOT NULL ENABLE, \n" +
                 "\t\"REGION_NAME\" VARCHAR2(25)\n" +
                 "   ) ;\n" +
@@ -180,7 +188,7 @@ public class MainIT extends AbstractTestNGSpringContextTests {
                 "  CREATE UNIQUE INDEX \"HR\".\"REG_ID_PK\" ON \"HR\".\"REGIONS\" (\"REGION_ID\") \n" +
                 "  ;");
 
-        assertEqualsFileContent(pwd + "/triggers/secure_employees.sql",
+        assertEqualsFileContent(dirPath + "/triggers/secure_employees.sql",
                 "CREATE OR REPLACE TRIGGER \"HR\".\"SECURE_EMPLOYEES\" \n" +
                 "  BEFORE INSERT OR UPDATE OR DELETE ON employees\n" +
                 "BEGIN\n" +
@@ -188,8 +196,6 @@ public class MainIT extends AbstractTestNGSpringContextTests {
                 "END secure_employees;\n" +
                 "/\n" +
                 "ALTER TRIGGER \"HR\".\"SECURE_EMPLOYEES\" DISABLE;");
-
-
     }
 
 
@@ -240,8 +246,6 @@ public class MainIT extends AbstractTestNGSpringContextTests {
 
     @Test
     public void testFilterAndReplaceSeqValue() throws Exception {
-        File tempOutput = FileUtils.getFile(FileUtils.getTempDirectoryPath(),
-                "scheme2ddl-test-" + UUID.randomUUID().toString().substring(0,8));
         String outputPath = tempOutput.getAbsolutePath();
 
         String[] args = {"-url", url, "-f", "LOCATIONS_SEQ", "-o", outputPath};
@@ -262,6 +266,16 @@ public class MainIT extends AbstractTestNGSpringContextTests {
         assertEqualsFileContent(outputPath + "/sequences/locations_seq.sql", "CREATE SEQUENCE  \"HR\".\"LOCATIONS_SEQ\"  MINVALUE 1 MAXVALUE 9900 INCREMENT BY 100 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;\n" +
                 "/* -- actual sequence value was replaced by scheme2ddl to 1 */");
 
+    }
+
+    @Test
+    public void testRunWithCustomConfig() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+        String[] args = {"-url", url, "-c", "src/main/resources/scheme2ddl.config.xml", "-o", outputPath};
+        Main.main(args);
+        assertHRSchemaDefault(
+                outputPath,
+                outContent.toString());
     }
 
 
