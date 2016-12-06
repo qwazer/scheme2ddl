@@ -76,6 +76,8 @@ public class MainIT extends AbstractTestNGSpringContextTests {
         ReflectionTestUtils.setField(Main.class, "schemas", null);
         ReflectionTestUtils.setField(Main.class, "schemaList", null);
         ReflectionTestUtils.setField(Main.class, "replaceSequenceValues", false);
+        ReflectionTestUtils.setField(Main.class, "customConfigLocation", null);
+        ReflectionTestUtils.setField(Main.class, "parallelCount", 4);
     }
 
     @BeforeMethod
@@ -131,13 +133,6 @@ public class MainIT extends AbstractTestNGSpringContextTests {
     }
 
 
-
-    @Test(expectedExceptions = Exception.class, expectedExceptionsMessageRegExp = "Job (.*) unsuccessful", enabled = false)
-    public void testStopOnWarning() throws Exception {
-        String[] args = {"-url", url, "--stop-on-warning"};
-        Main.main(args);
-
-    }
 
     @Test
     public void testExportHRSchemaDefault() throws Exception {
@@ -269,13 +264,55 @@ public class MainIT extends AbstractTestNGSpringContextTests {
     }
 
     @Test
-    public void testRunWithCustomConfig() throws Exception {
+    public void testRunWithConfigPath() throws Exception {
         String outputPath = tempOutput.getAbsolutePath();
         String[] args = {"-url", url, "-c", "src/main/resources/scheme2ddl.config.xml", "-o", outputPath};
         Main.main(args);
         assertHRSchemaDefault(
                 outputPath,
                 outContent.toString());
+    }
+
+    @Test
+    public void testRunWithTestCustomConfig() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+        String[] args = {"-url", url, "-c", "src/test/resources/test.config.xml", "-o", outputPath};
+        Main.main(args);
+        String out = outContent.toString();
+        assertThat(out, containsString("Found 68 items for processing in schema HR"));
+        assertThat(out, containsString(
+                "Cannot get DDL for object UserObject{name='SYS_C004102', type='CONSTRAINT', schema='HR', ddl='null'} " +
+                        "with error message ConnectionCallback; uncategorized SQLException for SQL [];" +
+                        " SQL state [99999]; error code [31603];" +
+                        " ORA-31603: object \"SYS_C004102\" of type CONSTRAINT not found in schema \"HR\"\n"));
+
+
+        assertThat(out, containsString(
+                "-------------------------------------------------------\n" +
+                        "   R E P O R T     S K I P P E D     O B J E C T S     \n" +
+                        "-------------------------------------------------------\n" +
+                        "| skip rule |  object type              |    count    |\n" +
+                        "-------------------------------------------------------\n" +
+                        "|  config   |  INDEX                    |      19     |\n" +
+                        "| sql error |  CONSTRAINT               |      1      |"
+        ));
+    }
+
+    @Test
+    public void testStopOnWarning() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+        String[] args = {"-url", url, "-c", "src/test/resources/test.config.xml", "-o", outputPath, "--stop-on-warning"};
+        try {
+            Main.main(args);
+        }
+        catch (Exception e){
+
+        }
+        String out = outContent.toString();
+        assertThat(out, containsString("Found 68 items for processing in schema HR"));
+        assertThat(out, containsString("scheme2ddl of schema HR failed"));
+        assertThat(out, containsString("com.googlecode.scheme2ddl.exception.NonSkippableException"));
+
     }
 
 

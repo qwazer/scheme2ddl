@@ -34,7 +34,7 @@ public class Main {
     private static boolean stopOnWarning = false;
     private static boolean replaceSequenceValues = false;
     private static String customConfigLocation = null;
-    private static String defaultConfigLocation = "scheme2ddl.config.xml";
+    private static final String defaultConfigLocation = "scheme2ddl.config.xml";
     private static String dbUrl = null;
     private static String schemas;
     private static boolean isLaunchedByDBA;
