@@ -43,6 +43,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <bintray.repo>qwazer/maven</bintray.repo>
         <bintray.package>scheme2ddl</bintray.package>
+        <coveralls.repoToken>yourcoverallsprojectrepositorytoken</coveralls.repoToken>
     </properties>
 
 
@@ -120,6 +121,14 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.3.0</version>
+                <configuration>
+                    <repoToken>${coveralls.repoToken}</repoToken>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -5,8 +5,8 @@ services:
   - docker
 
 jdk:
-# - oraclejdk8
-  - openjdk6
+  - oraclejdk7
+#  - openjdk6
 
 
 before_install:
@@ -28,4 +28,8 @@ before_install:
   - travis_wait sleep 10
   - docker top oracle
 
-script: "mvn test verify"
+script:
+  - mvn test verify
+
+after_success:
+  - mvn coveralls:report -Dcoveralls.repoToken=$COVERALLS_REPO_TOKEN
