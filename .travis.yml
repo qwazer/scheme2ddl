@@ -28,4 +28,8 @@ before_install:
   - travis_wait sleep 10
   - docker top oracle
 
-script: "mvn test verify"
+script:
+  - mvn test verify
+
+after_success:
+  - mvn coveralls:report -DrepoToken=$COVERALLS_REPO_TOKEN
