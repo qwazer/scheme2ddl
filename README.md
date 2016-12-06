@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/qwazer/maven/scheme2ddl/images/download.svg) ](https://bintray.com/qwazer/maven/scheme2ddl/_latestVersion) &nbsp; [![Build Status](https://travis-ci.org/qwazer/scheme2ddl.svg?branch=master)](https://travis-ci.org/qwazer/scheme2ddl) &nbsp; [![Coverage Status](https://coveralls.io/repos/github/qwazer/scheme2ddl/badge.svg?branch=master)](https://coveralls.io/github/qwazer/scheme2ddl?branch=master)
+[ ![Download](https://api.bintray.com/packages/qwazer/maven/scheme2ddl/images/download.svg) ](https://bintray.com/qwazer/maven/scheme2ddl/_latestVersion) &nbsp; [![Build Status](https://travis-ci.org/qwazer/scheme2ddl.svg?branch=master)](https://travis-ci.org/qwazer/scheme2ddl) &nbsp; [![Coverage Status](https://coveralls.io/repos/github/qwazer/scheme2ddl/badge.svg)](https://coveralls.io/github/qwazer/scheme2ddl)
 
 **scheme2ddl** is command line util for export oracle schema to set of ddl scripts. Provide a lot of configurations via basic command line options or advanced XML configuartion.
 
