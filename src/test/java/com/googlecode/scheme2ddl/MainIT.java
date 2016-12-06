@@ -89,12 +89,6 @@ public class MainIT extends AbstractTestNGSpringContextTests {
     }
 
 
-    @Test
-    public void testPrintVersionOption() throws Exception {
-        String[] args = {"-version"};
-        Main.main(args);
-        assertThat(outContent.toString(), containsString("scheme2ddl version "));
-    }
 
     @Test(expectedExceptions = Exception.class, expectedExceptionsMessageRegExp = "Job (.*) unsuccessful", enabled = false)
     public void testStopOnWarning() throws Exception {
