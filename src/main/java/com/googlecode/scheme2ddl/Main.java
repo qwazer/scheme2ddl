@@ -337,7 +337,7 @@ public class Main {
                 String msg = "Unknown argument: " + arg;
                 System.err.println(msg);
                 printUsage();
-                throw new Exception("");
+                throw new Exception(msg);
             }
         }
     }

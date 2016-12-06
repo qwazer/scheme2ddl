@@ -75,5 +75,11 @@ public class MainCLITest {
         assertThat(outContent.toString(), containsString("scheme2ddl version "));
     }
 
+    @Test(expectedExceptions = Exception.class, expectedExceptionsMessageRegExp = "Unknown argument: .*")
+    public void testUnknownArgument() throws Exception {
+        String[] args = {"-xYx"};
+        Main.main(args);
+    }
+
 
 }
