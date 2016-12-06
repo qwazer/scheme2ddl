@@ -79,7 +79,7 @@ public class Main {
         if (connectionDao.isConnectionAvailable()) {
             System.out.println("OK success connection to " + dataSource.getURL());
         } else {
-            System.out.println("FAIL connect to " + dataSource.getURL());
+            System.out.println("FAIL connect to " + dataSource.getURL());   //todo unreacheble statement
         }
     }
 

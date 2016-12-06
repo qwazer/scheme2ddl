@@ -70,8 +70,18 @@ public class MainIT extends AbstractTestNGSpringContextTests {
         errContent.reset();
     }
 
+
+    @DataProvider
+    public static Object[][] justTestConnectionParamNames() {
+        return new Object[][]{
+                {"-url", "-tc"},
+                {"-url", "--test-connection"},
+        };
+    }
+
+
     @Test(dataProvider = "justTestConnectionParamNames")
-    public void testMainJustTestConnectionOption(String urlParamName, String testConnParamName) throws Exception {
+    public void testJustTestConnectionPositive(String urlParamName, String testConnParamName) throws Exception {
         String[] args = {urlParamName, url, testConnParamName};
         Main.main(args);
         Assert.assertEquals(
@@ -80,12 +90,10 @@ public class MainIT extends AbstractTestNGSpringContextTests {
         );
     }
 
-    @DataProvider
-    public static Object[][] justTestConnectionParamNames() {
-        return new Object[][]{
-                {"-url", "-tc"},
-                {"-url", "--test-connection"},
-        };
+    @Test(expectedExceptions = CannotGetJdbcConnectionException.class)
+    public void testJustTestConnectionNegative() throws Exception {
+        String[] args = {"-url", "1/1@127.0.0.1:789789", "-tc"};
+        Main.main(args);
     }
 
 
