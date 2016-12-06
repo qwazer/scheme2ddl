@@ -69,6 +69,9 @@ public class MainIT extends AbstractTestNGSpringContextTests {
         ReflectionTestUtils.setField(Main.class, "justPrintVersion", false);
         ReflectionTestUtils.setField(Main.class, "justTestConnection", false);
         ReflectionTestUtils.setField(Main.class, "dbUrl", null);
+        ReflectionTestUtils.setField(Main.class, "objectFilter", "%");
+        ReflectionTestUtils.setField(Main.class, "typeFilter", "");
+        ReflectionTestUtils.setField(Main.class, "typeFilterMode", "include");
     }
 
     @BeforeMethod
