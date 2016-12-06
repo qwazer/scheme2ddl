@@ -288,6 +288,19 @@ public class MainIT extends AbstractTestNGSpringContextTests {
 
     }
 
+
+    @Test
+    public void testRunAsSysDbaWithTypeFilter() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+        String[] args = {"-url", dbaAsSysdbaUrl, "--type-filter", "'SCHEDULE', 'JOB'"};
+        Main.main(args);
+        String out = outContent.toString();
+        assertThat(out, containsString("Will try to process schema  [SYS]"));
+        assertThat(out, containsString("Found 13 items for processing in schema SYS"));
+        assertThat(out, containsString("Cannot get DDL for object UserObject"));
+
+    }
+
     @Test
     public void testRunWithTestCustomConfig() throws Exception {
         String outputPath = tempOutput.getAbsolutePath();
