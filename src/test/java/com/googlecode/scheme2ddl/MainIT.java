@@ -37,6 +37,9 @@ public class MainIT extends AbstractTestNGSpringContextTests {
     @Value("${dbaUrl}")
     private String dbaUrl;
 
+    @Value("${dbaAsSysdbaUrl}")
+    private String dbaAsSysdbaUrl;
+
 
     @Autowired
     private JdbcTemplate dbaJdbcTemplate;
@@ -271,6 +274,18 @@ public class MainIT extends AbstractTestNGSpringContextTests {
         assertHRSchemaDefault(
                 outputPath,
                 outContent.toString());
+    }
+
+
+    @Test
+    public void testRunAsSysDbaTestConnection() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+        String[] args = {"-url", dbaAsSysdbaUrl, "-tc"};
+        Main.main(args);
+        Assert.assertEquals(
+                outContent.toString(),
+                "OK success connection to jdbc:oracle:thin:" + dbaAsSysdbaUrl + "\n");
+
     }
 
     @Test
