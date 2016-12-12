@@ -28,30 +28,9 @@ import static org.testng.Assert.assertTrue;
  * @since Date: 17.09.2016
  */
 
-@SpringBootTest(classes = ConfigurationIT.class, properties = "test-default.properties")
-public class MainIT extends AbstractTestNGSpringContextTests {
+//@SpringBootTest(classes = ConfigurationIT.class, properties = "test-default.properties")
+public class MainIT extends BaseIT {
 
-    @Value("${hrUrl}")
-    private String url;
-
-    @Value("${dbaUrl}")
-    private String dbaUrl;
-
-    @Value("${dbaAsSysdbaUrl}")
-    private String dbaAsSysdbaUrl;
-
-
-    @Autowired
-    private JdbcTemplate dbaJdbcTemplate;
-
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
-
-    private final PrintStream outOriginal = System.out;
-    private final PrintStream errorOriginal = System.err;
-
-
-    private File tempOutput;
 
 
     @BeforeClass
@@ -66,48 +45,7 @@ public class MainIT extends AbstractTestNGSpringContextTests {
 
     }
 
-    @BeforeMethod
-    public void resetDefaultsForStaticFields() throws Exception {
-        ReflectionTestUtils.setField(Main.class, "justPrintUsage", false);
-        ReflectionTestUtils.setField(Main.class, "justPrintVersion", false);
-        ReflectionTestUtils.setField(Main.class, "justTestConnection", false);
-        ReflectionTestUtils.setField(Main.class, "dbUrl", null);
-        ReflectionTestUtils.setField(Main.class, "objectFilter", "%");
-        ReflectionTestUtils.setField(Main.class, "typeFilter", "");
-        ReflectionTestUtils.setField(Main.class, "typeFilterMode", "include");
-        ReflectionTestUtils.setField(Main.class, "isLaunchedByDBA", false);
-        ReflectionTestUtils.setField(Main.class, "schemas", null);
-        ReflectionTestUtils.setField(Main.class, "schemaList", null);
-        ReflectionTestUtils.setField(Main.class, "replaceSequenceValues", false);
-        ReflectionTestUtils.setField(Main.class, "customConfigLocation", null);
-        ReflectionTestUtils.setField(Main.class, "parallelCount", 4);
-    }
 
-    @BeforeMethod
-    public void setUpStreams() {
-        System.setOut(new PrintStream(outContent));
-        System.setErr(new PrintStream(errContent));
-    }
-
-    @AfterMethod
-    public void cleanUpStreams() throws IOException {
-        System.setOut(outOriginal);
-        System.setErr(errorOriginal);
-        outContent.reset();
-        errContent.reset();
-    }
-
-    @BeforeMethod
-    public void setUpTempOutputDir(){
-        tempOutput = FileUtils.getFile(FileUtils.getTempDirectoryPath(),
-                "scheme2ddl-test-tmp-output",
-                UUID.randomUUID().toString().substring(0,8));
-    }
-
-    @AfterMethod
-    public void cleanUpTempOutput() throws IOException {
-        FileUtils.deleteDirectory(tempOutput);
-    }
 
 
     @DataProvider
@@ -344,11 +282,5 @@ public class MainIT extends AbstractTestNGSpringContextTests {
     }
 
 
-    private static void assertEqualsFileContent(String path, String content) throws IOException {
-        File file = new File(path);
-        assertTrue(file.exists(), "file doesn't exists " + file );
-        String fileContent = FileUtils.readFileToString(file, "UTF-8");
-        assertEquals(fileContent.trim().replace("\r", ""), content.replace("\r", ""));
 
-    }
 }
