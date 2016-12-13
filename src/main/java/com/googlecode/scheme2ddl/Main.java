@@ -171,13 +171,6 @@ public class Main {
         return list;
     }
 
-    private static void fillSchemaListFromUserName(ConfigurableApplicationContext context) {
-        OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
-        String schemaName = dataSource.getUser().split(" ")[0];
-        schemaList = new ArrayList<String>();
-        schemaList.add(schemaName);
-    }
-
     /**
      * @param context
      * @return existing bean 'schemaList', if this exists, or create and register new bean

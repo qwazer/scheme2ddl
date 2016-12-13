@@ -17,10 +17,10 @@
     </bean>
 
     <!-- list of schema for processing, used only if oracle user connected as sysdba-->
-    <util:list id="schemaList">
+    <!--<util:list id="schemaList">-->
         <!--<value>SCOTT</value>-->
         <!--<value>HR</value>-->
-    </util:list>
+    <!--</util:list>-->
 
     <bean id="reader" class="com.googlecode.scheme2ddl.UserObjectReader" scope="step">
         <property name="processPublicDbLinks" value="true"/>
