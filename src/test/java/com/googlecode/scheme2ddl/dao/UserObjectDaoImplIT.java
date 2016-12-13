@@ -3,9 +3,11 @@ package com.googlecode.scheme2ddl.dao;
 import com.googlecode.scheme2ddl.ConfigurationIT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -27,9 +29,21 @@ public class UserObjectDaoImplIT extends AbstractTestNGSpringContextTests {
     @Autowired
     protected JdbcTemplate dbaJdbcTemplate;
 
+    @BeforeClass
+    public void setUp()  {
+        try {
+            dbaJdbcTemplate.execute("select 1 from dual");
+        }
+        catch (CannotGetJdbcConnectionException e){
+            logger.warn("Ignore all test due", e);
+            throw new SkipException("Ignore all test due " +  e.getMessage());
+        }
+
+    }
+
 
     @BeforeClass
-    public void setUp() throws Exception {
+    public void initDao() throws Exception {
         userObjectDao = new UserObjectDaoImpl();
 
         userObjectDao.setLaunchedByDBA(false);

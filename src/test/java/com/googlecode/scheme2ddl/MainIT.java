@@ -181,6 +181,31 @@ public class MainIT extends BaseIT {
     }
 
     @Test
+    public void testProcessForeignSchemaParallel() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+
+        String[] args = {"-url", dbaUrl, "--schemas", "OUTLN", "--output", outputPath, "--parallel", "2"};
+
+        Main.main(args);
+        String out = outContent.toString();
+
+        assertThat(out, containsString("Will try to process schema  [OUTLN]"));
+        assertThat(out, containsString("Found 8 items for processing in schema OUTLN"));
+
+        assertEqualsFileContent(outputPath + "/OUTLN/procedures/ora$grant_sys_select.sql",
+                "CREATE OR REPLACE PROCEDURE \"OUTLN\".\"ORA$GRANT_SYS_SELECT\" as\n" +
+                "begin\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$ TO SELECT_CATALOG_ROLE';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$HINTS TO SELECT_CATALOG_ROLE';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$NODES TO SELECT_CATALOG_ROLE';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$ TO SYS WITH GRANT OPTION';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$HINTS TO SYS WITH GRANT OPTION';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$NODES TO SYS WITH GRANT OPTION';\n" +
+                "end;\n" +
+                "/");
+    }
+
+    @Test
     public void testFilterAndReplaceSeqValue() throws Exception {
         String outputPath = tempOutput.getAbsolutePath();
 
