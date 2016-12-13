@@ -138,7 +138,7 @@ public class Main {
                 if (isLaunchedByDBA)
                     schemaList = new ArrayList<String>(listFromContext);
                 else {
-                    log.warn("Ignore 'schemaList' from advanced config, becouse oracle user is not connected as sys dba");
+                    log.warn("Ignore 'schemaList' from advanced config, because oracle user is not connected as sys dba");
                     schemaList = extactSchemaListFromUserName(context);
                 }
             }

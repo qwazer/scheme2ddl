@@ -19,6 +19,7 @@ import java.io.PrintStream;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -270,6 +271,61 @@ public class MainIT extends BaseIT {
         String[] args = {"-url", url, "-c", "src/test/resources/test.config.xml", "-o", outputPath};
         Main.main(args);
         String out = outContent.toString();
+        assertThat(out, containsString("Found 68 items for processing in schema HR"));
+        assertThat(out, containsString(
+                "Cannot get DDL for object UserObject{name='SYS_C004102', type='CONSTRAINT', schema='HR', ddl='null'} " +
+                        "with error message ConnectionCallback; uncategorized SQLException for SQL [];" +
+                        " SQL state [99999]; error code [31603];" +
+                        " ORA-31603: object \"SYS_C004102\" of type CONSTRAINT not found in schema \"HR\"\n"));
+
+
+        assertThat(out, containsString(
+                "-------------------------------------------------------\n" +
+                        "   R E P O R T     S K I P P E D     O B J E C T S     \n" +
+                        "-------------------------------------------------------\n" +
+                        "| skip rule |  object type              |    count    |\n" +
+                        "-------------------------------------------------------\n" +
+                        "|  config   |  INDEX                    |      19     |\n" +
+                        "| sql error |  CONSTRAINT               |      1      |"
+        ));
+    }
+
+
+    @Test
+    public void testCustomConfigWithSchemaList() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+        String[] args = {"-url", url, "-c", "src/test/resources/test_schema_list.config.xml", "-o", outputPath};
+        Main.main(args);
+        String out = outContent.toString();
+        assertThat(out, containsString("Ignore 'schemaList' from advanced config, because oracle user is not connected as sys dba"));
+        assertThat(out, containsString("Found 68 items for processing in schema HR"));
+        assertThat(out, containsString(
+                "Cannot get DDL for object UserObject{name='SYS_C004102', type='CONSTRAINT', schema='HR', ddl='null'} " +
+                        "with error message ConnectionCallback; uncategorized SQLException for SQL [];" +
+                        " SQL state [99999]; error code [31603];" +
+                        " ORA-31603: object \"SYS_C004102\" of type CONSTRAINT not found in schema \"HR\"\n"));
+
+
+        assertThat(out, containsString(
+                "-------------------------------------------------------\n" +
+                        "   R E P O R T     S K I P P E D     O B J E C T S     \n" +
+                        "-------------------------------------------------------\n" +
+                        "| skip rule |  object type              |    count    |\n" +
+                        "-------------------------------------------------------\n" +
+                        "|  config   |  INDEX                    |      19     |\n" +
+                        "| sql error |  CONSTRAINT               |      1      |"
+        ));
+    }
+
+    @Test
+    public void testCustomConfigWithSchemaListAsDba() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+        String[] args = {"-url", dbaAsSysdbaUrl, "-c", "src/test/resources/test_schema_list.config.xml", "-o", outputPath};
+        Main.main(args);
+        String out = outContent.toString();
+        assertThat(out, not(containsString("Ignore 'schemaList' from advanced config, because oracle user is not connected as sys dba")));
+        assertThat(out, containsString("Will try to process schema list [SCOTT, HR]"));
+        assertThat(out, containsString("Found 0 items for processing in schema SCOTT"));
         assertThat(out, containsString("Found 68 items for processing in schema HR"));
         assertThat(out, containsString(
                 "Cannot get DDL for object UserObject{name='SYS_C004102', type='CONSTRAINT', schema='HR', ddl='null'} " +
