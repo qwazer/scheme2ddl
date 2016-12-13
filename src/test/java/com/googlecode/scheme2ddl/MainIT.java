@@ -19,6 +19,7 @@ import java.io.PrintStream;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -28,27 +29,9 @@ import static org.testng.Assert.assertTrue;
  * @since Date: 17.09.2016
  */
 
-@SpringBootTest(classes = ConfigurationIT.class, properties = "test-default.properties")
-public class MainIT extends AbstractTestNGSpringContextTests {
+//@SpringBootTest(classes = ConfigurationIT.class, properties = "test-default.properties")
+public class MainIT extends BaseIT {
 
-    @Value("${hrUrl}")
-    private String url;
-
-    @Value("${dbaUrl}")
-    private String dbaUrl;
-
-
-    @Autowired
-    private JdbcTemplate dbaJdbcTemplate;
-
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
-
-    private final PrintStream outOriginal = System.out;
-    private final PrintStream errorOriginal = System.err;
-
-
-    private File tempOutput;
 
 
     @BeforeClass
@@ -63,48 +46,7 @@ public class MainIT extends AbstractTestNGSpringContextTests {
 
     }
 
-    @BeforeMethod
-    public void resetDefaultsForStaticFields() throws Exception {
-        ReflectionTestUtils.setField(Main.class, "justPrintUsage", false);
-        ReflectionTestUtils.setField(Main.class, "justPrintVersion", false);
-        ReflectionTestUtils.setField(Main.class, "justTestConnection", false);
-        ReflectionTestUtils.setField(Main.class, "dbUrl", null);
-        ReflectionTestUtils.setField(Main.class, "objectFilter", "%");
-        ReflectionTestUtils.setField(Main.class, "typeFilter", "");
-        ReflectionTestUtils.setField(Main.class, "typeFilterMode", "include");
-        ReflectionTestUtils.setField(Main.class, "isLaunchedByDBA", false);
-        ReflectionTestUtils.setField(Main.class, "schemas", null);
-        ReflectionTestUtils.setField(Main.class, "schemaList", null);
-        ReflectionTestUtils.setField(Main.class, "replaceSequenceValues", false);
-        ReflectionTestUtils.setField(Main.class, "customConfigLocation", null);
-        ReflectionTestUtils.setField(Main.class, "parallelCount", 4);
-    }
 
-    @BeforeMethod
-    public void setUpStreams() {
-        System.setOut(new PrintStream(outContent));
-        System.setErr(new PrintStream(errContent));
-    }
-
-    @AfterMethod
-    public void cleanUpStreams() throws IOException {
-        System.setOut(outOriginal);
-        System.setErr(errorOriginal);
-        outContent.reset();
-        errContent.reset();
-    }
-
-    @BeforeMethod
-    public void setUpTempOutputDir(){
-        tempOutput = FileUtils.getFile(FileUtils.getTempDirectoryPath(),
-                "scheme2ddl-test-tmp-output",
-                UUID.randomUUID().toString().substring(0,8));
-    }
-
-    @AfterMethod
-    public void cleanUpTempOutput() throws IOException {
-        FileUtils.deleteDirectory(tempOutput);
-    }
 
 
     @DataProvider
@@ -240,6 +182,31 @@ public class MainIT extends AbstractTestNGSpringContextTests {
     }
 
     @Test
+    public void testProcessForeignSchemaParallel() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+
+        String[] args = {"-url", dbaUrl, "--schemas", "OUTLN", "--output", outputPath, "--parallel", "2"};
+
+        Main.main(args);
+        String out = outContent.toString();
+
+        assertThat(out, containsString("Will try to process schema  [OUTLN]"));
+        assertThat(out, containsString("Found 8 items for processing in schema OUTLN"));
+
+        assertEqualsFileContent(outputPath + "/OUTLN/procedures/ora$grant_sys_select.sql",
+                "CREATE OR REPLACE PROCEDURE \"OUTLN\".\"ORA$GRANT_SYS_SELECT\" as\n" +
+                "begin\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$ TO SELECT_CATALOG_ROLE';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$HINTS TO SELECT_CATALOG_ROLE';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$NODES TO SELECT_CATALOG_ROLE';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$ TO SYS WITH GRANT OPTION';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$HINTS TO SYS WITH GRANT OPTION';\n" +
+                "  EXECUTE IMMEDIATE 'GRANT SELECT ON OUTLN.OL$NODES TO SYS WITH GRANT OPTION';\n" +
+                "end;\n" +
+                "/");
+    }
+
+    @Test
     public void testFilterAndReplaceSeqValue() throws Exception {
         String outputPath = tempOutput.getAbsolutePath();
 
@@ -273,12 +240,98 @@ public class MainIT extends AbstractTestNGSpringContextTests {
                 outContent.toString());
     }
 
+
+    @Test
+    public void testRunAsSysDbaTestConnection() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+        String dba[] = dbaAsSysdbaUrl.split(" ");
+        assertTrue(dba.length==3);
+        String[] args = {"-url", dba[0], dba[1], dba[2], "-tc"};
+        Main.main(args);
+        Assert.assertEquals(
+                outContent.toString(),
+                "OK success connection to jdbc:oracle:thin:" + dbaAsSysdbaUrl + "\n");
+
+    }
+
+
+    @Test
+    public void testRunAsSysDbaWithTypeFilter() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+        String dba[] = dbaAsSysdbaUrl.split(" ");
+        assertTrue(dba.length==3);
+        String[] args = {"-url", dba[0], dba[1], dba[2], "--type-filter", "'SCHEDULE', 'JOB'"};
+        Main.main(args);
+        String out = outContent.toString();
+        assertThat(out, containsString("Will try to process schema  [SYS]"));
+        assertThat(out, containsString("Found 13 items for processing in schema SYS"));
+        assertThat(out, containsString("Cannot get DDL for object UserObject"));
+
+    }
+
     @Test
     public void testRunWithTestCustomConfig() throws Exception {
         String outputPath = tempOutput.getAbsolutePath();
         String[] args = {"-url", url, "-c", "src/test/resources/test.config.xml", "-o", outputPath};
         Main.main(args);
         String out = outContent.toString();
+        assertThat(out, containsString("Found 68 items for processing in schema HR"));
+        assertThat(out, containsString(
+                "Cannot get DDL for object UserObject{name='SYS_C004102', type='CONSTRAINT', schema='HR', ddl='null'} " +
+                        "with error message ConnectionCallback; uncategorized SQLException for SQL [];" +
+                        " SQL state [99999]; error code [31603];" +
+                        " ORA-31603: object \"SYS_C004102\" of type CONSTRAINT not found in schema \"HR\"\n"));
+
+
+        assertThat(out, containsString(
+                "-------------------------------------------------------\n" +
+                        "   R E P O R T     S K I P P E D     O B J E C T S     \n" +
+                        "-------------------------------------------------------\n" +
+                        "| skip rule |  object type              |    count    |\n" +
+                        "-------------------------------------------------------\n" +
+                        "|  config   |  INDEX                    |      19     |\n" +
+                        "| sql error |  CONSTRAINT               |      1      |"
+        ));
+    }
+
+
+    @Test
+    public void testCustomConfigWithSchemaList() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+        String[] args = {"-url", url, "-c", "src/test/resources/test_schema_list.config.xml", "-o", outputPath};
+        Main.main(args);
+        String out = outContent.toString();
+        assertThat(out, containsString("Ignore 'schemaList' from advanced config, because oracle user is not connected as sys dba"));
+        assertThat(out, containsString("Found 68 items for processing in schema HR"));
+        assertThat(out, containsString(
+                "Cannot get DDL for object UserObject{name='SYS_C004102', type='CONSTRAINT', schema='HR', ddl='null'} " +
+                        "with error message ConnectionCallback; uncategorized SQLException for SQL [];" +
+                        " SQL state [99999]; error code [31603];" +
+                        " ORA-31603: object \"SYS_C004102\" of type CONSTRAINT not found in schema \"HR\"\n"));
+
+
+        assertThat(out, containsString(
+                "-------------------------------------------------------\n" +
+                        "   R E P O R T     S K I P P E D     O B J E C T S     \n" +
+                        "-------------------------------------------------------\n" +
+                        "| skip rule |  object type              |    count    |\n" +
+                        "-------------------------------------------------------\n" +
+                        "|  config   |  INDEX                    |      19     |\n" +
+                        "| sql error |  CONSTRAINT               |      1      |"
+        ));
+    }
+
+    @Test
+    public void testCustomConfigWithSchemaListAsDba() throws Exception {
+        String outputPath = tempOutput.getAbsolutePath();
+        String dba[] = dbaAsSysdbaUrl.split(" ");
+        assertTrue(dba.length==3);
+        String[] args = {"-url", dba[0], dba[1], dba[2], "-c", "src/test/resources/test_schema_list.config.xml", "-o", outputPath};
+        Main.main(args);
+        String out = outContent.toString();
+        assertThat(out, not(containsString("Ignore 'schemaList' from advanced config, because oracle user is not connected as sys dba")));
+        assertThat(out, containsString("Will try to process schema list [SCOTT, HR]"));
+        assertThat(out, containsString("Found 0 items for processing in schema SCOTT"));
         assertThat(out, containsString("Found 68 items for processing in schema HR"));
         assertThat(out, containsString(
                 "Cannot get DDL for object UserObject{name='SYS_C004102', type='CONSTRAINT', schema='HR', ddl='null'} " +
@@ -316,11 +369,5 @@ public class MainIT extends AbstractTestNGSpringContextTests {
     }
 
 
-    private static void assertEqualsFileContent(String path, String content) throws IOException {
-        File file = new File(path);
-        assertTrue(file.exists(), "file doesn't exists " + file );
-        String fileContent = FileUtils.readFileToString(file, "UTF-8");
-        assertEquals(fileContent.trim().replace("\r", ""), content.replace("\r", ""));
 
-    }
 }

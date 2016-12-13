@@ -28,19 +28,5 @@ public class TypeNamesUtil {
         return type.replace(" ", "_");
     }
 
-    /**
-     * Oracle types in user_table without underscore, for example PACKAGE BODY
-     * but in DBMS_METADATA with underscore   PACKAGE_BODY
-     * @param type - type name from DBMS_METADATA representation
-     *
-     * @return type name for using in  advanced config
-     */
-    public static String map2TypeForConfig(String type) {
-        if (type.equals("DB_LINK"))
-            return "DATABASE LINK";
-        if (type.equals("PROCOBJ"))
-            return "JOB";
-        return type.replace("_", " ");
-    }
 
 }

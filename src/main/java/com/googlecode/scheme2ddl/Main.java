@@ -138,7 +138,7 @@ public class Main {
                 if (isLaunchedByDBA)
                     schemaList = new ArrayList<String>(listFromContext);
                 else {
-                    log.warn("Ignore 'schemaList' from advanced config, becouse oracle user is not connected as sys dba");
+                    log.warn("Ignore 'schemaList' from advanced config, because oracle user is not connected as sys dba");
                     schemaList = extactSchemaListFromUserName(context);
                 }
             }
@@ -169,13 +169,6 @@ public class Main {
         List<String> list = new ArrayList<String>();
         list.add(schemaName);
         return list;
-    }
-
-    private static void fillSchemaListFromUserName(ConfigurableApplicationContext context) {
-        OracleDataSource dataSource = (OracleDataSource) context.getBean("dataSource");
-        String schemaName = dataSource.getUser().split(" ")[0];
-        schemaList = new ArrayList<String>();
-        schemaList.add(schemaName);
     }
 
     /**

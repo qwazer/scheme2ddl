@@ -310,7 +310,7 @@ public class UserObjectDaoImpl extends JdbcDaoSupport implements UserObjectDao {
 				+ " GROUP BY rname";
 				
 				public Object doInConnection(Connection connection) throws SQLException, DataAccessException {
-					System.out.println(query);
+				//todo sl4j	logger.debug( "query: \n {} ", query);
 					applyTransformParameters(connection);
 					PreparedStatement ps = connection.prepareStatement(query);
 						

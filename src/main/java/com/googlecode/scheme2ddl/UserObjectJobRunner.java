@@ -65,13 +65,6 @@ public class UserObjectJobRunner {
         }
     }
 
-    private JobParameters getJobParameters(String schemaName, boolean launchedByDBA) {
-        JobParametersBuilder parametersBuilder = new JobParametersBuilder();
-        parametersBuilder.addString("schemaName", schemaName.toUpperCase());
-        parametersBuilder.addString("launchedByDBA", Boolean.toString(launchedByDBA));
-        return parametersBuilder.toJobParameters();
-    }
-
     private void writeJobExecutionStatus(JobExecution jobExecution, JobParameters jobParameters) {
         StepExecution step = jobExecution.getStepExecutions().toArray(new StepExecution[]{})[0];
         String schemaName = jobParameters.getString("schemaName");
