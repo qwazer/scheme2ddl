@@ -78,6 +78,7 @@ public abstract class BaseIT extends AbstractTestNGSpringContextTests {
         ReflectionTestUtils.setField(Main.class, "replaceSequenceValues", false);
         ReflectionTestUtils.setField(Main.class, "customConfigLocation", null);
         ReflectionTestUtils.setField(Main.class, "parallelCount", 4);
+        ReflectionTestUtils.setField(Main.class, "outputPath", null);
     }
 
     @BeforeMethod
