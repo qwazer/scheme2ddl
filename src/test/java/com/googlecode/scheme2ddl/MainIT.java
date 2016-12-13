@@ -244,7 +244,9 @@ public class MainIT extends BaseIT {
     @Test
     public void testRunAsSysDbaTestConnection() throws Exception {
         String outputPath = tempOutput.getAbsolutePath();
-        String[] args = {"-url", dbaAsSysdbaUrl, "-tc"};
+        String dba[] = dbaAsSysdbaUrl.split(" ");
+        assertTrue(dba.length==3);
+        String[] args = {"-url", dba[0], dba[1], dba[2], "-tc"};
         Main.main(args);
         Assert.assertEquals(
                 outContent.toString(),
@@ -256,7 +258,9 @@ public class MainIT extends BaseIT {
     @Test
     public void testRunAsSysDbaWithTypeFilter() throws Exception {
         String outputPath = tempOutput.getAbsolutePath();
-        String[] args = {"-url", dbaAsSysdbaUrl, "--type-filter", "'SCHEDULE', 'JOB'"};
+        String dba[] = dbaAsSysdbaUrl.split(" ");
+        assertTrue(dba.length==3);
+        String[] args = {"-url", dba[0], dba[1], dba[2], "--type-filter", "'SCHEDULE', 'JOB'"};
         Main.main(args);
         String out = outContent.toString();
         assertThat(out, containsString("Will try to process schema  [SYS]"));
@@ -320,7 +324,9 @@ public class MainIT extends BaseIT {
     @Test
     public void testCustomConfigWithSchemaListAsDba() throws Exception {
         String outputPath = tempOutput.getAbsolutePath();
-        String[] args = {"-url", dbaAsSysdbaUrl, "-c", "src/test/resources/test_schema_list.config.xml", "-o", outputPath};
+        String dba[] = dbaAsSysdbaUrl.split(" ");
+        assertTrue(dba.length==3);
+        String[] args = {"-url", dba[0], dba[1], dba[2], "-c", "src/test/resources/test_schema_list.config.xml", "-o", outputPath};
         Main.main(args);
         String out = outContent.toString();
         assertThat(out, not(containsString("Ignore 'schemaList' from advanced config, because oracle user is not connected as sys dba")));
