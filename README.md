@@ -10,6 +10,13 @@
 ###Benefits
 **scheme2ddl** give ability to filter undesirable information, separate DDL in different files, pretty format output.
 
+###Gradle build
+To build with gradle, in gradle.properties define your Nexus credentials. Alternatively use Oracle's maven dependency with credentials:
+http://stackoverflow.com/questions/37783669/how-to-add-ojdbc7-to-java-web-app-by-gradle
+
+Run task shadowJar.
+
+
 ###How to start with minimal configuration
 Java must be installed on your computer.
 
