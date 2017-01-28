@@ -26,10 +26,6 @@ apply plugin: 'org.springframework.boot'
 group = 'com.googlecode'
 version = '2.4.2-SNAPSHOT'
 
-description = ""
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 }
@@ -65,5 +61,3 @@ jar {
 shadowJar {
     mergeServiceFiles('META-INF/spring.*')
 }
-
-
