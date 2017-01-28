@@ -4,7 +4,7 @@ buildscript {
     }
     repositories {    	
         maven {
-            url "${nexusBaseUrl}/repository/maven-central"
+            url "https://code.lds.org/nexus/content/groups/main-repo"
       		url "https://plugins.gradle.org/m2/"
         }
     }
@@ -35,24 +35,10 @@ tasks.withType(JavaCompile) {
 }
 
 repositories {
-    mavenLocal()
-    maven {
-        url "${nexusBaseUrl}/repository/maven-central"
-    }
-	maven{
-		credentials {
-			username "$nexusUser"
-			password "$nexusPassword"
-			}
-		url "${nexusBaseUrl}/repository/${location}-releases"
-	}
-	maven{
-		credentials {
-			username "$nexusUser"
-			password "$nexusPassword"
-			}
-		url "${nexusBaseUrl}/repository/${location}-snapshots"
-	}	
+		mavenLocal()
+		mavenCentral()
+		maven { url "http://repo.spring.io/release" }
+		maven { url "https://code.lds.org/nexus/content/groups/main-repo" }
 }
 
 
@@ -63,7 +49,7 @@ dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version:'1.4.2.RELEASE'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-logging', version:'1.4.2.RELEASE'
     compile group: 'commons-io', name: 'commons-io', version:'2.5'
-    compile group: 'com.oracle', name:'ojdbc7', version:'12.1.0'
+    compile group: 'com.oracle', name:'ojdbc7', version:'12.1.0.2'
     testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version:'1.4.2.RELEASE') {
 		exclude(module: 'commons-logging')
     }
