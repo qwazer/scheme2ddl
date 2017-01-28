@@ -1,0 +1,63 @@
+buildscript {
+    ext {
+        springBootVersion = "${springBootVersion}"
+    }
+    repositories {    	
+        maven {
+            url "https://code.lds.org/nexus/content/groups/main-repo"
+      		url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    	classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
+    }
+        
+    
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: 'org.springframework.boot'
+
+
+
+group = 'com.googlecode'
+version = '2.4.2-SNAPSHOT'
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+repositories {
+		mavenLocal()
+		mavenCentral()
+		maven { url "http://repo.spring.io/release" }
+		maven { url "https://code.lds.org/nexus/content/groups/main-repo" }
+}
+
+
+dependencies {
+    compile(group: 'org.springframework.boot', name: 'spring-boot-starter-batch', version:'1.4.2.RELEASE') {
+		exclude(module: 'tomcat-jdbc')
+    }
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version:'1.4.2.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-logging', version:'1.4.2.RELEASE'
+    compile group: 'commons-io', name: 'commons-io', version:'2.5'
+    compile group: 'com.oracle', name:'ojdbc7', version:'12.1.0.2'
+    testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version:'1.4.2.RELEASE') {
+		exclude(module: 'commons-logging')
+    }
+    testCompile group: 'org.testng', name: 'testng', version:'6.8'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.googlecode.scheme2ddl.Main'
+    }
+}
+
+shadowJar {
+    mergeServiceFiles('META-INF/spring.*')
+}
