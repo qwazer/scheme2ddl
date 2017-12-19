@@ -5,9 +5,7 @@ services:
   - docker
 
 jdk:
-  - oraclejdk7
-#  - openjdk6
-
+  - oraclejdk8
 
 before_install:
   - docker pull wnameless/oracle-xe-11g
