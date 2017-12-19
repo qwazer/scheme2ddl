@@ -74,11 +74,3 @@ On Unix platform you can run `scheme2ddl.jar` as executable file:
  4. print every ddl to separate file grouped in folders like tables, views, procedures etc
 
 *scheme2ddl* build on top of [spring-batch](http://static.springsource.org/spring-batch/) framework. 
-
-
-### See it in action in cloud 
-You can see it in action as [Jenkins build](http://jenkins-ddl2svn.rhcloud.com/job/amazon-rds-oracle-schema2ddl/lastSuccessfulBuild). Look at console output and build artifacts.
-
-> Jenkins hosting provided by Red Hat's OpenShift.
-> Oracle hosting provided by Amazon's RDS.
-
