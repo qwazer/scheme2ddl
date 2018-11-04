@@ -75,17 +75,21 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
 			if (userObject.getType().equals("REFRESH_GROUP")) {
                 return ddlFormatter.formatDDL(userObjectDao.findRefGroupDDL(userObject.getType(), userObject.getName()));
             }
-            String res = userObjectDao.findPrimaryDDL(map2TypeForDBMS(userObject.getType()), userObject.getName());
+            StringBuilder res = new StringBuilder(userObjectDao.findPrimaryDDL(map2TypeForDBMS(userObject.getType()), userObject.getName()));
             if (userObject.getType().equals("SEQUENCE") && replaceSequenceValues) {
-                res = ddlFormatter.replaceActualSequenceValueWithOne(res);
+                res = new StringBuilder(ddlFormatter.replaceActualSequenceValueWithOne(res.toString()));
             }
             Set<String> dependedTypes = dependencies.get(userObject.getType());
             if (dependedTypes != null) {
                 for (String dependedType : dependedTypes) {
-                    res += userObjectDao.findDependentDLLByTypeName(dependedType, userObject.getName());
+                    String dependentDLL = userObjectDao.findDependentDLLByTypeName(dependedType, userObject.getName());
+                    if (dependedType.equals("INDEX")){
+                        dependentDLL = ddlFormatter.sortIndexesInDDL(dependentDLL);
+                    }
+                    res.append(dependentDLL);
                 }
             }
-            return ddlFormatter.formatDDL(res);
+            return ddlFormatter.formatDDL(res.toString());
         } catch (Exception e) {
             log.warn(String.format("Cannot get DDL for object %s with error message %s", userObject, e.getMessage()));
             if (stopOnWarning) {

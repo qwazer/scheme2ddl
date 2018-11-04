@@ -1,5 +1,8 @@
 package com.googlecode.scheme2ddl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,6 +13,7 @@ import java.util.regex.Pattern;
 public class DDLFormatter {
 
     private boolean noFormat;
+    private boolean sortCreateIndexStatements = true;
     private boolean statementOnNewLine;
     private boolean isMorePrettyFormat = false;
 
@@ -49,6 +53,9 @@ public class DDLFormatter {
         this.isMorePrettyFormat = isMorePrettyFormat;
     }
 
+    public void setSortCreateIndexStatements(boolean sortCreateIndexStatements) {
+        this.sortCreateIndexStatements = sortCreateIndexStatements;
+    }
 
     public String replaceActualSequenceValueWithOne(String res) {
 
@@ -64,5 +71,32 @@ public class DDLFormatter {
             output = res;
         }
         return output;
+    }
+
+    /**
+     * Read input string with list of 'create index' statements and, tokenize and sort alphabetically.
+     * @param dependentDLL -string with list of 'create index' statements
+     * @return  string with sorted alphabetically 'create index' statements
+     */
+    public String sortIndexesInDDL(String dependentDLL) {
+        if (noFormat || !sortCreateIndexStatements){
+            return dependentDLL;
+        }
+        String[] parts = dependentDLL.split("(?=CREATE INDEX)|(?=CREATE UNIQUE INDEX)|(?=CREATE BITMAP INDEX)");
+        List<String> list = new ArrayList<String>();
+        for (String part : parts) {
+            if (part != null && !part.trim().isEmpty()) {
+                list.add(part.trim());
+            }
+        }
+        Collections.sort(list);
+        StringBuilder s = new StringBuilder();
+        String prefix = "\n  "; //to preserve formatting  of dbms_metadata.get_depended_ddl output
+        for (String statement:list){
+            s.append(prefix);
+            prefix = "\n";
+            s.append(statement);
+        }
+        return s.toString();
     }
 }

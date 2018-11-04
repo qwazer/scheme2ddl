@@ -52,6 +52,7 @@
         <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT. -->
         <property name="noFormat" value="false"/>
         <property name="isMorePrettyFormat" value="false"/>
+        <property name="sortCreateIndexStatements" value="true"/>
     </bean>
 
     <!-- rules for construct filenames  -->
