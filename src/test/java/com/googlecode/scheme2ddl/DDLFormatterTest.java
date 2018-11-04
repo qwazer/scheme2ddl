@@ -38,4 +38,48 @@ public class DDLFormatterTest {
                 , res);
 
     }
+
+
+    @Test
+    public void testSortPreserveOriginalDDLIfNoSort() {
+        String s = "\n  CREATE UNIQUE INDEX \"HR\".\"REG_ID_PK\" ON \"HR\".\"REGIONS\" (\"REGION_ID\") \n" +
+                "  ;";
+        String res = ddlFormatter.sortIndexesInDDL(s);
+        assertEquals(s, res);
+    }
+
+    @Test
+    public void testSortIndexes() {
+        String s = "  CREATE INDEX \"HR\".\"A_IDX2\" ON \"HR\".\"A\" (\"C2\") \n" +
+                "  ;\n" +
+                "  CREATE INDEX \"HR\".\"A_IDX1\" ON \"HR\".\"A\" (\"C3\") \n" +
+                "  ;";
+        String res = ddlFormatter.sortIndexesInDDL(s);
+        assertEquals(
+                "\n  CREATE INDEX \"HR\".\"A_IDX1\" ON \"HR\".\"A\" (\"C3\") \n" +
+                        "  ;\n" +
+                        "CREATE INDEX \"HR\".\"A_IDX2\" ON \"HR\".\"A\" (\"C2\") \n" +
+                        "  ;"
+                , res);
+    }
+
+    @Test
+    public void testSortIndexesUniq() {
+        String s =
+                "  \n" +
+                "CREATE UNIQUE INDEX \"HR\".\"A_UNIQ2\" ON \"HR\".\"A\" (\"C1\", \"B2\") \n" +
+                "  ;\n" +
+                "  CREATE INDEX \"HR\".\"A_IDX1\" ON \"HR\".\"A\" (\"C1\") \n" +
+                "  ; " +
+                "CREATE BITMAP INDEX \"HR\".\"A_BITMAP_IDX\" ON \"HR\".\"A\" (\"C1\", \"C5\") \n" +
+                "  ;\n";
+        String res = ddlFormatter.sortIndexesInDDL(s);
+        assertEquals("\n  " +
+                "CREATE BITMAP INDEX \"HR\".\"A_BITMAP_IDX\" ON \"HR\".\"A\" (\"C1\", \"C5\") \n" +
+                "  ;\n" +
+                "CREATE INDEX \"HR\".\"A_IDX1\" ON \"HR\".\"A\" (\"C1\") \n" +
+                "  ;\n" +
+                "CREATE UNIQUE INDEX \"HR\".\"A_UNIQ2\" ON \"HR\".\"A\" (\"C1\", \"B2\") \n" +
+                "  ;", res);
+    }
 }
