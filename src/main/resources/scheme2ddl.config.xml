@@ -9,11 +9,10 @@
 
 
     <bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource">
-        <property name="URL" value="jdbc:oracle:thin:@MyOracleHost:1521:MyDB"/>
+        <property name="URL" value="jdbc:oracle:thin:@192.168.26.32:1521:orcl"/>
         <!-- You can choose a DBA user. For example: value="sys as sysdba" -->
-        <property name="user" value="scott"/>
-        <property name="password" value="tiger"/>
-        <property name="connectionCachingEnabled" value="true"/>
+        <property name="user" value="kws"/>
+        <property name="password" value="oracle"/>
     </bean>
 
     <!-- list of schema for processing, used only if oracle user connected as sysdba-->
@@ -51,7 +50,7 @@
     <bean id="ddlFormatter" class="com.googlecode.scheme2ddl.DDLFormatter">
         <!-- Check it to true if you don't want apply formatting on DMBS_OUTPUT. -->
         <property name="noFormat" value="false"/>
-        <property name="isMorePrettyFormat" value="false"/>
+        <property name="isMorePrettyFormat" value="true"/>
         <property name="sortCreateIndexStatements" value="true"/>
     </bean>
 
@@ -163,14 +162,14 @@
             <set>
                 <value>COMMENT</value>
                 <value>INDEX</value>
-                <value>OBJECT_GRANT</value>
-                <value>TRIGGER</value>
+<!--                <value>OBJECT_GRANT</value>-->
+<!--                <value>TRIGGER</value>-->
             </set>
         </entry>
         <entry key="VIEW">
             <set>
                 <value>COMMENT</value>
-                <value>OBJECT_GRANT</value>
+<!--                <value>OBJECT_GRANT</value>-->
             </set>
         </entry>
         <entry key="MATERIALIZED VIEW">
@@ -178,32 +177,32 @@
                 <value>COMMENT</value>
                 <value>INDEX</value>
                 <value>MATERIALIZED_VIEW_LOG</value>
-                <value>OBJECT_GRANT</value>
+<!--                <value>OBJECT_GRANT</value>-->
             </set>
         </entry>
         <entry key="FUNCTION">
             <set>
-                <value>OBJECT_GRANT</value>
+<!--                <value>OBJECT_GRANT</value>-->
             </set>
         </entry>
         <entry key="PROCEDURE">
             <set>
-                <value>OBJECT_GRANT</value>
+<!--                <value>OBJECT_GRANT</value>-->
             </set>
         </entry>
         <entry key="PACKAGE BODY">
             <set>
-                <value>OBJECT_GRANT</value>
+<!--                <value>OBJECT_GRANT</value>-->
             </set>
         </entry>
         <entry key="SYNONYM">
             <set>
-                <value>OBJECT_GRANT</value>
+<!--                <value>OBJECT_GRANT</value>-->
             </set>
         </entry>
         <entry key="TYPE">
             <set>
-                <value>OBJECT_GRANT</value>
+<!--                <value>OBJECT_GRANT</value>-->
             </set>
         </entry>
     </util:map>
