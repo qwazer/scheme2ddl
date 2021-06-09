@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/qwazer/maven/scheme2ddl/images/download.svg) ](https://bintray.com/qwazer/maven/scheme2ddl/_latestVersion) &nbsp; [![Build Status](https://travis-ci.org/qwazer/scheme2ddl.svg?branch=master)](https://travis-ci.org/qwazer/scheme2ddl) &nbsp; [![Coverage Status](https://coveralls.io/repos/github/qwazer/scheme2ddl/badge.svg?branch=master)](https://coveralls.io/github/qwazer/scheme2ddl?branch=master)
+[![Build Status](https://travis-ci.org/qwazer/scheme2ddl.svg?branch=master)](https://travis-ci.org/qwazer/scheme2ddl) &nbsp; [![Coverage Status](https://coveralls.io/repos/github/qwazer/scheme2ddl/badge.svg?branch=master)](https://coveralls.io/github/qwazer/scheme2ddl?branch=master)
 
 **scheme2ddl** is command line util for export oracle schema to set of ddl scripts. Provide a lot of configurations via basic command line options or advanced XML configuartion.
 
@@ -66,8 +66,10 @@ On Unix platform you can run `scheme2ddl.jar` as executable file:
 ### How it is work inside? 
 
  1.  First, get list of all user_object to export
- 
-    `select * from user_objects`
+
+```sql
+select * from user_objects
+```
 
  2. then applying [dbms_metadata.set_transform_param](http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#i1000135)
  3. for every user object invoke [dbms_metadata.get_ddl](http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#i1019414) and [dbms_metadata.get_dependent_ddl](http://download.oracle.com/docs/cd/B19306_01/appdev.102/b14258/d_metada.htm#i1019414)
