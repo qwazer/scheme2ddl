@@ -55,41 +55,80 @@
         <property name="sortCreateIndexStatements" value="true"/>
     </bean>
 
-    <!-- rules for construct filenames  -->
-    <bean id="fileNameConstructor" class="com.googlecode.scheme2ddl.FileNameConstructor">
-        <!-- Construct your custom layout from keywords
+    <!-- Construct your custom layout from keywords:
+          * %s / %S - schema name in lower case / upper case
+          * %a / %A - type name in singular form and lower case / upper case (i.e. 'table' or 'index')
+          * %t / %T - type name in plural form and lower case / upper case (i.e. 'tables' or 'indexes')
+          * %o / %O - object name in lower case / upper case
+          * %e / %E - extension in lower case / upper case -->
+    <!-- File extension map rules. Use predefined 'TOAD' or 'PL/SQL Developer' mapping or create custom mapping -->
+    <!-- combine package spec and body files into one packages directory -->
+    <bean id="simpleFileNameConstructor" class="com.googlecode.scheme2ddl.AlternateFileNameConstructor">
+        <property name="template" value="%t/%o.%e" />
+        <property name="templateForSysDBA" value="%S/%t/%o.%e" />
+        <property name="needToReplaceWindowsReservedFileNames" value="true" />
+        <property name="extensionMap" ref="toad-flyway" />
+        <property name="combinePackage" value="true" />
+    </bean>
 
-                schema - schema name in lower case
-                type - type name in lower case, for example 'table' or 'index'
-                types_plural - type name in plural form in lower case, for xample 'tables' or 'indexes'
-                object_name - object name in lower case
-                ext - extension in lower case
-                SCHEMA - schema name in UPPER case
-                TYPE - type name in UPPER case, for example 'table' or 'index'
-                TYPES_PLURAL - type name in plural form in UPPER case, for xample 'tables' or 'indexes'
-                OBJECT_NAME - object name in UPPER case
-                EXT - extension in UPPER case
+    <!-- Construct your custom layout from keywords
+            schema - schema name in lower case
+            type - type name in lower case, for example 'table' or 'index'
+            types_plural - type name in plural form in lower case, for xample 'tables' or 'indexes'
+            object_name - object name in lower case
+            ext - extension in lower case
+            SCHEMA - schema name in UPPER case
+            TYPE - type name in UPPER case, for example 'table' or 'index'
+            TYPES_PLURAL - type name in plural form in UPPER case, for xample 'tables' or 'indexes'
+            OBJECT_NAME - object name in UPPER case
+            EXT - extension in UPPER case
 
-            Keywords escaping is not supported.
-            Word in Mixed Case is not keyword
-        -->
+        Keywords escaping is not supported.
+        Word in Mixed Case is not keyword
+    -->
+    <!-- File extension map rules.
+         Use predefined 'TOAD' or 'PL/SQL Developer' mapping or create custom mapping -->
+    <!-- combine package spec and body files into one packages directory.
+        Only use this for TOAD extensionMap, otherwise spec sql files overwrite body sql files.-->
+   <!--  <bean id="fileNameConstructor" class="com.googlecode.scheme2ddl.FileNameConstructor">
         <property name="template" value="types_plural/object_name.ext"/>
         <property name="templateForSysDBA" value="SCHEMA/types_plural/object_name.ext"/>
         <property name="needToReplaceWindowsReservedFileNames" value="true"/>
-
-        <!-- File extension map rules.
-        Use predefined 'TOAD' or 'PL/SQL Developer' mapping or create custom mapping -->
         <property name="extensionMap" ref="sql_by_default"/>
-		<!-- combine package spec and body files into one packages directory.
-		Only use this for TOAD extensionMap, otherwise spec sql files overwrite body sql files.-->
-		<property name="combinePackage" value="false"/>
-    </bean>
+        <property name="combinePackage" value="false"/>
+    </bean>-->
 
     <util:map id="sql_by_default">
         <entry key="DEFAULT">
             <value>sql</value>
         </entry>
     </util:map>
+
+    <!-- TOAD + Flyway mix -->
+    <util:map id="toad-flyway">
+        <entry key="DEFAULT">
+            <value>.sql</value>
+        </entry>
+        <entry key="PROCEDURE">
+            <value>.prc</value>
+        </entry>
+        <entry key="FUNCTION">
+            <value>.fnc</value>
+        </entry>
+        <entry key="TRIGGER">
+            <value>.trg</value>
+        </entry>
+        <entry key="VIEW">
+            <value>.vw</value>
+        </entry>
+        <entry key="PACKAGE">
+            <value>.pks</value>
+        </entry>
+        <entry key="PACKAGE_BODY">
+            <value>-body.pkb</value>
+        </entry>
+    </util:map>
+
 
     <!-- File extension map rules like TOAD -->
     <util:map id="toad">

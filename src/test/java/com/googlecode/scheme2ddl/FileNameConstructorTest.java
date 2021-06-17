@@ -86,7 +86,7 @@ public class FileNameConstructorTest {
 
     @Test
     public void testKeywordSchema() throws Exception {
-        String template = FileNameConstructor.kw_schema_lower + "/" + FileNameConstructor.kw_schema_UPPER;
+        String template = FileNameConstructor.KW_SCHEMA_LOWER + "/" + FileNameConstructor.KW_SCHEMA_UPPER;
         fileNameConstructor.setTemplate(template);
         fileNameConstructor.afterPropertiesSet();
         for (UserObject userObject : list) {
@@ -97,7 +97,7 @@ public class FileNameConstructorTest {
 
     @Test
     public void testKeywordObjectName() throws Exception {
-        String template = FileNameConstructor.kw_objectname_lower + "/" + FileNameConstructor.kw_objectname_UPPER;
+        String template = FileNameConstructor.KW_OBJECTNAME_LOWER + "/" + FileNameConstructor.KW_OBJECTNAME_UPPER;
         fileNameConstructor.setTemplate(template);
         fileNameConstructor.afterPropertiesSet();
         for (UserObject userObject : list) {
@@ -108,7 +108,7 @@ public class FileNameConstructorTest {
 
     @Test
     public void testKeywordExtension() throws Exception {
-        String template = FileNameConstructor.kw_extension_lower + "/" + FileNameConstructor.kw_extension_UPPER;
+        String template = FileNameConstructor.KW_EXTENSION_LOWER + "/" + FileNameConstructor.KW_EXTENSION_UPPER;
         fileNameConstructor.setTemplate(template);
         fileNameConstructor.afterPropertiesSet();
         for (UserObject userObject : list) {
@@ -119,9 +119,9 @@ public class FileNameConstructorTest {
 
     @Test
     public void testTemplateWithTypeMix() throws Exception {
-        String template = FileNameConstructor.kw_type_lower + "/" + FileNameConstructor.kw_type_lower +
-                FileNameConstructor.kw_type_UPPER + "/" + FileNameConstructor.kw_types_plural_lower + "//" +
-                FileNameConstructor.kw_types_plural_UPPER + "/" + FileNameConstructor.kw_types_plural_UPPER + ".TyPEs_PLURAL";
+        String template = FileNameConstructor.KW_TYPE_LOWER + "/" + FileNameConstructor.KW_TYPE_LOWER +
+                FileNameConstructor.KW_TYPE_UPPER + "/" + FileNameConstructor.KW_TYPES_PLURAL_LOWER + "//" +
+                FileNameConstructor.KW_TYPES_PLURAL_UPPER + "/" + FileNameConstructor.KW_TYPES_PLURAL_UPPER + ".TyPEs_PLURAL";
         fileNameConstructor.setTemplate(template);
         fileNameConstructor.afterPropertiesSet();
         for (UserObject userObject : list) {
