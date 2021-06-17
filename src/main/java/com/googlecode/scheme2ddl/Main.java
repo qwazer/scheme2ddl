@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -39,9 +40,9 @@ public class Main {
     private static String schemas;
     private static boolean isLaunchedByDBA;
     private static List<String> schemaList;
-	private static String objectFilter = "%";
-	private static String typeFilter = "";
-	private static String typeFilterMode = "include";
+    private static String objectFilter = "%";
+    private static String typeFilter = "";
+    private static String typeFilterMode = "include";
 
     public static void main(String[] args) throws Exception {
 		typeFilterMode = "include"; //default is to include any type filter
@@ -111,10 +112,9 @@ public class Main {
         //process schemas
         processSchemas(context);
 
-        FileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);   //will create new one if not exist
+        IFileNameConstructor fileNameConstructor = retrieveFileNameConstructor(context);   //will create new one if not exist
         if (isLaunchedByDBA) {
-            fileNameConstructor.setTemplate(fileNameConstructor.getTemplateForSysDBA());
-            fileNameConstructor.afterPropertiesSet();
+            fileNameConstructor.useSysDBATemplate();
         }
 
         if (stopOnWarning){
@@ -191,16 +191,14 @@ public class Main {
      * @param context
      * @return existing bean 'fileNameConstructor', if this exists, or create and register new bean
      */
-    private static FileNameConstructor retrieveFileNameConstructor(ConfigurableApplicationContext context) {
-        FileNameConstructor fileNameConstructor;
+    private static IFileNameConstructor retrieveFileNameConstructor(ConfigurableApplicationContext context) {
+        IFileNameConstructor fileNameConstructor;
         try {
-            fileNameConstructor = (FileNameConstructor) context.getBean("fileNameConstructor");
+            fileNameConstructor = (IFileNameConstructor) context.getBean("fileNameConstructor");
         } catch (NoSuchBeanDefinitionException e) {
-            DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
+            BeanDefinitionRegistry beanFactory = (BeanDefinitionRegistry) context.getBeanFactory();
             beanFactory.registerBeanDefinition("fileNameConstructor", BeanDefinitionBuilder.rootBeanDefinition(FileNameConstructor.class).getBeanDefinition());
-            fileNameConstructor = (FileNameConstructor) context.getBean("fileNameConstructor");
-            fileNameConstructor.afterPropertiesSet();
-            //for compatability with old config without fileNameConstructor bean
+            fileNameConstructor = (IFileNameConstructor) context.getBean("fileNameConstructor");
             UserObjectProcessor userObjectProcessor = (UserObjectProcessor) context.getBean("processor");
             userObjectProcessor.setFileNameConstructor(fileNameConstructor);
         }
