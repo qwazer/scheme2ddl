@@ -4,7 +4,7 @@
 
     <groupId>com.googlecode</groupId>
     <artifactId>scheme2ddl</artifactId>
-    <version>2.4.3-SNAPSHOT</version>
+    <version>2.4.2</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -19,7 +19,7 @@
         <connection>scm:git:git@github.com:qwazer/scheme2ddl.git</connection>
         <url>scm:git:git@github.com:qwazer/scheme2ddl.git</url>
         <developerConnection>scm:git:git@github.com:qwazer/scheme2ddl.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v2.4.2</tag>
     </scm>
 
 
@@ -76,10 +76,7 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -169,11 +166,16 @@
  mvn install:install-file -Dfile=ojdbc5.jar -DgroupId=com.oracle -DartifactId=ojdbc5 -Dversion=11.2.0.3.0 -Dpackaging=jar -DgeneratePom=true
 -->
         <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>ojdbc5</artifactId>
-            <version>11.2.0.3.0</version>
+            <groupId>com.oracle.ojdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>19.3.0.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.oracle.ojdbc</groupId>
+            <artifactId>orai18n</artifactId>
+            <version>19.3.0.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.testng</groupId>
@@ -190,17 +192,6 @@
             <id>release</id>
             <build>
                 <plugins>
-                    <plugin>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
                 </plugins>
             </build>
         </profile>
