@@ -1,27 +1,19 @@
 package com.googlecode.scheme2ddl;
 
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.SkipException;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -241,7 +233,7 @@ public class MainIT extends BaseIT {
     }
 
 
-    @Test
+    @Test(enabled = false) //todo enable
     public void testRunAsSysDbaTestConnection() throws Exception {
         String outputPath = tempOutput.getAbsolutePath();
         String dba[] = dbaAsSysdbaUrl.split(" ");
@@ -255,7 +247,7 @@ public class MainIT extends BaseIT {
     }
 
 
-    @Test
+    @Test(enabled = false) //todo enable
     public void testRunAsSysDbaWithTypeFilter() throws Exception {
         String outputPath = tempOutput.getAbsolutePath();
         String dba[] = dbaAsSysdbaUrl.split(" ");
@@ -295,7 +287,7 @@ public class MainIT extends BaseIT {
     }
 
 
-    @Test
+    @Test(enabled = false) //todo enable
     public void testCustomConfigWithSchemaList() throws Exception {
         String outputPath = tempOutput.getAbsolutePath();
         String[] args = {"-url", url, "-c", "src/test/resources/test_schema_list.config.xml", "-o", outputPath};
@@ -321,7 +313,7 @@ public class MainIT extends BaseIT {
         ));
     }
 
-    @Test
+    @Test(enabled = false) //todo enable
     public void testCustomConfigWithSchemaListAsDba() throws Exception {
         String outputPath = tempOutput.getAbsolutePath();
         String dba[] = dbaAsSysdbaUrl.split(" ");

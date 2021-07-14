@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/qwazer/scheme2ddl.svg?branch=master)](https://travis-ci.org/qwazer/scheme2ddl) &nbsp; [![Coverage Status](https://coveralls.io/repos/github/qwazer/scheme2ddl/badge.svg?branch=master)](https://coveralls.io/github/qwazer/scheme2ddl?branch=master)
+[![Build Status](https://travis-ci.com/qwazer/scheme2ddl.svg?branch=master)](https://travis-ci.com/qwazer/scheme2ddl) &nbsp; [![Coverage Status](https://coveralls.io/repos/github/qwazer/scheme2ddl/badge.svg?branch=master)](https://coveralls.io/github/qwazer/scheme2ddl?branch=master)
 
 **scheme2ddl** is command line util for export oracle schema to set of ddl scripts. Provide a lot of configurations via basic command line options or advanced XML configuartion.
 
