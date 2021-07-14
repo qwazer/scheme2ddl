@@ -9,7 +9,7 @@ jdk:
 
 before_install:
   - docker pull wnameless/oracle-xe-11g-r2
-  - docker run --name oracle -d -p 127.0.0.1:49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g
+  - docker run --name oracle -d -p 127.0.0.1:49161:1521 -e ORACLE_ALLOW_REMOTE=true wnameless/oracle-xe-11g-r2
  # - docker inspect oracle
  # - docker ps -a
   - echo "Wait to allow Oracle to be initialized"
