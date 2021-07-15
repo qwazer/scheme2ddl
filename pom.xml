@@ -25,9 +25,8 @@
 
     <distributionManagement>
         <repository>
-            <id>bintray-qwazer-maven</id>
-            <name>qwazer-maven</name>
-            <url>https://api.bintray.com/maven/${bintray.repo}/${bintray.package}/;publish=1</url>
+            <id>cloudsmith</id>
+            <url>https://maven.cloudsmith.io/qwazer/repo</url>
         </repository>
     </distributionManagement>
 
