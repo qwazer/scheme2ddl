@@ -10,6 +10,14 @@
 ### Benefits
 **scheme2ddl** give ability to filter undesirable information, separate DDL in different files, pretty format output.
 
+### Download
+
+Use link above or
+
+```yaml
+wget https://dl.cloudsmith.io/public/qwazer/repo/maven/com/googlecode/scheme2ddl/2.4.3/scheme2ddl-2.4.3.jar
+```
+
 ### How to start with minimal configuration
 Java must be installed on your computer.
 
