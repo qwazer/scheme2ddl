@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ItemWriter;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -31,14 +32,13 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
         String absoluteFileName = outputPath + "/" +  userObject.getFileName();
         absoluteFileName = FilenameUtils.separatorsToSystem(absoluteFileName);
         File file = new File(absoluteFileName);
-        FileUtils.writeStringToFile(file, userObject.getDdl());
+        FileUtils.writeStringToFile(file, userObject.getDdl(), StandardCharsets.UTF_8);
         log.info(String.format("Saved %s %s.%s to file %s",
                 userObject.getType().toLowerCase(),
                 userObject.getSchema().toLowerCase(),
                 userObject.getName().toLowerCase(),
                 file.getAbsolutePath()));
     }
-
 
 
     public void setOutputPath(String outputPath) {
