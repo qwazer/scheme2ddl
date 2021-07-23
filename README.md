@@ -15,7 +15,7 @@
 Use link above or
 
 ```yaml
-wget https://dl.cloudsmith.io/public/qwazer/repo/maven/com/googlecode/scheme2ddl/2.4.3/scheme2ddl-2.4.3.jar
+wget https://dl.cloudsmith.io/public/qwazer/repo/maven/com/googlecode/scheme2ddl/2.4.4/scheme2ddl-2.4.4.jar
 ```
 
 ### How to start with minimal configuration
