@@ -26,7 +26,7 @@ public class UserObjectWriterTest {
 
         String fileName = outputPath + "/" +  userObject.getFileName();
         File f = new File(fileName);
-       // f.deleteOnExit(); //to delete temp file after test over
+        f.deleteOnExit(); //to delete temp file after test over
         Assertions.assertThat(f).hasContent(content);
 
     }
