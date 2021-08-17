@@ -13,17 +13,17 @@ before_install:
  # - docker inspect oracle
  # - docker ps -a
   - echo "Wait to allow Oracle to be initialized"
-  - travis_wait sleep 10
+  - sleep 10
   - docker top oracle
-  - travis_wait sleep 10
+  - sleep 10
   - docker top oracle
-  - travis_wait sleep 10
+  - sleep 10
   - docker top oracle
-  - travis_wait sleep 10
+  - sleep 10
   - docker top oracle
-  - travis_wait sleep 10
+  - sleep 10
   - docker top oracle
-  - travis_wait sleep 10
+  - sleep 10
   - docker top oracle
 
 script:
@@ -31,3 +31,7 @@ script:
 
 after_success:
   - mvn coveralls:report -Dcoveralls.repoToken=$COVERALLS_REPO_TOKEN
+
+cache:
+  directories:
+  - $HOME/.m2
