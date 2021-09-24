@@ -1,17 +1,16 @@
 package com.googlecode.scheme2ddl;
 
-import oracle.jdbc.driver.OracleDriver;
-import oracle.jdbc.pool.OracleDataSource;
-import oracle.jdbc.pool.OracleDataSourceFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.*;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.TestPropertySource;
+import java.sql.SQLException;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import oracle.jdbc.pool.OracleDataSource;
 
 /**
  * @author A_Reshetnikov

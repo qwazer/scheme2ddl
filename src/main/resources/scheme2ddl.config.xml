@@ -13,7 +13,6 @@
         <!-- You can choose a DBA user. For example: value="sys as sysdba" -->
         <property name="user" value="scott"/>
         <property name="password" value="tiger"/>
-        <property name="connectionCachingEnabled" value="true"/>
     </bean>
 
     <!-- list of schema for processing, used only if oracle user connected as sysdba-->
