@@ -5,6 +5,7 @@ import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 
 public class UserObjectWriterTest {
 
@@ -27,7 +28,7 @@ public class UserObjectWriterTest {
         String fileName = outputPath + "/" +  userObject.getFileName();
         File f = new File(fileName);
         f.deleteOnExit(); //to delete temp file after test over
-        Assertions.assertThat(f).hasContent(content);
+        Assertions.assertThat(f).usingCharset(StandardCharsets.UTF_8).hasContent(content);
 
     }
 }
