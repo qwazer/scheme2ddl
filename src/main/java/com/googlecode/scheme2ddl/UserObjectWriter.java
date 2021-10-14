@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ItemWriter;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
 
     private static final Log log = LogFactory.getLog(UserObjectWriter.class);
     private String outputPath;
-
+    private String encoding = "utf-8";
 
     public void write(List<? extends UserObject> data) throws Exception {
         if (data.size() > 0) {
@@ -32,7 +33,7 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
         String absoluteFileName = outputPath + "/" +  userObject.getFileName();
         absoluteFileName = FilenameUtils.separatorsToSystem(absoluteFileName);
         File file = new File(absoluteFileName);
-        FileUtils.writeStringToFile(file, userObject.getDdl(), StandardCharsets.UTF_8);
+        FileUtils.writeStringToFile(file, userObject.getDdl(), Charset.forName(encoding));
         log.info(String.format("Saved %s %s.%s to file %s",
                 userObject.getType().toLowerCase(),
                 userObject.getSchema().toLowerCase(),
@@ -40,6 +41,9 @@ public class UserObjectWriter implements ItemWriter<UserObject> {
                 file.getAbsolutePath()));
     }
 
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
 
     public void setOutputPath(String outputPath) {
         this.outputPath = outputPath;
