@@ -22,7 +22,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
     private static final Log log = LogFactory.getLog(UserObjectProcessor.class);
     private UserObjectDao userObjectDao;
     private DDLFormatter ddlFormatter;
-    private FileNameConstructor fileNameConstructor;
+    private IFileNameConstructor fileNameConstructor;
     private Map<String, Set<String>> excludes;
     private Map<String, Set<String>> dependencies;
     private boolean stopOnWarning;
@@ -116,7 +116,7 @@ public class UserObjectProcessor implements ItemProcessor<UserObject, UserObject
         this.ddlFormatter = ddlFormatter;
     }
 
-    public void setFileNameConstructor(FileNameConstructor fileNameConstructor) {
+    public void setFileNameConstructor(IFileNameConstructor fileNameConstructor) {
         this.fileNameConstructor = fileNameConstructor;
     }
 
